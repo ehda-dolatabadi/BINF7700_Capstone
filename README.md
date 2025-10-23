@@ -21,6 +21,11 @@ The aim is to use single-cell transcriptomic data to reconstruct Schwann cell tr
 
 ## Project Directions
 
+- Reanalyze Li et al. (2021) scRNA-seq dataset using the updated genome (UKY_AmexF1_1)
+- Implement a reproducible HPC workflow with Cell Ranger, Seurat, Monocle3, and CellChat
+- Improve Schwann-cell identification and annotation using newer datasets
+- Map Schwann-cell trajectories and neuro-immune ligand–receptor interactions across time points
+- Interpret how Schwann-immune signaling contributes to axolotl limb regeneration
 
 ## Technical Skills Inventory
 
