@@ -19,16 +19,8 @@ The aim is to use single-cell transcriptomic data to reconstruct Schwann cell tr
 - https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/040/938/575/GCF_040938575.1_UKY_AmexF1_1/GCF_040938575.1_UKY_AmexF1_1_genomic.fna.gz
 - https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/040/938/575/GCF_040938575.1_UKY_AmexF1_1/GCF_040938575.1_UKY_AmexF1_1_genomic.gtf.gz
 
-## Project Possible Directions
+## Project Directions
 
-- Address gaps in the current axolotl reference genome and many missing annotations.
-- Consider the newer genome assembly for improved analysis.
-- Perform trajectory analysis for connective tissues or other cell populations.
-- Examine Schwann cell responses to event over time.
-- Map fibroblast state changes across regeneration. 
-- Explore additional signaling responses of interest. 
-- Investigate how the immune system interacts with the trauma event.
-- Investigate the large migration of macrophages at the timepoint.
 
 ## Technical Skills Inventory
 
