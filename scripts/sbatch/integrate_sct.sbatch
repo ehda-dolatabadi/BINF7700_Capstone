@@ -1,29 +1,22 @@
 #!/bin/bash
-#SBATCH --job-name=normalize
+#SBATCH --job-name=integrate
 #SBATCH --partition=courses
-#SBATCH --time=00:30:00			# limit is 24hr
+#SBATCH --time=2:00:00			# limit is 24hr
 #SBATCH --cpus-per-task=4		# limit is 128/node
 #SBATCH --mem=8G			# limit is 515G/node
 #SBATCH --chdir=/scratch/dolatabadi.e	# working directory
 #SBATCH --output=logs/%x_%j.out		# stdout log
 #SBATCH --error=logs/%x_%j.err		# stderr log
-#SBATCH --array=0-15
+#SBATCH --array=0-1
 
 set -euo pipefail
 
 # Arrays
 REFS=("UKY_AmexF1_1_genomic" "AmexT_v47-AmexG_v6_0-DD")
-SMPS=("control" "3h" "24h" "72h" "7dpa" "14dpa" "22dpa" "33dpa")
-
-# Derive indices
-ref_idx=$((SLURM_ARRAY_TASK_ID / ${#SMPS[@]}))
-smp_idx=$((SLURM_ARRAY_TASK_ID % ${#SMPS[@]}))
-
-REF=${REFS[$ref_idx]}
-SMP=${SMPS[$smp_idx]}
 
 # Paths
-DIR="$DATA/outputs/ref_${REF}/seurat/qc/$SMP/${SMP}_filtered.rds"
+REF=${REFS[$SLURM_ARRAY_TASK_ID]}
+DIR="$DATA/outputs/ref_${REF}/seurat/normalize"
 OUT="$DATA/outputs/ref_${REF}/seurat/normalize"
 
 mkdir -p "$OUT"
@@ -32,5 +25,5 @@ mkdir -p "$OUT"
 eval "$(conda shell.bash hook)"
 conda activate seurat
 
-# Run normalize
-Rscript "$RUN/normalize_sct.R" "$SMP" "$DIR" "$OUT"
+# Run integrate
+Rscript "$RUN/integrate_sct.R" "$REF" "$OUT" $DIR/*_sct.rds
