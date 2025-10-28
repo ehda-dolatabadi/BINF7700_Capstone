@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=aggr_normalize
 #SBATCH --partition=courses
-#SBATCH --time=24:00:00			# limit is 24hr
+#SBATCH --time=2:00:00			# limit is 24hr
 #SBATCH --cpus-per-task=28		# limit is 128/node
 #SBATCH --mem=180G			# limit is 515G/node
 #SBATCH --chdir=/scratch/dolatabadi.e   # working directory
