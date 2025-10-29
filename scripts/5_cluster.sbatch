@@ -38,7 +38,4 @@ Rscript "$RUN/seurat/5_pca.R" "$ID" "$OUT" "$OUT/${ID}_integrated.rds"
 Rscript "$RUN/seurat/6_cluster.R" "$ID" "$OUT" "$OUT/${ID}_pca.rds"
 
 # Run UMAP
-Rscript "$RUN/seurat/6_cluster.R" "$ID" "$OUT" "$OUT/${ID}_clustered.rds"
-
-# Plot UMAP
-Rscript "$RUN/seurat/6_cluster.R" "$ID" "$OUT" "$OUT/${ID}_umap.rds"
+Rscript "$RUN/seurat/7_umap.R" "$ID" "$OUT" "$OUT/${ID}_clustered.rds"

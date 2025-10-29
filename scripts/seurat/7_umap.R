@@ -30,6 +30,11 @@ obj <- RunUMAP(
   seed.use     = seed
 )
 
+# Plot
+png(file.path(outdir, paste0(id, "_umap.png")), width = 1600, height = 1200)
+print(DimPlot(obj, reduction = "umap", label = TRUE, pt.size = 0.5))
+dev.off()
+
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_umap.rds")))
 
@@ -40,12 +45,8 @@ write.table(
     n_cells          = ncol(obj),
     n_features       = nrow(obj),
     dims_used        = dims,
-    umap_components  = n_components,
-    umap_neighbors   = n_neighbors,
-    umap_min_dist    = min_dist,
-    umap_spread      = spread,
     umap_metric      = metric,
-    umap_seed        = seed_use
+    umap_seed        = seed
   ),
   file = file.path(outdir, paste0(id, "_umap.tsv")),
   sep = "\t", quote = FALSE, row.names = FALSE
