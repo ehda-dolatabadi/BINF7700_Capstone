@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=integrate
+#SBATCH --job-name=seurat
 #SBATCH --partition=courses
 #SBATCH --time=2:00:00			# limit is 24hr
 #SBATCH --cpus-per-task=4		# limit is 128/node
@@ -19,7 +19,7 @@ ID="axolotl"
 REF=${REFS[$SLURM_ARRAY_TASK_ID]}
 
 # Paths
-DIR="$DATA/outputs/ref_${REF}/seurat/normalized"
+DIR="$DATA/outputs/ref_${REF}/seurat"
 OUT="$DATA/outputs/ref_${REF}/seurat"
 
 mkdir -p "$OUT"
@@ -28,5 +28,8 @@ mkdir -p "$OUT"
 eval "$(conda shell.bash hook)"
 conda activate seurat
 
-# Run integrate
-Rscript "$RUN/integrate_sct.R" "$ID" "$OUT" $DIR/*_sct.rds
+# Run PCA
+Rscript "$RUN/pca.R" "$ID" "$OUT" "$DIR/${ID}_integrated.rds"
+
+# Run cluster
+Rscript "$RUN/cluste.R" "$ID" "$OUT" "$DIR/${ID}_pca.rds"
