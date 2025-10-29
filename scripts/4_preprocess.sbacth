@@ -24,9 +24,9 @@ SMP=${SMPS[$smp_idx]}
 
 # Paths
 DIR="$DATA/outputs/cellranger/ref_${REF}/$SMP/outs/filtered_feature_bc_matrix"
-OUT_qc="$DATA/outputs/ref_${REF}/seurat/qc/$SMP"
-OUT_filter="$DATA/outputs/ref_${REF}/seurat/filtered"
-OUT_normalize="$DATA/outputs/ref_${REF}/seurat/normalized"
+OUT_qc="$DATA/outputs/ref_${REF}/seurat/1_qc/$SMP"
+OUT_filter="$DATA/outputs/ref_${REF}/seurat/2_filtered"
+OUT_normalize="$DATA/outputs/ref_${REF}/seurat/3_normalized"
 
 mkdir -p "$OUT_qc"
 mkdir -p "$OUT_filter"
