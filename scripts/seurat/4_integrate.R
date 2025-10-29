@@ -10,12 +10,11 @@ set.seed(777)
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
-
 id	<- args[1]
 outdir	<- args[2]
 paths	<- args[3:length(args)]
 
-# Load SCT objects
+# Load normalized objects
 obj_list <- lapply(paths, readRDS)
 
 # Integration features
@@ -29,26 +28,26 @@ anchors <- FindIntegrationAnchors(
   anchor.features = features
 )
 
-integrated <- IntegrateData(
+obj <- IntegrateData(
   anchorset = anchors,
   normalization.method = "SCT"
 )
 
-# Use the integrated assay for downstream steps
-DefaultAssay(integrated) <- "integrated"
+# Set default assay to integrated for downstream steps
+DefaultAssay(obj) <- "integrated"
 
-# Save
-saveRDS(integrated, file = file.path(outdir, paste0(id, "_integrated.rds")))
+# Save object
+saveRDS(obj, file = file.path(outdir, paste0(id, "_integrated.rds")))
 
-# Summary TSV
+# Summary
 n_cells_total <- sum(sapply(obj_list, ncol))
 write.table(
   data.frame(
     id				= id,
     n_samples			= length(obj_list),
     n_cells_total		= n_cells_total,
-    n_features_integrated	= nrow(integrated),
-    default_assay		= DefaultAssay(integrated),
+    n_features_integrated	= nrow(obj),
+    default_assay		= DefaultAssay(obj),
     n_integration_features	= length(features)
   ),
   file = file.path(outdir, paste0(id, "_integrated.tsv")),

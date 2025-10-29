@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Purpose: SCTransform normalization on a filtered Seurat object
-# Usage: Rscript 3_normalize.R <id> <input> <outdir>
+# Usage: Rscript 3_normalize.R <id> <output> <input>
 
 suppressPackageStartupMessages({
   library(Seurat)
@@ -10,12 +10,11 @@ set.seed(777)
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
+id      <- args[1]
+outdir  <- args[2]
+input   <- args[3]
 
-id	<- args[1]
-input	<- args[2]
-outdir	<- args[3]
-
-# Load filtered Seurat object from QC step
+# Load filtered object
 obj <- readRDS(input)
 
 # SCTransform
@@ -23,15 +22,15 @@ obj <- SCTransform(
   object = obj,
   assay = "RNA",
   new.assay.name = "SCT",
-  verbose = TRUE
 )
 
 # Set default assay to SCT for downstream steps
 DefaultAssay(obj) <- "SCT"
 
-# Save outputs
+# Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_normalized.rds")))
 
+# Summary
 write.table(
   data.frame(
     id			= id,

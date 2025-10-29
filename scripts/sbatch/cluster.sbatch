@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=integrate
+#SBATCH --job-name=cluster
 #SBATCH --partition=courses
-#SBATCH --time=2:00:00			# limit is 24hr
+#SBATCH --time=4:00:00			# limit is 24hr
 #SBATCH --cpus-per-task=4		# limit is 128/node
 #SBATCH --mem=8G			# limit is 515G/node
 #SBATCH --chdir=/scratch/dolatabadi.e	# working directory
@@ -29,4 +29,10 @@ eval "$(conda shell.bash hook)"
 conda activate seurat
 
 # Run integrate
-Rscript "$RUN/integrate_sct.R" "$ID" "$OUT" $DIR/*_sct.rds
+#Rscript "$RUN/seurat/4_integrate.R" "$ID" "$OUT" $DIR/*_sct.rds
+
+# Run PCA
+Rscript "$RUN/seurat/5_pca.R" "$ID" "$OUT" "$DIR/${ID}_integrated.rds"
+
+# Run cluster
+Rscript "$RUN/seurat/6_cluster.R" "$ID" "$OUT" "$DIR/${ID}_pca.rds"

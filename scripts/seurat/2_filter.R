@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Purpose: Run filtering on a 10x sample
-# Usage: Rscript 2_filter.R <id> <input> <outdir>
+# Usage: Rscript 2_filter.R <id> <output> <input>
 
 suppressPackageStartupMessages({
   library(Seurat)
@@ -10,12 +10,11 @@ set.seed(777)
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
+id      <- args[1]
+outdir  <- args[2]
+input   <- args[3]
 
-id	<- args[1]
-input	<- args[2]
-outdir	<- args[3]
-
-# Thresholds
+# Parameters
 min_cells	<- 5
 min_features	<- 500
 max_features	<- 7500
@@ -33,7 +32,7 @@ obj <- CreateSeuratObject(
   project = id
 )
 
-# Filters
+# Filter
 n_before <- ncol(obj)
 obj <- subset(
   obj,
@@ -46,9 +45,10 @@ obj <- subset(
 )
 n_after <- ncol(obj)
 
-# Save
+# Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_filtered.rds")))
 
+# Summary
 write.table(
   data.frame(id, n_cells_before=n_before, n_cells_after=n_after,
              min_cells, min_features, max_features,

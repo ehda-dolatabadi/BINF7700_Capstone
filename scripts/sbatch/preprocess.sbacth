@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=qc
+#SBATCH --job-name=preproces
 #SBATCH --partition=courses
-#SBATCH --time=00:30:00                 # limit is 24hr
+#SBATCH --time=02:00:00                 # limit is 24hr
 #SBATCH --cpus-per-task=4              	# limit is 128/node
 #SBATCH --mem=8G                      	# limit is 515G/node
 #SBATCH --chdir=/scratch/dolatabadi.e   # working directory
@@ -24,13 +24,23 @@ SMP=${SMPS[$smp_idx]}
 
 # Paths
 DIR="$DATA/outputs/cellranger/ref_${REF}/$SMP/outs/filtered_feature_bc_matrix"
-OUT="$DATA/outputs/ref_${REF}/seurat/qc/$SMP"
+OUT_qc="$DATA/outputs/ref_${REF}/seurat/qc/$SMP"
+OUT_filter="$DATA/outputs/ref_${REF}/seurat/filtered"
+OUT_normalize="$DATA/outputs/ref_${REF}/seurat/normalized"
 
-mkdir -p "$OUT"
+mkdir -p "$OUT_qc"
+mkdir -p "$OUT_filter"
+mkdir -p "$OUT_normalize"
 
 # Environment
 eval "$(conda shell.bash hook)"
 conda activate seurat
 
 # Run QC
-Rscript "$RUN/qc.R" "$SMP" "$DIR" "$OUT"
+Rscript "$RUN/seurat/1_qc.R" "$SMP" "$OUT_qc" "$DIR"
+
+# Run filter
+Rscript "$RUN/seurat/2_filter.R" "$SMP" "$OUT_filtered" "$DIR"
+
+# Run normalize
+Rscript "$RUN/seurat/3_normalize.R" "$SMP" "$OUT_normalize" "$OUT_filtered"

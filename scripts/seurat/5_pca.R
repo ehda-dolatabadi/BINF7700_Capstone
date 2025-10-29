@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Purpose: Run PCA on an integrated Seurat object
-# Usage: Rscript 5_pca.R <id> <input> <outdir>
+# Usage: Rscript 5_pca.R <id> <output> <input>
 
 suppressPackageStartupMessages({
   library(Seurat)
@@ -11,12 +11,11 @@ set.seed(777)
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
+id      <- args[1]
+outdir  <- args[2]
+input   <- args[3]
 
-id	<- args[1]
-input	<- args[2]
-outdir	<- args[3]
-
-# Fixed parameters
+# Parameters
 npcs <- 50
 
 # Load integrated object

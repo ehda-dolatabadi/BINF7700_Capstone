@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Purpose: Run QC on a 10x sample
-# Usage: Rscript 1_qc.R <id> <input> <outdir>
+# Usage: Rscript 1_qc.R <id> <output> <input>
 
 suppressPackageStartupMessages({
   library(Seurat)
@@ -11,12 +11,11 @@ set.seed(777)
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
-
 id	<- args[1]
-input	<- args[2]
-outdir	<- args[3]
+outdir	<- args[2]
+input	<- args[3]
 
-# Thresholds
+# Parameters
 min_cells	<- 5
 min_features	<- 500
 

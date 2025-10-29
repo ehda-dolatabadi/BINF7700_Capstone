@@ -1,22 +1,20 @@
 #!/usr/bin/env Rscript
 # Purpose: Run graph-based clustering on PCA Seurat object
-# Usage: Rscript 6_cluster.R <id> <input> <outdir>
+# Usage: Rscript 6_cluster.R <id> <output> <input>
 
 suppressPackageStartupMessages({
   library(Seurat)
-  library(ggplot2)
 })
 
 set.seed(777)
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
+id      <- args[1]
+outdir  <- args[2]
+input   <- args[3]
 
-id	<- args[1]
-input	<- args[2]
-outdir	<- args[3]
-
-# Fixed parameters
+# Parameters
 dims <- 30
 res <- 0.5
 
