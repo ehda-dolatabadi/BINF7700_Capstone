@@ -29,10 +29,16 @@ eval "$(conda shell.bash hook)"
 conda activate seurat
 
 # Run integrate
-#Rscript "$RUN/seurat/4_integrate.R" "$ID" "$OUT" $DIR/*_normalized.rds
+Rscript "$RUN/seurat/4_integrate.R" "$ID" "$OUT" $DIR/*_normalized.rds
 
 # Run PCA
 Rscript "$RUN/seurat/5_pca.R" "$ID" "$OUT" "$OUT/${ID}_integrated.rds"
 
 # Run cluster
-#Rscript "$RUN/seurat/6_cluster.R" "$ID" "$OUT" "$OUT/${ID}_pca.rds"
+Rscript "$RUN/seurat/6_cluster.R" "$ID" "$OUT" "$OUT/${ID}_pca.rds"
+
+# Run UMAP
+Rscript "$RUN/seurat/6_cluster.R" "$ID" "$OUT" "$OUT/${ID}_clustered.rds"
+
+# Plot UMAP
+Rscript "$RUN/seurat/6_cluster.R" "$ID" "$OUT" "$OUT/${ID}_umap.rds"
