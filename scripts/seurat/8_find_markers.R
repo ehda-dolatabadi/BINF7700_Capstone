@@ -4,6 +4,7 @@
 
 suppressPackageStartupMessages({
   library(Seurat)
+  library(dplyr)
 })
 
 set.seed(777)
@@ -17,8 +18,18 @@ input   <- args[3]
 # Load clustered object
 obj <- readRDS(input)
 
+# Use SCT assay and prepare it
+DefaultAssay(obj) <- "SCT"
+obj <- PrepSCTFindMarkers(obj)
+
 # Find markers
-markers <- FindAllMarkers(obj)
+obj <- FindVariableFeatures(obj, nfeatures = 3000)
+markers <- FindAllMarkers(
+  obj,
+  max.cells.per.ident = 500,
+  only.pos = TRUE,
+  features = VariableFeatures(obj)
+)
 
 # Order markers
 markers <- markers[order(markers$cluster, markers$p_val_adj, -markers$avg_log2FC), ]
@@ -26,3 +37,22 @@ markers <- markers[order(markers$cluster, markers$p_val_adj, -markers$avg_log2FC
 # Save markers
 outfile <- file.path(outdir, paste0(id, "_markers.tsv"))
 write.table(markers, file = outfile, sep = "\t", quote = FALSE, row.names = FALSE)
+
+# Filter
+markers <- markers %>%
+  filter(
+        p_val_adj < 0.05,
+        avg_log2FC >= 0.5,
+        (pct.1 - pct.2) >= 0.2
+  )
+
+# Rank and pick top 10 per cluster
+top <- markers %>%
+  group_by(cluster) %>%
+  arrange(p_val_adj, desc(avg_log2FC), desc(pct.1 - pct.2)) %>%
+  slice_head(n = 10) %>%
+  ungroup()
+
+# Save filtered markers
+outfile <- file.path(outdir, paste0(id, "_markers_filtered.tsv"))
+write.table(top, file = outfile, sep = "\t", quote = FALSE, row.names = FALSE)

@@ -32,6 +32,10 @@ obj <- CreateSeuratObject(
   project = id
 )
 
+# QC metrics
+obj[["percent.mt"]]	<- PercentageFeatureSet(obj, pattern = "^(COX|ND|CYTB|ATP)")
+obj[["percent.ribo"]]	<- PercentageFeatureSet(obj, pattern = "^RPS|^RPL")
+
 # Filter
 n_before <- ncol(obj)
 obj <- subset(
