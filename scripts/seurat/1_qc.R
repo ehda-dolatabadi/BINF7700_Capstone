@@ -49,5 +49,3 @@ for (i in qc_metrics) {
   print(VlnPlot(obj, features = i) + NoLegend() + labs(x = NULL))
   dev.off()
 }
-
-print(sessionInfo())

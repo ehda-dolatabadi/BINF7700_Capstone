@@ -41,5 +41,3 @@ write.table(
   file = file.path(outdir, paste0(id, "_clustered.tsv")),
   sep = "\t", quote = FALSE, row.names = FALSE
 )
-
-print(sessionInfo())
