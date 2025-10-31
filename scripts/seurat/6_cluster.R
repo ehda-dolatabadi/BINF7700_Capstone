@@ -15,7 +15,7 @@ outdir  <- args[2]
 input   <- args[3]
 
 # Parameters
-dims <- 30
+dims <- 20
 res <- 0.5
 
 # Load PCA object
