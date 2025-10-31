@@ -51,3 +51,6 @@ The aim is to use single-cell transcriptomic data to reconstruct Schwann cell tr
 - NCBI. (2024). Ambystoma mexicanum genome assembly UKY_AmexF1_1 (GCF_040938575.1) [*Genome assembly*]. NCBI Datasets. https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_040938575.1/
 - Qin, T., Han, J., Fan, C., Sun, H., Rauf, N., Wang, T., Yin, Z., & Chen, X. (2024). Unveiling axolotl transcriptome for tissue regeneration with high-resolution annotation via long-read sequencing. *Computational and structural biotechnology journal, 23*, 3186–3198. https://doi.org/10.1016/j.csbj.2024.08.014
 - Rodgers, A. K., Smith, J. J., & Voss, S. R. (2020). Identification of immune and non-immune cells in regenerating axolotl limbs by single-cell sequencing. *Experimental cell research, 394*(2), 112149. https://doi.org/10.1016/j.yexcr.2020.112149
+
+https://satijalab.org/seurat/articles/get_started
+https://satijalab.org/seurat/articles/pbmc3k_tutorial.html
