@@ -1,0 +1,17 @@
+Module	Section	Sample Name	Source
+FastQC	all_sections	3h_S0_L001_R1_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/3h_S0_L001_R1_001_fastqc.zip
+FastQC	all_sections	3h_S0_L001_R2_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/3h_S0_L001_R2_001_fastqc.zip
+FastQC	all_sections	7dpa_S1_L001_R1_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/7dpa_S1_L001_R1_001_fastqc.zip
+FastQC	all_sections	7dpa_S1_L001_R2_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/7dpa_S1_L001_R2_001_fastqc.zip
+FastQC	all_sections	14dpa_S1_L001_R1_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/14dpa_S1_L001_R1_001_fastqc.zip
+FastQC	all_sections	14dpa_S1_L001_R2_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/14dpa_S1_L001_R2_001_fastqc.zip
+FastQC	all_sections	22dpa_S1_L001_R1_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/22dpa_S1_L001_R1_001_fastqc.zip
+FastQC	all_sections	22dpa_S1_L001_R2_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/22dpa_S1_L001_R2_001_fastqc.zip
+FastQC	all_sections	24h_S1_L001_R1_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/24h_S1_L001_R1_001_fastqc.zip
+FastQC	all_sections	24h_S1_L001_R2_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/24h_S1_L001_R2_001_fastqc.zip
+FastQC	all_sections	33dpa_S1_L001_R1_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/33dpa_S1_L001_R1_001_fastqc.zip
+FastQC	all_sections	33dpa_S1_L001_R2_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/33dpa_S1_L001_R2_001_fastqc.zip
+FastQC	all_sections	72h_S1_L001_R1_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/72h_S1_L001_R1_001_fastqc.zip
+FastQC	all_sections	72h_S1_L001_R2_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/72h_S1_L001_R2_001_fastqc.zip
+FastQC	all_sections	control_S0_L001_R1_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/control_S0_L001_R1_001_fastqc.zip
+FastQC	all_sections	control_S0_L001_R2_001	/courses/BINF7700.202610/students/dolatabadi.e/outputs/fastqc/control_S0_L001_R2_001_fastqc.zip

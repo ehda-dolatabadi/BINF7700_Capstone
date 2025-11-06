@@ -1,2 +1,2 @@
-project_id	n_samples	n_cells_total	n_features_integrated	default_assay	n_integration_features
-AmexT_v47-AmexG_v6_0-DD	8	73515	3000	integrated	3000
+id	n_samples	n_cells_total	n_features_integrated	default_assay	n_integration_features
+4	8	73515	3000	integrated	3000
