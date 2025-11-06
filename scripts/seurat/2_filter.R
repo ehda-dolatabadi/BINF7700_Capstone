@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Purpose: Run filtering on a 10x sample
-# Usage: Rscript 2_filter.R <id> <output> <input>
+# Usage: Rscript 2_filter.R <id> <output> <input> <params>
 
 suppressPackageStartupMessages({
   library(Seurat)
@@ -15,13 +15,13 @@ outdir  <- args[2]
 input   <- args[3]
 
 # Parameters
-min_cells	<- 5
-min_features	<- 500
-max_features	<- 7500
-min_counts	<- 1000
-max_counts	<- 40000
-max_mt		<- 25
-max_ribo	<- 40
+min_cells    <- 5
+min_counts   <- as.numeric(args[4])
+max_counts   <- as.numeric(args[5])
+min_features <- as.numeric(args[6])
+max_features <- as.numeric(args[7])
+max_mt       <- as.numeric(args[8])
+max_ribo     <- as.numeric(args[9])
 
 # Load and create Seurat object
 counts <- Read10X(input)
@@ -41,9 +41,10 @@ n_before <- ncol(obj)
 obj <- subset(
   obj,
   subset =
-    nFeature_RNA <= max_features &
     nCount_RNA   >= min_counts   &
     nCount_RNA   <= max_counts   &
+    nFeature_RNA >= min_features &
+    nFeature_RNA <= max_features &
     percent.mt   <= max_mt       &
     percent.ribo <= max_ribo
 )

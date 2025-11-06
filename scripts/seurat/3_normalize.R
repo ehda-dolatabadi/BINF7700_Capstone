@@ -22,6 +22,8 @@ obj <- SCTransform(
   object = obj,
   assay = "RNA",
   new.assay.name = "SCT",
+  ncells = 5000,		# default
+  variable.features.n = 3000	# default
 )
 
 # Set default assay to SCT for downstream steps

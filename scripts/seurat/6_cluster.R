@@ -15,7 +15,7 @@ outdir  <- args[2]
 input   <- args[3]
 
 # Parameters
-dims <- 20
+dims <- 10
 res <- 0.5
 
 # Load PCA object
@@ -23,7 +23,7 @@ obj <- readRDS(input)
 
 # Neighbors and clustering (Leiden)
 obj <- FindNeighbors(obj, dims = 1:dims)
-obj <- FindClusters(obj, res = 0.5, algorithm = 4)
+obj <- FindClusters(obj, res = res, algorithm = 4)
 
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_clustered.rds")))

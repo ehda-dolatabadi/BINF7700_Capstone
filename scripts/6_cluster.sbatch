@@ -49,3 +49,6 @@ echo "UMAP completed✅"
 echo "Finding Markers..."
 Rscript "$RUN/seurat/8_find_markers.R" "8" "$OUT" "$OUT/6_clustered.rds"
 echo "Markers finding completed✅"
+
+# Sync
+rsync -av --update --info=progress2 --stats --exclude 'cellranger/' --exclude '*.rds' "$DATA/outputs/" "$WORK/results/"
