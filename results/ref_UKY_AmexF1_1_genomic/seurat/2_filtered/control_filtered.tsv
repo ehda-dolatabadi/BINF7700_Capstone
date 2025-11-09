@@ -1,2 +1,2 @@
 id	n_cells_before	n_cells_after	min_cells	min_features	max_features	min_counts	max_counts	max_mt	max_ribo
-control	6599	5903	5	500	5000	1000	20000	10	30
+control	6599	5899	5	500	5000	1000	20000	10	30
