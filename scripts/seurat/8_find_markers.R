@@ -27,7 +27,7 @@ obj <- FindVariableFeatures(obj, nfeatures = 3000)
 markers <- FindAllMarkers(
   obj,
   max.cells.per.ident = 500,
-  only.pos = TRUE,
+  only.pos = FALSE,
   features = VariableFeatures(obj)
 )
 
@@ -40,16 +40,17 @@ write.table(markers, file = outfile, sep = "\t", quote = FALSE, row.names = FALS
 
 # Filter
 markers <- markers %>%
+  mutate(direction = ifelse(avg_log2FC >= 0, "up", "down")) %>%
   filter(
-        p_val_adj < 0.05,
-        avg_log2FC >= 0.5,
-        (pct.1 - pct.2) >= 0.2
+    p_val_adj < 0.05,
+    abs(avg_log2FC) >= 1,
+    abs(pct.1 - pct.2) >= 0.2
   )
 
-# Rank and pick top 10 per cluster
+# Rank and pick top 10 per cluster and direction
 top <- markers %>%
-  group_by(cluster) %>%
-  arrange(p_val_adj, desc(avg_log2FC), desc(pct.1 - pct.2)) %>%
+  group_by(cluster, direction) %>%
+  arrange(p_val_adj, desc(abs(avg_log2FC)), desc(abs(pct.1 - pct.2))) %>%
   slice_head(n = 10) %>%
   ungroup()
 

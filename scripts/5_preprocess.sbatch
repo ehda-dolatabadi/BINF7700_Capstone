@@ -7,7 +7,7 @@
 #SBATCH --chdir=/scratch/dolatabadi.e   # working directory
 #SBATCH --output=logs/%x_%j.out         # stdout log
 #SBATCH --error=logs/%x_%j.err          # stderr log
-#SBATCH --array=0-15
+#SBATCH --array=0-7
 
 set -euo pipefail
 

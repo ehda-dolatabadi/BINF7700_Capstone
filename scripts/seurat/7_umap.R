@@ -15,7 +15,7 @@ outdir  <- args[2]
 input   <- args[3]
 
 # Parameters
-dims	<- 20
+dims	<- 10
 metric	<- "cosine"
 seed	<- 777
 

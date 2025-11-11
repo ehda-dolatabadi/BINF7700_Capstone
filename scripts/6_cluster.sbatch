@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=cluster
 #SBATCH --partition=courses
-#SBATCH --time=3:00:00			# limit is 24hr
+#SBATCH --time=04:00:00			# limit is 24hr
 #SBATCH --cpus-per-task=4		# limit is 128/node
 #SBATCH --mem=8G			# limit is 515G/node
 #SBATCH --chdir=/scratch/dolatabadi.e	# working directory
 #SBATCH --output=logs/%x_%j.out		# stdout log
 #SBATCH --error=logs/%x_%j.err		# stderr log
-#SBATCH --array=0-1
+#SBATCH --array=0-0
 
 set -euo pipefail
 
