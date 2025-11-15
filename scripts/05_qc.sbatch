@@ -26,8 +26,8 @@ REF=${REFS[0]}
 SMP=${SMPS[$SLURM_ARRAY_TASK_ID]}
 
 # Paths
-DIR="$DATA/outputs/ref_${REF}/cellranger/$SMP/outs/filtered_feature_bc_matrix"
-OUT="$DATA/outputs/ref_${REF}/seurat/1_qc/$SMP"
+DIR="$DATA/outputs/ref_${REF}/seurat/00_mapped/${SMP}_mapped.rds"
+OUT="$DATA/outputs/ref_${REF}/seurat/01_qc/$SMP"
 
 mkdir -p "$OUT"
 
@@ -36,7 +36,7 @@ eval "$(conda shell.bash hook)"
 conda activate seurat
 
 # Run QC
-Rscript "$RUN/seurat/1_qc.R" "$SMP" "$OUT" "$DIR"
+Rscript "$RUN/seurat/01_qc.R" "$SMP" "$OUT" "$DIR"
 
 # Sync
 rsync -av --update --info=progress2 --stats --exclude 'cellranger/' --exclude '*.rds' "$DATA/outputs/" "$WORK/results/"

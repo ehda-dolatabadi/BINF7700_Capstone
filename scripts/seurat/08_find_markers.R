@@ -1,10 +1,11 @@
 #!/usr/bin/env Rscript
 # Purpose: Find marker genes for each Seurat cluster
-# Usage: Rscript 8_find_markers.R <id> <output> <input>
+# Usage: Rscript 8_find_markers.R <id> <output> <input> <cores>
 
 suppressPackageStartupMessages({
   library(Seurat)
   library(dplyr)
+  library(future)
 })
 
 set.seed(777)
@@ -14,6 +15,11 @@ args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
+cores	<- args[4]
+
+# Set up parallelization
+options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
+plan("multicore", workers = as.numeric(cores))
 
 # Load clustered object
 obj <- readRDS(input)
@@ -23,12 +29,10 @@ DefaultAssay(obj) <- "SCT"
 obj <- PrepSCTFindMarkers(obj)
 
 # Find markers
-obj <- FindVariableFeatures(obj, nfeatures = 3000)
 markers <- FindAllMarkers(
   obj,
   max.cells.per.ident = 500,
   only.pos = FALSE,
-  features = VariableFeatures(obj)
 )
 
 # Order markers

@@ -1,0 +1,2 @@
+id	n_cells	n_features	dims_used	umap_metric	umap_seed
+07	57167	3000	10	cosine	777

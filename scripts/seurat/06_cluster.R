@@ -4,6 +4,7 @@
 
 suppressPackageStartupMessages({
   library(Seurat)
+  library(future)
 })
 
 set.seed(777)
@@ -17,6 +18,10 @@ input   <- args[3]
 # Parameters
 dims <- 10
 res <- 0.5
+
+# Set up parallelization
+options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
+plan("multicore", workers = as.numeric(cores))
 
 # Load PCA object
 obj <- readRDS(input)

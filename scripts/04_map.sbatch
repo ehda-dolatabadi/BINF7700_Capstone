@@ -19,15 +19,14 @@ SMP=${SMPS[$SLURM_ARRAY_TASK_ID]}
 
 # Paths
 DIR="$DATA/outputs/ref_${REF}/cellranger/$SMP/outs/filtered_feature_bc_matrix"
-OUT="$DATA/ref_genomes/ref_files"
-TSV="$OUT/gene_map.tsv"
+OUT="$DATA/outputs/ref_${REF}/seurat/00_mapped"
+TSV="$DATA/ref_genomes/ref_files/loc_map.tsv"
 
-cd "$OUT"
+mkdir -p "$OUT"
 
 # Environment
 eval "$(conda shell.bash hook)"
 conda activate seurat
 
 # Map unknown features
-Rscript "$RUN/gene_map.R"
-Rscript "$RUN/seurat/0_map_features.R" "$DIR" "$TSV"
+Rscript "$RUN/seurat/00_map_features.R" "$SMP" "$OUT" "$DIR" "$TSV"
