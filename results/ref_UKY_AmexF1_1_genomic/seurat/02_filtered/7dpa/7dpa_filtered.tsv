@@ -1,0 +1,2 @@
+id	n_before	n_after_filter	min_features	max_features	min_counts	max_counts	max_mt	max_ribo
+7dpa	8916	6714	500	5000	1000	30000	10	30
