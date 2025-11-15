@@ -20,7 +20,9 @@ input <- args[3]
 obj <- readRDS(input)
 
 # Core Schwann cell identity markers (highest specificity)
-schwann_markers <- c("SOX10", "PMP22", "MPZ", "CDH19", "GJB1", "PRX", "POU3F1", "ERBB3")
+schwann_markers <- c("SOX10", "S100", "S100B", "NGFR", "p75NTR", "MPZ", "MBP", "PMP22", "PLP1", "PRX", 
+		     "NCAM", "NCAM1", "L1CAM", "SCN7A", "SOX2", "GAP43", "EGR2", "Krox20", "POU3F1", "OCT6")
+
 schwann_markers_available <- schwann_markers[schwann_markers %in% rownames(obj)]
 
 # Add module score (makes schwann1 feature)
