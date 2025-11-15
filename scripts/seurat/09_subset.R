@@ -16,6 +16,7 @@ input   <- args[3]
 cores   <- args[4]
 
 # Parameters
+idents <- 14
 dims <- 30
 res <- 1.5
 metric  <- "cosine"
@@ -34,7 +35,7 @@ plan("multicore", workers = as.numeric(cores))
 obj <- readRDS(input)
 
 # Subset to cluster
-obj <- subset(obj, idents = 14)
+obj <- subset(obj, idents = idents)
 
 # Switch back to RNA
 DefaultAssay(obj) <- "RNA"

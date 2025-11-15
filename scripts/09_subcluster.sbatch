@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=nano
+#SBATCH --job-name=subset
 #SBATCH --partition=courses
 #SBATCH --time=24:00:00			# limit is 24hr
 #SBATCH --cpus-per-task=64		# limit is 128/node

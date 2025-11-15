@@ -5,6 +5,7 @@
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
+  library(future)
 })
 
 set.seed(777)
@@ -14,6 +15,10 @@ args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
+
+# Set up parallelization
+options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
+plan("multicore", workers = as.numeric(cores))
 
 # Parameters
 npcs <- 50

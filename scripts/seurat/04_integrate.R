@@ -4,6 +4,7 @@
 
 suppressPackageStartupMessages({
   library(Seurat)
+  library(future)
 })
 
 set.seed(777)
@@ -13,6 +14,10 @@ args <- commandArgs(trailingOnly = TRUE)
 id	<- args[1]
 outdir	<- args[2]
 paths	<- args[3:length(args)]
+
+# Set up parallelization
+options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
+plan("multicore", workers = as.numeric(cores))
 
 # Load normalized objects
 obj_list <- lapply(paths, readRDS)

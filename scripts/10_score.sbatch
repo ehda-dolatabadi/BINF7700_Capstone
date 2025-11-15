@@ -29,15 +29,5 @@ echo "Marker-based scoring..."
 Rscript "$RUN/seurat/10_score.R" "10" "$OUT" "$OUT/06_clustered.rds"
 echo "Scoring completed✅"
 
-# Run UMAP
-echo "Running UMAP..."
-#Rscript "$RUN/seurat/07_umap.R" "10" "$OUT" "$OUT/10_clustered.rds"
-echo "UMAP completed✅"
-
-# Find markers
-echo "Finding Markers..."
-#Rscript "$RUN/seurat/08_find_markers.R" "10" "$OUT" "$OUT/10_clustered.rds" "${SLURM_CPUS_PER_TASK}"
-echo "Markers finding completed✅"
-
 # Sync
 rsync -av --update --info=progress2 --stats --exclude 'cellranger/' --exclude '*.rds' "$DATA/outputs/" "$WORK/results/"
