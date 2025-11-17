@@ -7,13 +7,33 @@
 #SBATCH --chdir=/scratch/dolatabadi.e	# working directory
 #SBATCH --output=logs/%x_%j.out		# stdout log
 #SBATCH --error=logs/%x_%j.err		# stderr log
-#SBATCH --array=0-0
 
 set -euo pipefail
 
-# Arrays
-REFS=("UKY_AmexF1_1_genomic" "AmexT_v47-AmexG_v6_0-DD")
-REF=${REFS[$SLURM_ARRAY_TASK_ID]}
+# Samples
+SMPS=("control" "3h" "24h" "72h" "7dpa" "14dpa" "22dpa" "33dpa")
+REF="UKY_AmexF1_1_genomic"
+
+# Paths
+DIR="$DATA/outputs/ref_${REF}/cellranger/$SMP/outs/filtered_feature_bc_matrix"
+OUT="$DATA/outputs/ref_${REF}/seurat/00_mapped"
+TSV="$DATA/ref_genomes/ref_files/loc_map.tsv"
+
+mkdir -p "$OUT"
+
+# Environment
+eval "$(conda shell.bash hook)"
+conda activate seurat
+
+# Run preprocessing for all timepoints in parallel
+for SMP in "${SMPS[@]}"; do
+    srun --exclusive -N1 -n1 -c 8 --mem=16G "
+        Rscript "$RUN/seurat/00_map_features.R" "$SMP" "$OUT" "$DIR" "$TSV" &&
+        Rscript filter.R ${smp} &&
+        Rscript normalize.R ${smp}
+    " &
+done
+
 
 # Paths
 DIR="$DATA/outputs/ref_${REF}/seurat/03_normalized"

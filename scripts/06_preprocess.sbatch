@@ -54,7 +54,7 @@ Rscript "$RUN/seurat/02_filter.R" "$SMP" "$OUT_filter" "$DIR"\
   "$p1" "$p2" "$p3" "$p4" "$p5" "$p6"
 
 # Run normalize
-Rscript "$RUN/seurat/03_normalize.R" "$SMP" "$OUT_normalize" "$OUT_filter/${SMP}_filtered.rds"
+Rscript "$RUN/seurat/03_normalize.R" "$SMP" "$OUT_normalize" "$OUT_filter/${SMP}_filtered.rds" "${SLURM_CPUS_PER_TASK}"
 
 # Sync
 rsync -av --update --info=progress2 --stats --exclude 'cellranger/' --exclude '*.rds' "$DATA/outputs/" "$WORK/results/"

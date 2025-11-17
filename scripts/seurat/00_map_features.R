@@ -51,7 +51,8 @@ counts_agg <- rowsum(as.matrix(counts), group = new_names)
 # Create new object
 obj <- CreateSeuratObject(
   counts = counts_agg,
-  meta.data = obj@meta.data
+  meta.data = obj@meta.data,
+  project = id
 )
 
 # Save object

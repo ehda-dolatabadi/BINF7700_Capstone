@@ -13,11 +13,12 @@ set.seed(777)
 args <- commandArgs(trailingOnly = TRUE)
 id	<- args[1]
 outdir	<- args[2]
-paths	<- args[3:length(args)]
+cores   <- args[3]
+paths	<- args[4:length(args)]
 
 # Set up parallelization
-options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
-plan("multicore", workers = as.numeric(cores))
+options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
+plan("multicore", workers = as.numeric(cores)/8)
 
 # Load normalized objects
 obj_list <- lapply(paths, readRDS)
@@ -40,6 +41,10 @@ obj <- IntegrateData(
 
 # Set default assay to integrated for downstream steps
 DefaultAssay(obj) <- "integrated"
+
+# Correct timepoints order
+timepoint_order <- c("control", "3h", "24h", "72h", "7dpa", "14dpa", "22dpa", "33dpa")
+obj$orig.ident <- factor(obj$orig.ident, levels = timepoint_order)
 
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_integrated.rds")))

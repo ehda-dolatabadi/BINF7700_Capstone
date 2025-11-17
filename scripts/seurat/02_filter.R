@@ -64,9 +64,6 @@ write.table(
   sep = "\t", quote = FALSE, row.names = FALSE
 )
 
-
-
-
 # Plots
 pdf(file.path(outdir, paste0(id, "_plots.pdf")), width = 15, height = 9)
 
