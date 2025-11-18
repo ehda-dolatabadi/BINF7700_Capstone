@@ -13,12 +13,11 @@ set.seed(777)
 args <- commandArgs(trailingOnly = TRUE)
 id	<- args[1]
 outdir	<- args[2]
-cores   <- args[3]
 paths	<- args[4:length(args)]
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
-plan("multicore", workers = as.numeric(cores)/8)
+plan("multicore", workers = 8)
 
 # Load normalized objects
 obj_list <- lapply(paths, readRDS)

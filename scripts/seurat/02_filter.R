@@ -17,12 +17,12 @@ outdir  <- args[2]
 input   <- args[3]
 
 # Parameters
-min_counts   <- as.numeric(args[4])
-max_counts   <- as.numeric(args[5])
-min_features <- as.numeric(args[6])
-max_features <- as.numeric(args[7])
-max_mt       <- as.numeric(args[8])
-max_ribo     <- as.numeric(args[9])
+min_counts   <- 1000
+max_counts   <- 30000
+min_features <- 500
+max_features <- 5000
+max_mt       <- 10
+max_ribo     <- 30
 
 # Load mapped object
 obj <- readRDS(input)
