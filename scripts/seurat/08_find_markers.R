@@ -46,7 +46,7 @@ markers <- markers %>%
   mutate(direction = ifelse(avg_log2FC >= 0, "up", "down")) %>%
   filter(
     p_val_adj < 0.05,
-    abs(avg_log2FC) >= 1,
+    abs(avg_log2FC) >= 0.5,
     abs(pct.1 - pct.2) >= 0.2
   )
 
@@ -54,7 +54,7 @@ markers <- markers %>%
 top <- markers %>%
   group_by(cluster, direction) %>%
   arrange(p_val_adj, desc(abs(avg_log2FC)), desc(abs(pct.1 - pct.2))) %>%
-  slice_head(n = 10) %>%
+  slice_head(n = 30) %>%
   ungroup()
 
 # Save filtered markers

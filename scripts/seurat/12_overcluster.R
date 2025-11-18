@@ -2,6 +2,7 @@
 
 suppressPackageStartupMessages({
   library(Seurat)
+  library(ggplot2)
   library(dplyr)
   library(future)
 })
@@ -24,7 +25,7 @@ seed    <- 777
 significance <- 0.05
 regulation <- 0.5
 enrichment <- 0.2
-top <- 10
+top <- 30
 
 # Set up parallelization
 options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
@@ -32,18 +33,6 @@ plan("multicore", workers = 16)
 
 # Load PCA object
 obj <- readRDS(input)
-
-# PCA
-obj <- RunPCA(obj, npcs = npcs)
-
-# Elbow plot
-png(file.path(outdir, paste0(id, "_elbow.png")), width=1200, height=720)
-print(ElbowPlot(obj, ndims = npcs) +
-        geom_vline(xintercept = 10, linetype = "dashed", color = "red"))
-dev.off()
-
-# Prepare SCT assay
-obj <- PrepSCTFindMarkers(obj)
 
 # Clustering
 obj <- FindNeighbors(obj, dims = 1:dims)
@@ -65,10 +54,14 @@ dev.off()
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_overclustered.rds")))
 
+# Use SCT assay and prepare it
+DefaultAssay(obj) <- "SCT"
+obj <- PrepSCTFindMarkers(obj)
+
 # Find markers
 markers <- FindAllMarkers(
   obj,
-  only.pos = FALSE,
+  only.pos = FALSE
 )
 
 # Order markers
@@ -117,7 +110,7 @@ write.table(
     enrichment,
     top
   ),
-  file = file.path(outdir, paste0(id, "_subcluster_summary.tsv")),
+  file = file.path(outdir, paste0(id, "_enriched_summary.tsv")),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE

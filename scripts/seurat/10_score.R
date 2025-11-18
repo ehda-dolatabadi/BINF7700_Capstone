@@ -19,6 +19,9 @@ input <- args[3]
 # Load clustered object
 obj <- readRDS(input)
 
+# Use SCT assay
+DefaultAssay(obj) <- "SCT"
+
 # Core Schwann cell identity markers (highest specificity)
 schwann_markers <- c("SOX10", "S100", "S100B", "NGFR", "p75NTR", "MPZ", "MBP", "PMP22", "PLP1", "PRX", 
 		     "NCAM", "NCAM1", "L1CAM", "SCN7A", "SOX2", "GAP43", "EGR2", "Krox20", "POU3F1", "OCT6")

@@ -4,16 +4,17 @@ suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
   library(dplyr)
+  library(future)
 })
 
 set.seed(777)
 
-# Close any open graphics devices
-while (!is.null(dev.list())) dev.off()
-
 # Set up parallelization
 options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
 plan("multicore", workers = 16)
+
+# Close any open graphics devices
+while (!is.null(dev.list())) dev.off()
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
@@ -27,6 +28,10 @@ ery_thr <- 10
 
 # Load clustered object
 obj <- readRDS(input)
+
+# Use SCT assay
+DefaultAssay(obj) <- "SCT"
+
 n_cells_before = ncol(obj)
 n_features_before = nrow(obj)
 
@@ -152,8 +157,8 @@ regulation <- 0.5
 enrichment <- 0.2
 top <- 30
 
-# Load PCA object
-obj <- readRDS(input)
+# Use integrated assay
+DefaultAssay(obj) <- "integrated"
 
 # PCA
 obj <- RunPCA(obj, npcs = npcs)
@@ -163,9 +168,6 @@ png(file.path(outdir, paste0(id, "_elbow.png")), width=1200, height=720)
 print(ElbowPlot(obj, ndims = npcs) +
         geom_vline(xintercept = 10, linetype = "dashed", color = "red"))
 dev.off()
-
-# Prepare SCT assay
-obj <- PrepSCTFindMarkers(obj)
 
 # Clustering
 obj <- FindNeighbors(obj, dims = 1:dims)
@@ -187,10 +189,14 @@ dev.off()
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_enriched.rds")))
 
+# Use SCT assay and prepare it
+DefaultAssay(obj) <- "SCT"
+obj <- PrepSCTFindMarkers(obj)
+
 # Find markers
 markers <- FindAllMarkers(
   obj,
-  only.pos = FALSE,
+  only.pos = FALSE
 )
 
 # Order markers
