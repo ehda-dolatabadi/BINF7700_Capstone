@@ -35,6 +35,12 @@ obj <- readRDS(input)
 n_cells_before <- ncol(obj)
 n_features_before <- nrow(obj)
 
+# Elbow plot
+png(file.path(outdir, paste0(id, "_elbow.png")), width=1200, height=720)
+print(ElbowPlot(obj, ndims = npcs) +
+        geom_vline(xintercept = 10, linetype = "dashed", color = "red"))
+dev.off()
+
 # Subset to cluster
 obj <- subset(obj, idents = idents)
 

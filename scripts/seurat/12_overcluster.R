@@ -15,6 +15,7 @@ outdir  <- args[2]
 input   <- args[3]
 
 # Parameters
+npcs <- 50
 dims <- 30
 res <- 2.0
 metric  <- "cosine"
@@ -33,7 +34,13 @@ plan("multicore", workers = 16)
 obj <- readRDS(input)
 
 # PCA
-obj <- RunPCA(obj, npcs = 50)
+obj <- RunPCA(obj, npcs = npcs)
+
+# Elbow plot
+png(file.path(outdir, paste0(id, "_elbow.png")), width=1200, height=720)
+print(ElbowPlot(obj, ndims = npcs) +
+        geom_vline(xintercept = 10, linetype = "dashed", color = "red"))
+dev.off()
 
 # Prepare SCT assay
 obj <- PrepSCTFindMarkers(obj)
@@ -95,7 +102,6 @@ write.table(filtered_top, file = outfile, sep = "\t", quote = FALSE, row.names =
 write.table(
   data.frame(
     id,
-    idents,
     n_cells = ncol(obj),
     n_features = nrow(obj),
     dims,
