@@ -84,8 +84,9 @@ png(file.path(outdir, paste0(id, "_schwann_score_distribution.png")), width = 16
 hist(obj$Schwann_score1, breaks = 50, main = "Schwann Score Distribution", xlab = "Schwann Score")
 dev.off()
 
+df <- obj@meta.data
 png(file.path(outdir, paste0(id, "_scatter_plot.png")), width = 1600, height = 1200)
-df <- obj@meta.data %>% 
+df %>% 
   arrange(Schwann_score1) %>%
   ggplot(aes_string("Epithelial_score1", "Erythrocyte_score1", colour = "Schwann_score1")) +
   geom_point() +
