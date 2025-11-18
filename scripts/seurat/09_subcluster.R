@@ -13,7 +13,6 @@ args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
-cores   <- args[4]
 
 # Parameters
 idents <- 14
@@ -28,8 +27,8 @@ enrichment <- 0.1
 top <- 10
 
 # Set up parallelization
-options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
-plan("multicore", workers = as.numeric(cores))
+options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
+plan("multicore", workers = 64)
 
 # Load PCA object
 obj <- readRDS(input)

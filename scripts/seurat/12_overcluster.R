@@ -26,8 +26,8 @@ enrichment <- 0.2
 top <- 10
 
 # Set up parallelization
-options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
-plan("multicore", workers = 64)
+options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
+plan("multicore", workers = 16)
 
 # Load PCA object
 obj <- readRDS(input)

@@ -3,6 +3,7 @@
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
+  library(dplyr)
 })
 
 set.seed(777)
@@ -83,13 +84,16 @@ png(file.path(outdir, paste0(id, "_schwann_score_distribution.png")), width = 16
 hist(obj$Schwann_score1, breaks = 50, main = "Schwann Score Distribution", xlab = "Schwann Score")
 dev.off()
 
-df %>% arrange(obj$Schwann_score1) %>%
-      ggplot(aes_string(obj$Epithelial_score1, obj$Erythrocyte_score1, colour = obj$Schwann_score1))) +
-      geom_point() +
-      scale_color_gradientn(colors = c("black","blue","green2","red","yellow"),
-                            guide = guide_colorbar(barwidth = 2, barheight = 30)) +
-      scale_x_log10() +
-      scale_y_log10()
+png(file.path(outdir, paste0(id, "_scatter_plot.png")), width = 1600, height = 1200)
+df <- obj@meta.data %>% 
+  arrange(Schwann_score1) %>%
+  ggplot(aes_string("Epithelial_score1", "Erythrocyte_score1", colour = "Schwann_score1")) +
+  geom_point() +
+  scale_color_gradientn(colors = c("black","blue","green2","red","yellow"),
+                        guide = guide_colorbar(barwidth = 2, barheight = 30)) +
+  scale_x_log10() +
+  scale_y_log10()
+dev.off()
 
 # Filtering
 cells_to_keep <- which(obj$Epithelial_score1 < epi_thr & 
