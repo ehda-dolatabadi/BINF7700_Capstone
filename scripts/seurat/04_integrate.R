@@ -13,7 +13,7 @@ set.seed(777)
 args <- commandArgs(trailingOnly = TRUE)
 id	<- args[1]
 outdir	<- args[2]
-paths	<- args[4:length(args)]
+paths	<- args[3:length(args)]
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
@@ -21,6 +21,12 @@ plan("multicore", workers = 8)
 
 # Load normalized objects
 obj_list <- lapply(paths, readRDS)
+n_samples <- length(obj_list)
+n_cells_total <- sum(sapply(obj_list, ncol))
+n_features_per_sample <- sapply(obj_list, nrow)
+n_features_min <- min(n_features_per_sample)
+n_features_max <- max(n_features_per_sample)
+n_features_mean <- mean(n_features_per_sample)
 
 # Integration features
 features <- SelectIntegrationFeatures(object.list = obj_list, nfeatures = 3000)
@@ -32,6 +38,7 @@ anchors <- FindIntegrationAnchors(
   normalization.method = "SCT",
   anchor.features = features
 )
+n_anchors <- nrow(anchors@anchors)
 
 obj <- IntegrateData(
   anchorset = anchors,
@@ -48,17 +55,21 @@ obj$orig.ident <- factor(obj$orig.ident, levels = timepoint_order)
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_integrated.rds")))
 
-# Summary
-n_cells_total <- sum(sapply(obj_list, ncol))
+# Summary table
 write.table(
   data.frame(
-    id				= id,
-    n_samples			= length(obj_list),
-    n_cells_total		= n_cells_total,
-    n_features_integrated	= nrow(obj),
-    default_assay		= DefaultAssay(obj),
-    n_integration_features	= length(features)
+    id,
+    n_samples,
+    n_cells_total,
+    n_cells_after = ncol(obj),
+    n_features_min,
+    n_features_max,
+    n_features_mean,
+    n_features_integrated = nrow(obj),
+    n_anchors
   ),
-  file = file.path(outdir, paste0(id, "_integrated.tsv")),
-  sep = "\t", quote = FALSE, row.names = FALSE
+  file = file.path(outdir, paste0(id, "_integration_summary.tsv")),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
 )

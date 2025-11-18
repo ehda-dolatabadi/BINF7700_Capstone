@@ -33,6 +33,8 @@ plan("multicore", workers = as.numeric(cores))
 
 # Load PCA object
 obj <- readRDS(input)
+n_cells_before <- ncol(obj)
+n_features_before <- nrow(obj)
 
 # Subset to cluster
 obj <- subset(obj, idents = idents)
@@ -93,7 +95,7 @@ outfile <- file.path(outdir, paste0(id, "_markers.tsv"))
 write.table(markers, file = outfile, sep = "\t", quote = FALSE, row.names = FALSE)
 
 # Filter
-markers <- markers %>%
+filtered <- markers %>%
   mutate(direction = ifelse(avg_log2FC >= 0, "up", "down")) %>%
   filter(
     p_val_adj < significance,
@@ -102,7 +104,7 @@ markers <- markers %>%
   )
 
 # Rank and pick top rankings per cluster and direction
-top <- markers %>%
+filtered_top <- filtered %>%
   group_by(cluster, direction) %>%
   arrange(p_val_adj, desc(abs(avg_log2FC)), desc(abs(pct.1 - pct.2))) %>%
   slice_head(n = top) %>%
@@ -110,4 +112,32 @@ top <- markers %>%
 
 # Save filtered markers
 outfile <- file.path(outdir, paste0(id, "_markers_filtered.tsv"))
-write.table(top, file = outfile, sep = "\t", quote = FALSE, row.names = FALSE)
+write.table(filtered_top, file = outfile, sep = "\t", quote = FALSE, row.names = FALSE)
+
+# Summary table
+write.table(
+  data.frame(
+    id,
+    idents,
+    n_cells_before,
+    n_cells_after = ncol(obj),
+    n_features_before,
+    n_features_after = nrow(obj),
+    dims,
+    res,
+    n_subclusters = length(unique(obj$seurat_clusters)),
+    metric,
+    seed,
+    n_markers_total = nrow(markers),
+    n_markers_filtered = nrow(filtered),
+    n_markers_top = nrow(filtered_top),
+    significance,
+    regulation,
+    enrichment,
+    top
+  ),
+  file = file.path(outdir, paste0(id, "_subcluster_summary.tsv")),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
+)

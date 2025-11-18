@@ -3,7 +3,7 @@
 set -euo pipefail
 
 echo "Integrting normalized samples..." &&
-Rscript "$WORK/scripts/seurat/04_integrate.R"		"04" "$OUT" "$OUT_normalize"/*_normalized.rds &&
+#Rscript "$WORK/scripts/seurat/04_integrate.R"		"04" "$OUT" "$OUT_normalize"/*_normalized.rds &&
 echo "Integration completed✅" &&
 
 echo "Running PCA..." &&

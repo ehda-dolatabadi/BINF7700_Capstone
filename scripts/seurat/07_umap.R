@@ -43,16 +43,19 @@ dev.off()
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_umap.rds")))
 
-# Summary
+# Summary table
 write.table(
   data.frame(
-    id               = id,
-    n_cells          = ncol(obj),
-    n_features       = nrow(obj),
-    dims_used        = dims,
-    umap_metric      = metric,
-    umap_seed        = seed
+    id,
+    n_cells = ncol(obj),
+    n_features = nrow(obj),
+    n_clusters = length(unique(obj$seurat_clusters)),
+    dims,
+    metric,
+    seed
   ),
-  file = file.path(outdir, paste0(id, "_umap.tsv")),
-  sep = "\t", quote = FALSE, row.names = FALSE
+  file = file.path(outdir, paste0(id, "_umap_summary.tsv")),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
 )

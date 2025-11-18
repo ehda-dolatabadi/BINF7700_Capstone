@@ -59,3 +59,19 @@ dev.off()
 
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_scored.rds")))
+
+# Summary table
+write.table(
+  data.frame(
+    id,
+    n_cells = ncol(obj),
+    n_features = nrow(obj),
+    n_schwann_markers_total = length(schwann_markers),
+    n_schwann_markers_available = length(schwann_markers_available),
+    schwann_markers_available = paste(schwann_markers_available, collapse = ",")
+  ),
+  file = file.path(outdir, paste0(id, "_schwann_score_summary.tsv")),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
+)

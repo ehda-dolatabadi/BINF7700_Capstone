@@ -29,28 +29,31 @@ obj <- readRDS(input)
 # PCA
 obj <- RunPCA(obj, npcs = npcs)
 
+# PCA info
+pca_stdev <- obj@reductions$pca@stdev
+total_var <- sum(pca_stdev^2)
+pct_var_pc1 <- (pca_stdev[1]^2 / total_var) * 100
+
 # Elbow plot
 png(file.path(outdir, paste0(id, "_elbow.png")), width=1200, height=720)
-print(ElbowPlot(obj, ndims = npcs))
+print(ElbowPlot(obj, ndims = npcs) + 
+	geom_vline(xintercept = 10, linetype = "dashed", color = "red"))
 dev.off()
 
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_pca.rds")))
 
-# Summary
-stdev <- Stdev(obj, reduction = "pca")
-pct_var <- (stdev^2) / sum(stdev^2) * 100
-
+# Summary table
 write.table(
   data.frame(
-    id		= id,
-    n_cells	= ncol(obj),
-    n_features	= nrow(obj),
-    n_pcs	= length(stdev),
-    var_top10	= round(sum(pct_var[1:10]), 2),
-    var_top30	= round(sum(pct_var[1:30]), 2),
-    var_total	= round(sum(pct_var), 2)
+    id,
+    n_cells = ncol(obj),
+    n_features = nrow(obj),
+    npcs,
+    pct_var_pc1
   ),
-  file = file.path(outdir, paste0(id, "_pca.tsv")),
-  sep = "\t", quote = FALSE, row.names = FALSE
+  file = file.path(outdir, paste0(id, "_pca_summary.tsv")),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
 )

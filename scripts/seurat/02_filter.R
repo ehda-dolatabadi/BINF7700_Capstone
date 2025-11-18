@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Purpose: Run filtering on a 10x sample
-# Usage: Rscript 2_filter.R <id> <output> <input> <params>
+# Usage: Rscript 2_filter.R <id> <output> <input>
 
 suppressPackageStartupMessages({
   library(Seurat)
@@ -26,6 +26,8 @@ max_ribo     <- 30
 
 # Load mapped object
 obj <- readRDS(input)
+n_cells_before <- ncol(obj)
+n_features_before <- nrow(obj)
 
 # QC metrics
 obj[["percent.mt"]]     <- PercentageFeatureSet(obj, pattern = "^(COX|ND|CYTB|ATP)")
@@ -38,7 +40,6 @@ qc_metrics <- c("nCount_RNA", "nFeature_RNA", "percent.mt","percent.ribo","perce
 df <- as_tibble(obj[[]], rownames="Cell.Barcode")
 
 # Filter
-n_before <- ncol(obj)
 obj <- subset(
   obj,
   subset =
@@ -49,19 +50,29 @@ obj <- subset(
     percent.mt   <= max_mt       &
     percent.ribo <= max_ribo
 )
-n_after_filter <- ncol(obj)
 
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_filtered.rds")))
 
-# Summary
+# Summary table
 write.table(
-  data.frame(id, n_before, n_after_filter,
-             min_features, max_features,
-	     min_counts, max_counts,
-             max_mt, max_ribo),
-  file = file.path(outdir, paste0(id, "_filtered.tsv")),
-  sep = "\t", quote = FALSE, row.names = FALSE
+  data.frame(
+    id,
+    n_cells_before,
+    n_cells_after = ncol(obj),
+    n_features_before,
+    n_features_after = nrow(obj),
+    min_counts,
+    max_counts,
+    min_features,
+    max_features,
+    max_mt,
+    max_ribo
+  ),
+  file = file.path(outdir, paste0(id, "_filtering_summary.tsv")),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
 )
 
 # Plots

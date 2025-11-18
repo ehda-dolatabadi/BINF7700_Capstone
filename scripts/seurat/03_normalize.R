@@ -30,6 +30,7 @@ obj <- SCTransform(
   ncells = 5000,		# default
   variable.features.n = 3000	# default
 )
+n_variable_features <- length(VariableFeatures(obj))
 
 # Set default assay to SCT for downstream steps
 DefaultAssay(obj) <- "SCT"
@@ -37,15 +38,16 @@ DefaultAssay(obj) <- "SCT"
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_normalized.rds")))
 
-# Summary
+# Summary table
 write.table(
   data.frame(
-    id			= id,
-    n_cells		= ncol(obj),
-    n_features		= nrow(obj),
-    default_assay	= DefaultAssay(obj),
-    n_var_features	= length(VariableFeatures(obj))
+    id,
+    n_cells = ncol(obj),
+    n_features = nrow(obj),
+    n_variable_features
   ),
-  file = file.path(outdir, paste0(id, "_normalized.tsv")),
-  sep = "\t", quote = FALSE, row.names = FALSE
+  file = file.path(outdir, paste0(id, "_normalization_summary.tsv")),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
 )

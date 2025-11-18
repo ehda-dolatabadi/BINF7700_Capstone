@@ -22,10 +22,8 @@ ery_thr <- 10
 
 # Load clustered object
 obj <- readRDS(input)
-
-# Define your custom order
-timepoint_order <- c("control", "3h", "24h", "72h", "7dpa", "14dpa", "22dpa", "33dpa")
-obj$orig.ident <- factor(obj$orig.ident, levels = timepoint_order)
+n_cells_before = ncol(obj)
+n_features_before = nrow(obj)
 
 # Define marker sets
 epithelial_markers <- c("KRT8", "KRT18", "KRT1", "EPCAM", "CLDN7", 
@@ -47,6 +45,7 @@ obj <- AddModuleScore(
   features = list(epithelial_markers_available),
   name = "Epithelial_score"
 )
+n_cells_epithelial = sum(obj$Epithelial_score1 >= epi_thr)
 
 # Add module score for erythrocyte cells
 obj <- AddModuleScore(
@@ -54,6 +53,7 @@ obj <- AddModuleScore(
   features = list(erythrocyte_markers_available),
   name = "Erythrocyte_score"
 )
+n_cells_erythrocyte = sum(obj$Erythrocyte_score1 >= ery_thr)
 
 # Add module score for schwann cells
 obj <- AddModuleScore(
@@ -92,8 +92,36 @@ df %>% arrange(obj$Schwann_score1) %>%
       scale_y_log10()
 
 # Filtering
-#cells_to_keep <- which(obj$Epithelial_score1 < epi_thr & 
+cells_to_keep <- which(obj$Epithelial_score1 < epi_thr & 
                        obj$Erythrocyte_score1 < ery_thr)
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_scored.rds")))
+saveRDS(obj, file = file.path(outdir, paste0(id, "_enriched.rds")))
+
+# Summary table
+write.table(
+  data.frame(
+    id,
+    n_cells_before,
+    n_cells_after = ncol(obj),
+    n_features_before,
+    n_features_after = nrow(obj),
+    n_epithelial_markers_total = length(epithelial_markers),
+    n_epithelial_markers_available = length(epithelial_markers_available),
+    n_erythrocyte_markers_total = length(erythrocyte_markers),
+    n_erythrocyte_markers_available = length(erythrocyte_markers_available),
+    n_schwann_markers_total = length(schwann_markers),
+    n_schwann_markers_available = length(schwann_markers_available),
+    epi_thr,
+    ery_thr,
+    n_cells_epithelial,
+    pct_cells_epithelial = n_cells_epithelial / n_cells_before * 100,
+    n_cells_erythrocyte,
+    n_cells_erythrocyte = n_cells_erythrocyte / n_cells_before * 100,
+    pct_cells_kept = ncol(obj) / n_cells_before * 100
+  ),
+  file = file.path(outdir, paste0(id, "_scoring_summary.tsv")),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
+)
