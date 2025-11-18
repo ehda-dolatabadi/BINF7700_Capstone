@@ -18,7 +18,7 @@ outdir	<- args[2]
 input	<- args[3]
 
 # Parameters
-epi_thr <- 1.5
+epi_thr <- 1.0
 ery_thr <- 10
 
 # Load clustered object
