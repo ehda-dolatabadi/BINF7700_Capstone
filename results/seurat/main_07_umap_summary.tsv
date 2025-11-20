@@ -1,0 +1,2 @@
+id	n_cells	n_features	n_clusters	dims	metric	seed
+main	57167	3000	17	10	cosine	777
