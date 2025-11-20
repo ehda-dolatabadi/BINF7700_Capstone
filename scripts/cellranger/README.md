@@ -107,6 +107,7 @@ graph TD
     B --> D
     D --> E[03: aggr - Aggregate No Normalization]
     D --> F[03: aggr_normalize - Aggregate With Normalization]
+    D --> I[Filtered Count Matrix - Per Sample]
     E --> G[Raw Count Matrix]
     F --> H[Normalized Count Matrix]
 ```

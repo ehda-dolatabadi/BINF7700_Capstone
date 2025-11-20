@@ -23,7 +23,6 @@ This repository contains a reproducible computational workflow for analyzing sin
 - [Pipeline Architecture](#pipeline-architecture)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Detailed Documentation](#detailed-documentation)
 - [Project Structure](#project-structure)
 - [References](#references)
 
@@ -62,8 +61,8 @@ bash scripts/seurat/run_pipeline.sh
 ### Prerequisites
 
 **Software Requirements:**
-- R with packages: Seurat, dplyr, ggplot2, future
 - Cell Ranger
+- R with packages: Seurat, dplyr, ggplot2, future
 - Monocle3 (for trajectory analysis - coming soon)
 - CellChat (for communication analysis - coming soon)
 - SLURM job scheduler
