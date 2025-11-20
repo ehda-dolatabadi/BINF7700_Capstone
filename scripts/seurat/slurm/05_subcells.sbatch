@@ -10,9 +10,6 @@
 
 set -euo pipefail
 
-# Variables
-ID=${1:-""}  # Use first argument, or "" if not provided
-
 # Environment
 eval "$(conda shell.bash hook)"
 conda activate seurat
@@ -25,6 +22,3 @@ echo "Subset completed✅"
 echo "Re-running normalization and integration..."
 Rscript "$WORK/scripts/seurat/04_reintegrate_subset.R"	"$ID"   "$OUT"  "$OUT/${ID}_00_subset.rds"
 echo "Normalization and integration completed✅"
-
-# Sync
-rsync -av --update --info=progress2 --stats --exclude 'cellranger/' --exclude '*.rds' "$DATA/outputs/" "$WORK/results/"

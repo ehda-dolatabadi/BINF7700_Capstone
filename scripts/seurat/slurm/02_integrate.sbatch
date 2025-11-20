@@ -11,7 +11,6 @@
 set -euo pipefail
 
 # Variables
-ID=${1:-""}  # Use first argument, or "" if not provided
 OUT_normalize="$OUT/${ID}_03_normalized"
 
 # Environment
@@ -22,6 +21,3 @@ conda activate seurat
 echo "Integrting normalized samples..."
 Rscript "$WORK/scripts/seurat/04_integrate.R" "$ID" "$OUT" "$OUT_normalize"/*_normalized.rds
 echo "Integration completed✅"
-
-# Sync
-rsync -av --update --info=progress2 --stats --exclude 'cellranger/' --exclude '*.rds' "$DATA/outputs/" "$WORK/results/"

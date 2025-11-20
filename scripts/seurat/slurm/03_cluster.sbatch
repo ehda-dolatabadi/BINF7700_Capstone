@@ -10,9 +10,6 @@
 
 set -euo pipefail
 
-# Variables
-ID=${1:-""}  # Use first argument, or "" if not provided
-
 # Environment
 eval "$(conda shell.bash hook)"
 conda activate seurat
@@ -37,6 +34,3 @@ echo "Markers finding completed✅"
 echo "Scoring markers..."
 Rscript "$WORK/scripts/seurat/09_score_markers.R"	"$ID"   "$OUT"  "$OUT/${ID}_06_clustered.rds"
 echo "Scoring completed✅"
-
-# Sync
-rsync -av --update --info=progress2 --stats --exclude 'cellranger/' --exclude '*.rds' "$DATA/outputs/" "$WORK/results/"

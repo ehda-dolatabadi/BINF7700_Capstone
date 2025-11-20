@@ -12,8 +12,6 @@
 set -euo pipefail
 
 # Variables
-ID=${1:-""}  # Use first argument, or "" if not provided
-
 SMP="${SMPS[$SLURM_ARRAY_TASK_ID]}"
 
 DIR="$RESULT/cellranger/$SMP/outs/filtered_feature_bc_matrix"
@@ -44,6 +42,3 @@ echo "Filtering of $SMP completed✅"
 echo "Normalizing of $SMP..."
 Rscript "$WORK/scripts/seurat/03_normalize.R"           "$SMP" "$OUT_normalize"	"$OUT_filter/${SMP}_filtered.rds"
 echo "Normalization of $SMP completed✅"
-
-# Sync
-rsync -av --update --info=progress2 --stats --exclude 'cellranger/' --exclude '*.rds' "$DATA/outputs/" "$WORK/results/"
