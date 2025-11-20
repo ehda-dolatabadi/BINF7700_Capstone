@@ -26,6 +26,9 @@ npcs <- 50
 # Load integrated object
 obj <- readRDS(input)
 
+# Set default assay to integrated
+DefaultAssay(obj) <- "integrated"
+
 # PCA
 obj <- RunPCA(obj, npcs = npcs)
 

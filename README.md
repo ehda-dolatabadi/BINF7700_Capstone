@@ -21,10 +21,12 @@ This repository contains a reproducible computational workflow for analyzing sin
 
 - [Quick Start](#quick-start)
 - [Pipeline Architecture](#pipeline-architecture)
-- [Installation](#installation)
+- [Prerequisites](#prerequisites)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [References](#references)
+
+---
 
 ## Quick Start
 
@@ -45,6 +47,8 @@ bash scripts/seurat/run_pipeline.sh
 # - CellChat cell-cell communication
 ```
 
+---
+
 ## Pipeline Architecture
 
 ### Pipeline Components
@@ -56,9 +60,9 @@ bash scripts/seurat/run_pipeline.sh
 | **Monocle3** | Trajectory Inference & Pseudotime | Monocle3, UMAP | [Monocle3 README](scripts/monocle3/README.md) *(Coming soon)* |
 | **CellChat** | Cell-Cell Communication | CellChat | [CellChat README](scripts/cellchat/README.md) *(Coming soon)* |
 
-## Installation
+---
 
-### Prerequisites
+## Prerequisites
 
 **Software Requirements:**
 - Cell Ranger
@@ -66,6 +70,8 @@ bash scripts/seurat/run_pipeline.sh
 - Monocle3 (for trajectory analysis - coming soon)
 - CellChat (for communication analysis - coming soon)
 - SLURM job scheduler
+
+---
 
 ## Usage
 
@@ -118,6 +124,8 @@ bash scripts/cellchat/run_cellchat.sh
 - **Output**: Ligand-receptor networks, signaling pathways, communication patterns
 - **Time**: TBD
 
+---
+
 ## Project Structure
 
 ```
@@ -167,6 +175,8 @@ bash scripts/cellchat/run_cellchat.sh
 └── README.md                 # This file
 ```
 
+---
+
 ## Reference Genomes
 
 This project uses two axolotl reference genomes:
@@ -186,30 +196,7 @@ This project uses two axolotl reference genomes:
 - Genome: https://www.axolotl-omics.org/dl/AmexG_v6.0-DD.fa.gz
 - Annotation: https://www.axolotl-omics.org/dl/AmexT_v47-AmexG_v6.0-DD.gtf.gz
 
-## Expected Outputs
-
-### Cell Ranger Outputs
-- `filtered_feature_bc_matrix/`: Count matrices for downstream analysis
-- `web_summary.html`: QC metrics and cell statistics
-- `molecule_info.h5`: Molecular-level data
-
-### Seurat Outputs
-- `*_clustered.rds`: Seurat objects with cluster assignments
-- `*_markers.tsv`: Differentially expressed genes per cluster
-- `*_umap.png`: UMAP visualizations
-- QC plots and summary statistics
-
-### Monocle3 Outputs *(Coming soon)*
-- `*_trajectory.rds`: Monocle3 objects with pseudotime
-- `*_pseudotime_plot.png`: Trajectory visualizations
-- `*_gene_dynamics.tsv`: Genes varying along pseudotime
-- Branch-specific marker genes
-
-### CellChat Outputs *(Coming soon)*
-- `*_cellchat.rds`: CellChat objects with inferred networks
-- `*_network_plots.png`: Communication network visualizations
-- `*_lr_pairs.tsv`: Significant ligand-receptor interactions
-- Signaling pathway analysis results
+---
 
 ## References
 
@@ -239,13 +226,13 @@ This project uses two axolotl reference genomes:
 - **Axolotl-omics. (n.d.).** Assemblies. https://www.axolotl-omics.org/assemblies
 
 ### Software and Methods
+- **Cell Ranger**: 10X Genomics. (2023). Cell Ranger Software. https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger
+
+- **10X Genomics Chromium**: Zheng, G.X.Y., Terry, J.M., Belgrader, P., Ryvkin, P., Bent, Z.W., Wilson, R., Ziraldo, S.B., Wheeler, T.D., McDermott, G.P., Zhu, J., Grego>
+
 - **Seurat**: Hao, Y., Stuart, T., Kowalski, M.H., Choudhary, S., Hoffman, P., Hartman, A., Srivastava, A., Molla, G., Madad, S., Fernandez-Granda, C., & Satija, R. (2024). Dictionary learning for integrative, multimodal and scalable single-cell analysis. *Nature Biotechnology, 42*, 293-304. https://doi.org/10.1038/s41587-023-01767-y
 
 - **SCTransform**: Hafemeister, C., & Satija, R. (2019). Normalization and variance stabilization of single-cell RNA-seq data using regularized negative binomial regression. *Genome Biology, 20*, 296. https://doi.org/10.1186/s13059-019-1874-1
-
-- **Cell Ranger**: 10X Genomics. (2023). Cell Ranger Software. https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger
-
-- **10X Genomics Chromium**: Zheng, G.X.Y., Terry, J.M., Belgrader, P., Ryvkin, P., Bent, Z.W., Wilson, R., Ziraldo, S.B., Wheeler, T.D., McDermott, G.P., Zhu, J., Gregory, M.T., Shuga, J., Montesclaros, L., Underwood, J.G., Masquelier, D.A., Nishimura, S.Y., Schnall-Levin, M., Wyatt, P.W., Hindson, C.M., Bharadwaj, R., Wong, A., Ness, K.D., Beppu, L.W., Deeg, H.J., McFarland, C., Loeb, K.R., Valente, W.J., Ericson, N.G., Stevens, E.A., Radich, J.P., Mikkelsen, T.S., Hindson, B.J., & Bielas, J.H. (2017). Massively parallel digital transcriptional profiling of single cells. *Nature Communications, 8*, 14049. https://doi.org/10.1038/ncomms14049
 
 - **future package**: Bengtsson, H. (2021). A unifying framework for parallel and distributed processing in R using futures. *The R Journal, 13*(2), 208-227. https://doi.org/10.32614/RJ-2021-048
 

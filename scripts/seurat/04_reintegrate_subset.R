@@ -26,19 +26,44 @@ n_features_before <- nrow(obj)
 # Switch back to RNA assay
 DefaultAssay(obj) <- "RNA"
 
-# Split by sample
+# Split by sample to check cell counts
 obj_list <- SplitObject(obj, split.by = "orig.ident")
-
-# Check for samples with fewer than 30 cells
 cell_counts <- sapply(obj_list, ncol)
 samples <- names(cell_counts)[cell_counts < 30]
 
 if (length(samples) > 0) {
-  cat("Some samples had less than 30 cells.", paste(samples, collapse = ", "), "\n")
-  cat("Skipping reintegration", "\n")
+  cat("Some samples had less than 30 cells:", paste(samples, collapse = ", "), "\n")
+  cat("Running SCTransform on whole object without re-integration\n")
+  
+  # Run SCTransform on the WHOLE object (not split)
+  obj <- SCTransform(
+    obj,
+    assay = "RNA",
+    new.assay.name = "SCT"
+  )
+  
+  # Set default to SCT (not integrated, since we skipped integration)
+  DefaultAssay(obj) <- "SCT"
+  
   # Save object
   saveRDS(obj, file = file.path(outdir, paste0(id, "_04_integrated.rds")))
-  # Exit with success status
+  
+  # Summary table
+  write.table(
+    data.frame(
+      id,
+      n_cells_before,
+      n_cells_after = ncol(obj),
+      n_features_before,
+      n_features_after = nrow(obj),
+      integration_performed = FALSE
+    ),
+    file = file.path(outdir, paste0(id, "_04_integration_summary.tsv")),
+    sep = "\t",
+    quote = FALSE,
+    row.names = FALSE
+  )
+  
   quit(save = "no", status = 0)
 }
 
@@ -47,8 +72,11 @@ obj_list <- lapply(obj_list, function(x) {
   SCTransform(x, assay = "RNA", new.assay.name = "SCT")
 })
 
-# Set to SCT assay
-DefaultAssay(obj) <- "SCT"
+# Set to SCT assay for each object in the list
+obj_list <- lapply(obj_list, function(x) {
+  DefaultAssay(x) <- "SCT"
+  x
+})
 
 # Integration features
 features <- SelectIntegrationFeatures(object.list = obj_list, nfeatures = 3000)

@@ -4,9 +4,6 @@
 #SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
-#SBATCH --chdir=/scratch/dolatabadi.e   # log directory
-#SBATCH --output=logs/%x_%j.out         # stdout log
-#SBATCH --error=logs/%x_%j.err          # stderr log
 #SBATCH --array=0-7
 
 set -euo pipefail

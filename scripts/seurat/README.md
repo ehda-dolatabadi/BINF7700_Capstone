@@ -14,6 +14,8 @@ A comprehensive pipeline for processing and analyzing single-cell RNA-seq data f
 - [Output Files](#output-files)
 - [Citation](#references)
 
+---
+
 ## Overview
 
 This pipeline processes 10X Genomics single-cell RNA-seq data through a complete analysis workflow including:
@@ -28,6 +30,8 @@ This pipeline processes 10X Genomics single-cell RNA-seq data through a complete
 - Subsetting and re-analysis of specific populations
 
 The pipeline is designed to run on HPC systems using SLURM job scheduling and processes data from multiple experimental time points.
+
+---
 
 ## Directory Structure
 
@@ -59,6 +63,8 @@ scripts/seurat/
     └── 05_subcells.sbatch          # Subset by cell type and re-integrate
 ```
 
+---
+
 ## Prerequisites
 
 ### Software Requirements
@@ -77,6 +83,8 @@ scripts/seurat/
 
 - **10X Genomics data**: `filtered_feature_bc_matrix` directories for each sample
 - **Gene mapping file**: TSV file with columns `gene_id` and `symbol` for ID-to-symbol mapping
+
+---
 
 ## Installation
 
@@ -105,6 +113,8 @@ $DATA/outputs/
     └── ...
 ```
 
+---
+
 ## Pipeline Workflow
 
 ```mermaid
@@ -126,9 +136,11 @@ graph TD
     N --> G
 ```
 
+---
+
 ## Usage
 
-### Quick Start (Full Pipeline)
+### Full Pipeline
 
 ```bash
 # Navigate to the working directory
@@ -155,6 +167,8 @@ Rscript scripts/seurat/01_qc.R <sample_id> <output_dir> <input_rds>
 # Example: Run integration
 Rscript scripts/seurat/04_integrate.R <analysis_id> <output_dir> sample1.rds sample2.rds ...
 ```
+
+---
 
 ## Scripts Description
 
@@ -347,6 +361,8 @@ markers <- c("SOX10", "S100", "S100B", "NGFR", "p75NTR", "MPZ", "MBP",
 
 **Output**: `<id>_04_integrated.rds`, `<id>_04_integration_summary.tsv`
 
+---
+
 ## Output Files
 
 ### File Naming Convention
@@ -396,10 +412,11 @@ results/seurat/
 
 ## Citation
 
-If you use this pipeline, please cite:
+- **Seurat**: Hao, Y., Stuart, T., Kowalski, M.H., Choudhary, S., Hoffman, P., Hartman, A., Srivastava, A., Molla, G., Madad, S., Fernandez-Granda, C., & Satija, R. (2024). Dictionary learning for integrative, multimodal and scalable single-cell analysis. *Nature Biotechnology, 42*, 293-304. https://doi.org/10.1038/s41587-023-01767-y
 
-- **Seurat**: Hao et al. (2021). Integrated analysis of multimodal single-cell data. Cell.
-- **SCTransform**: Hafemeister & Satija (2019). Normalization and variance stabilization of single-cell RNA-seq data using regularized negative binomial regression. Genome Biology.
+- **SCTransform**: Hafemeister, C., & Satija, R. (2019). Normalization and variance stabilization of single-cell RNA-seq data using regularized negative binomial regression. *Genome Biology, 20*, 296. https://doi.org/10.1186/s13059-019-1874-1
+
+- **future package**: Bengtsson, H. (2021). A unifying framework for parallel and distributed processing in R using futures. *The R Journal, 13*(2), 208-227. https://doi.org/10.32614/RJ-2021-048
 
 ---
 

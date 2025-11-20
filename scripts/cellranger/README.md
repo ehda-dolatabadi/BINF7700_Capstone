@@ -14,6 +14,8 @@ A comprehensive pipeline for processing single-cell RNA-seq data using 10X Genom
 - [Output Files](#output-files)
 - [Citation](#citation)
 
+---
+
 ## Overview
 
 This pipeline processes 10X Genomics single-cell RNA-seq FASTQ files through the Cell Ranger workflow including:
@@ -24,6 +26,8 @@ This pipeline processes 10X Genomics single-cell RNA-seq FASTQ files through the
 - Sample aggregation with normalization (`aggr`)
 
 The pipeline is designed to run on HPC systems using SLURM job scheduling and processes data from multiple experimental time points across different reference genomes.
+
+---
 
 ## Directory Structure
 
@@ -38,6 +42,8 @@ scripts/cellranger/
     └── 03_aggr_normalize.sbatch   # Aggregate samples (with normalization)
 ```
 
+---
+
 ## Prerequisites
 
 ### Software Requirements
@@ -50,6 +56,8 @@ scripts/cellranger/
 - **10X Genomics FASTQ files**: Illumina sequencing data from Chromium platform
 - **Reference genome FASTA**: Genomic sequence file (`.fna` or `.fa`)
 - **Gene annotation GTF**: Gene annotations (`.gtf`)
+
+---
 
 ## Installation
 
@@ -98,6 +106,8 @@ $SCRATCH/
     └── ...
 ```
 
+---
+
 ## Pipeline Workflow
 
 ```mermaid
@@ -111,6 +121,8 @@ graph TD
     E --> G[Raw Count Matrix]
     F --> H[Normalized Count Matrix]
 ```
+
+---
 
 ## Usage
 
@@ -129,6 +141,8 @@ sbatch scripts/cellranger/slurm/03_aggr.sbatch
 # Step 3b: Aggregate with normalization (optional)
 sbatch scripts/cellranger/slurm/03_aggr_normalize.sbatch
 ```
+
+---
 
 ## Scripts Description
 
@@ -213,6 +227,8 @@ control,/path/to/control/outs/molecule_info.h5
 
 **Output**: Combined count matrix in `aggr_samples/outs/count/filtered_feature_bc_matrix/`
 
+---
+
 ## Output Files
 
 ### File Naming Convention
@@ -265,8 +281,9 @@ $SCRATCH/outputs/ref_<genome>/cellranger/
 
 ## Citation
 
-- **Cell Ranger**: 10X Genomics. Cell Ranger Software. https://www.10xgenomics.com/support/software/cell-ranger
-- **10X Genomics Chromium**: Zheng, G.X., Terry, J.M., et al. (2017). Massively parallel digital transcriptional profiling of single cells. Nature Communications, 8, 14049.
+- **Cell Ranger**: 10X Genomics. (2023). Cell Ranger Software. https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger
+
+- **10X Genomics Chromium**: Zheng, G.X.Y., Terry, J.M., Belgrader, P., Ryvkin, P., Bent, Z.W., Wilson, R., Ziraldo, S.B., Wheeler, T.D., McDermott, G.P., Zhu, J., Grego>
 
 ---
 
