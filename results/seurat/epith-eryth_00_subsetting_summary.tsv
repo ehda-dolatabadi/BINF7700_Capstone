@@ -1,0 +1,2 @@
+id	n_cells_before	n_cells_after	n_features_before	n_features_after	n_epithelial_markers_total	n_epithelial_markers_available	n_erythrocyte_markers_total	n_erythrocyte_markers_available	epi_thr	ery_thr	n_cells_epithelial	pct_cells_epithelial	n_cells_erythrocyte	pct_cells_erythrocyte	pct_cells_kept
+epith-eryth	57167	28207	18906	18906	10	10	8	8	0.5	3	24092	42.1431945003236	4894	8.56088302692113	49.3414032571239

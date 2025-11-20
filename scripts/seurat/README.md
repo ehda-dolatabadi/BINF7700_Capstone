@@ -117,10 +117,10 @@ graph TD
     F --> G[05: PCA]
     G --> H[06: Cluster - Leiden]
     H --> I[07: UMAP]
-    I --> J[08: Find Markers]
-    I --> K[09: Score Cell Types]
-    J --> L[10: Subset Clusters]
-    K --> M[11: Subset Cell Types]
+    H --> J[08: Find Markers]
+    H --> K[09: Score Cell Types]
+    H --> L[10: Subset Clusters]
+    F --> M[11: Subset Cell Types]
     L --> N[04: Re-integrate Subset]
     M --> N
     N --> G

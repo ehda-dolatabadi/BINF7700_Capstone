@@ -130,10 +130,6 @@ sbatch scripts/cellranger/slurm/03_aggr.sbatch
 sbatch scripts/cellranger/slurm/03_aggr_normalize.sbatch
 ```
 
-### Running Individual Steps
-
-Each script can be run independently:
-
 ## Scripts Description
 
 ### 01_mkref.sbatch
