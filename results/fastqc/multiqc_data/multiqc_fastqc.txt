@@ -13,3 +13,5 @@ Sample	Filename	File type	Encoding	Total Sequences	Total Bases	Sequences flagged
 72h_S1_L001_R2_001	72h_S1_L001_R2_001.fastq.gz	Conventional base calls	Sanger / Illumina 1.9	663045217.0	64.9 Gbp	0.0	98.0	44.0	20.27158470676225	98.0	98	pass	pass	pass	warn	pass	pass	pass	fail	pass	pass
 7dpa_S1_L001_R1_001	7dpa_S1_L001_R1_001.fastq.gz	Conventional base calls	Sanger / Illumina 1.9	673600700.0	17.5 Gbp	0.0	26.0	50.0	22.499431637005014	26.0	26	pass	pass	pass	pass	pass	pass	pass	fail	pass	pass
 7dpa_S1_L001_R2_001	7dpa_S1_L001_R2_001.fastq.gz	Conventional base calls	Sanger / Illumina 1.9	673600700.0	66 Gbp	0.0	98.0	45.0	16.540020342268694	98.0	98	pass	pass	pass	warn	pass	pass	pass	fail	pass	pass
+control_S0_L001_R1_001	control_S0_L001_R1_001.fastq.gz	Conventional base calls	Sanger / Illumina 1.9	657171949.0	17 Gbp	0.0	26.0	50.0	19.409601616900105	26.0	26	pass	pass	pass	pass	pass	pass	pass	fail	pass	pass
+control_S0_L001_R2_001	control_S0_L001_R2_001.fastq.gz	Conventional base calls	Sanger / Illumina 1.9	657171949.0	64.4 Gbp	0.0	98.0	44.0	23.322626675376743	98.0	98	pass	pass	pass	fail	pass	pass	pass	fail	pass	pass
