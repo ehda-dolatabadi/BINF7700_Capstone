@@ -43,6 +43,7 @@ scripts/cellranger/
 ### Software Requirements
 
 - Cell Ranger (tested with v9.0.1)
+- SLURM workload manager
 
 ### Input Data
 

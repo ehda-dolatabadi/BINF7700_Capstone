@@ -26,18 +26,29 @@ n_features_before <- nrow(obj)
 # Switch back to RNA assay
 DefaultAssay(obj) <- "RNA"
 
-# Re-run SCTransform on the subset
-obj <- SCTransform(
-  obj,
-  assay = "RNA",
-  new.assay.name = "SCT",
-)
+# Split by sample
+obj_list <- SplitObject(obj, split.by = "orig.ident")
+
+# Check for samples with fewer than 30 cells
+cell_counts <- sapply(obj_list, ncol)
+samples <- names(cell_counts)[cell_counts < 30]
+
+if (length(samples) > 0) {
+  cat("Some samples had less than 30 cells.", paste(samples, collapse = ", "), "\n")
+  cat("Skipping reintegration", "\n")
+  # Save object
+  saveRDS(obj, file = file.path(outdir, paste0(id, "_04_integrated.rds")))
+  # Exit with success status
+  quit(save = "no", status = 0)
+}
+
+# Re-run SCTransform on each sample separately
+obj_list <- lapply(obj_list, function(x) {
+  SCTransform(x, assay = "RNA", new.assay.name = "SCT")
+})
 
 # Set to SCT assay
 DefaultAssay(obj) <- "SCT"
-
-# Split by sample
-obj_list <- SplitObject(obj, split.by = "orig.ident")
 
 # Integration features
 features <- SelectIntegrationFeatures(object.list = obj_list, nfeatures = 3000)

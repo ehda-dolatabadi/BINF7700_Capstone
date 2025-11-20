@@ -16,7 +16,7 @@ conda activate seurat
 
 # Workflow
 echo "Subsetting data..."
-Rscript "$WORK/scripts/seurat/11_subset_cells.R"	"$ID"   "$OUT"  "$OUT/${main_ID}_04_integrated.rds"
+#Rscript "$WORK/scripts/seurat/11_subset_cells.R"	"$ID"   "$OUT"  "$OUT/${main_ID}_04_integrated.rds"
 echo "Subset completed✅"
 
 echo "Re-running normalization and integration..."

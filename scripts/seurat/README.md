@@ -61,9 +61,14 @@ scripts/seurat/
 
 ## Prerequisites
 
+### Software Requirements
+
+- R (tested with v4.5.1)
+- SLURM workload manager
+
 ### R Packages
 
-- Seurat
+- Seurat (tested with v5.3.0)
 - ggplot2
 - dplyr
 - future (for parallelization)
@@ -84,7 +89,7 @@ DATA="/path/to/your/data"       # Base data directory
 LOG="/path/to/logs"		# Logs directory
 WORK="/path/to/root"  		# Working directory
 TSV="/path/to/loc_map.tsv"	# Gene mapping file
-OUT="/path/to/out"		# Seurat outputs directory
+OUT="/path/to/out"	10X Genomics. Cell Ranger Software. https://www.10xgenomics.com/support/software/cell-ranger	# Seurat outputs directory
 
 ```
 
@@ -92,13 +97,12 @@ OUT="/path/to/out"		# Seurat outputs directory
 
 Ensure your data is organized as:
 ```
-$DATA/output/
-└── outputs/
-    └── cellranger/
-        ├── control/outs/filtered_feature_bc_matrix/
-        ├── 3h/outs/filtered_feature_bc_matrix/
-        ├── 24h/outs/filtered_feature_bc_matrix/
-        └── ...
+$DATA/outputs/
+└── cellranger/
+    ├── control/outs/filtered_feature_bc_matrix/
+    ├── 3h/outs/filtered_feature_bc_matrix/
+    ├── 24h/outs/filtered_feature_bc_matrix/
+    └── ...
 ```
 
 ## Pipeline Workflow
@@ -399,8 +403,4 @@ If you use this pipeline, please cite:
 
 ---
 
-## Contact
-
-For questions or issues with this pipeline, please contact the repository maintainer.
-
-**Last Updated**: 2025-11-19
+**Last Updated**: 2025-11-20

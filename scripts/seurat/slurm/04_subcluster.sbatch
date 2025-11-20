@@ -20,5 +20,5 @@ Rscript "$WORK/scripts/seurat/10_subset_clusters.R"	"$ID"   "$OUT"  "$OUT/${main
 echo "Subset completed✅"
 
 echo "Re-running normalization and integration..."
-Rscript "$WORK/scripts/seurat/04_reintegrate_subset.R"	"$ID"   "$OUT"  "$OUT/${ID}_00_subset.rds"
+Rscript "$WORK/scripts/seurat/04_reintegrate_subset.R"  "$ID"   "$OUT"  "$OUT/${ID}_00_subset.rds"
 echo "Normalization and integration completed✅"
