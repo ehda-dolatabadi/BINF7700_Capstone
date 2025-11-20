@@ -31,7 +31,7 @@ obj <- FindNeighbors(obj, dims = 1:dims)
 obj <- FindClusters(obj, res = res, algorithm = 4)
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_clustered.rds")))
+saveRDS(obj, file = file.path(outdir, paste0(id, "_06_clustered.rds")))
 
 # Summary table
 write.table(
@@ -43,7 +43,7 @@ write.table(
     res,
     n_clusters = length(unique(obj$seurat_clusters))
   ),
-  file = file.path(outdir, paste0(id, "_clustering_summary.tsv")),
+  file = file.path(outdir, paste0(id, "_06_clustering_summary.tsv")),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE

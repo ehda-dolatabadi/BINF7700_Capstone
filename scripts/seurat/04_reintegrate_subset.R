@@ -1,9 +1,8 @@
 #!/usr/bin/env Rscript
-# Purpose: Integrate multiple SCT-normalized Seurat objects
-# Usage: Rscript 4_integrate.R <id> <outdir> <sample1.rds> <sample2.rds> ...
 
 suppressPackageStartupMessages({
   library(Seurat)
+  library(dplyr)
   library(future)
 })
 
@@ -11,22 +10,34 @@ set.seed(777)
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
-id	<- args[1]
-outdir	<- args[2]
-paths	<- args[3:length(args)]
+id      <- args[1]
+outdir  <- args[2]
+input   <- args[3]
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 8)
 
-# Load normalized objects
-obj_list <- lapply(paths, readRDS)
-n_samples <- length(obj_list)
-n_cells_total <- sum(sapply(obj_list, ncol))
-n_features_per_sample <- sapply(obj_list, nrow)
-n_features_min <- min(n_features_per_sample)
-n_features_max <- max(n_features_per_sample)
-n_features_mean <- mean(n_features_per_sample)
+# Load subset object
+obj <- readRDS(input)
+n_cells_before <- ncol(obj)
+n_features_before <- nrow(obj)
+
+# Switch back to RNA assay
+DefaultAssay(obj) <- "RNA"
+
+# Re-run SCTransform on the subset
+obj <- SCTransform(
+  obj,
+  assay = "RNA",
+  new.assay.name = "SCT",
+)
+
+# Set to SCT assay
+DefaultAssay(obj) <- "SCT"
+
+# Split by sample
+obj_list <- SplitObject(obj, split.by = "orig.ident")
 
 # Integration features
 features <- SelectIntegrationFeatures(object.list = obj_list, nfeatures = 3000)
@@ -59,14 +70,10 @@ saveRDS(obj, file = file.path(outdir, paste0(id, "_04_integrated.rds")))
 write.table(
   data.frame(
     id,
-    n_samples,
-    n_cells_total,
+    n_cells_before,
     n_cells_after = ncol(obj),
-    n_features_min,
-    n_features_max,
-    n_features_mean,
-    n_features_integrated = nrow(obj),
-    n_anchors
+    n_features_before,
+    n_features_after = nrow(obj)
   ),
   file = file.path(outdir, paste0(id, "_04_integration_summary.tsv")),
   sep = "\t",
