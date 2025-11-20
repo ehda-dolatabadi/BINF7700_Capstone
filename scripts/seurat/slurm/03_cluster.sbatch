@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=preprocess
+#SBATCH --job-name=cluster
 #SBATCH --partition=courses
 #SBATCH --time=04:00:00
 #SBATCH --cpus-per-task=64

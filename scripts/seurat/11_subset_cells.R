@@ -63,7 +63,7 @@ n_cells_erythrocyte = sum(obj$Erythrocyte_score1 >= ery_thr)
 
 # Plot VlnPlot
 png(file.path(outdir, paste0(id, "_00_violin_score.png")), width = 1600, height = 1200)
-VlnPlot(obj, features = c("Epithelial_score1", "Erythrocyte_score1", "Schwann_score1"), pt.size = 0, group.by = "orig.ident") +
+VlnPlot(obj, features = c("Epithelial_score1", "Erythrocyte_score1"), pt.size = 0, group.by = "orig.ident") +
   labs(x = NULL)
 dev.off()
 

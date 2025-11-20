@@ -46,13 +46,13 @@ dev.off()
 
 # Plot VlnPlot
 png(file.path(outdir, paste0(id, "_09_violin_score.png")), width = 1600, height = 1200)
-VlnPlot(obj, features = feature_name, group.by = groupe_by, pt.size = 0) +
+VlnPlot(obj, features = feature_name, group.by = group_by, pt.size = 0) +
   labs(x = NULL)
 dev.off()
 
 # Check individual marker expression
 png(file.path(outdir, paste0(id, "_09_individual_markers_violin.png")), width = 1600, height = 1200)
-VlnPlot(obj, features = _markers_available, ncol = 2, pt.size = 0) +
+VlnPlot(obj, features = markers_available, ncol = 2, pt.size = 0) +
   labs(x = NULL)
 dev.off()
 
@@ -70,9 +70,9 @@ write.table(
     id,
     n_cells = ncol(obj),
     n_features = nrow(obj),
-    n_schwann_markers_total = length(schwann_markers),
-    n_schwann_markers_available = length(schwann_markers_available),
-    schwann_markers_available = paste(schwann_markers_available, collapse = ",")
+    n_markers_total = length(markers),
+    n_markers_available = length(markers_available),
+    markers_available = paste(markers_available, collapse = ",")
   ),
   file = file.path(outdir, paste0(id, "_09_score_summary.tsv")),
   sep = "\t",

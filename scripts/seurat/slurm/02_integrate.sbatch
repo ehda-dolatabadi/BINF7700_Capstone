@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=preprocess
+#SBATCH --job-name=integrate
 #SBATCH --partition=courses
 #SBATCH --time=04:00:00
 #SBATCH --cpus-per-task=64
@@ -18,6 +18,6 @@ eval "$(conda shell.bash hook)"
 conda activate seurat
 
 # Workflow
-echo "Integrting normalized samples..."
+echo "Integrating normalized samples..."
 Rscript "$WORK/scripts/seurat/04_integrate.R" "$ID" "$OUT" "$OUT_normalize"/*_normalized.rds
 echo "Integration completed✅"
