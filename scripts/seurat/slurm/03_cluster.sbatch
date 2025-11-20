@@ -34,3 +34,6 @@ echo "Markers finding completed✅"
 echo "Scoring markers..."
 Rscript "$WORK/scripts/seurat/09_score_markers.R"	"$ID"   "$OUT"  "$OUT/${ID}_06_clustered.rds"
 echo "Scoring completed✅"
+
+# Sync
+rsync -av --update --info=progress2 --stats --exclude '*.rds' "$OUT/" "$WORK/results/seurat/"

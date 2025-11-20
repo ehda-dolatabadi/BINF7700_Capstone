@@ -11,10 +11,8 @@ A comprehensive pipeline for processing and analyzing single-cell RNA-seq data f
 - [Pipeline Workflow](#pipeline-workflow)
 - [Usage](#usage)
 - [Scripts Description](#scripts-description)
-- [Parameters](#parameters)
 - [Output Files](#output-files)
-- [Advanced Usage](#advanced-usage)
-- [Troubleshooting](#troubleshooting)
+- [Citation](#references)
 
 ## Overview
 
@@ -29,14 +27,14 @@ This pipeline processes 10X Genomics single-cell RNA-seq data through a complete
 - Cell type scoring
 - Subsetting and re-analysis of specific populations
 
-The pipeline is designed to run on HPC systems using SLURM job scheduling and processes data from multiple experimental time points: control, 3h, 24h, 72h, 7dpa, 14dpa, 22dpa, and 33dpa.
+The pipeline is designed to run on HPC systems using SLURM job scheduling and processes data from multiple experimental time points.
 
 ## Directory Structure
 
 ```
 scripts/seurat/
-├── README.md                        # This file
-├── run_pipeline.sh                  # Main pipeline orchestration script
+├── README.md                       # This file
+├── run_pipeline.sh                 # Main pipeline orchestration script
 │
 ├── R Scripts (Analysis Steps)
 ├── 00_map_features.R               # Map gene IDs to symbols
@@ -63,15 +61,9 @@ scripts/seurat/
 
 ## Prerequisites
 
-### Software Requirements
-
-- **R** (version ≥ 4.0)
-- **Conda/Miniconda** for environment management
-- **SLURM** workload manager (for HPC execution)
-
 ### R Packages
 
-- Seurat (≥ 4.0)
+- Seurat
 - ggplot2
 - dplyr
 - future (for parallelization)
@@ -83,38 +75,30 @@ scripts/seurat/
 
 ## Installation
 
-### 1. Set up Conda environment
-
-```bash
-# Create a new conda environment
-conda create -n seurat -c conda-forge -c bioconda r-base r-seurat r-ggplot2 r-dplyr r-future
-
-# Activate the environment
-conda activate seurat
-```
-
-### 2. Configure paths
+### 1. Configure paths
 
 Edit `run_pipeline.sh` to set your directory paths:
 
 ```bash
-DATA="/path/to/your/data"           # Base data directory
-SCRATCH="/path/to/scratch"          # Scratch directory for logs
-WORK="$HOME/BINF7700_Capstone"      # Working directory
+DATA="/path/to/your/data"       # Base data directory
+LOG="/path/to/logs"		# Logs directory
+WORK="/path/to/root"  		# Working directory
+TSV="/path/to/loc_map.tsv"	# Gene mapping file
+OUT="/path/to/out"		# Seurat outputs directory
+
 ```
 
-### 3. Prepare input data
+### 2. Prepare input data
 
 Ensure your data is organized as:
 ```
-$DATA/
-├── cellranger/
-│   ├── control/outs/filtered_feature_bc_matrix/
-│   ├── 3h/outs/filtered_feature_bc_matrix/
-│   ├── 24h/outs/filtered_feature_bc_matrix/
-│   └── ...
-└── ref_genomes/ref_files/
-    └── loc_map.tsv
+$DATA/output/
+└── outputs/
+    └── cellranger/
+        ├── control/outs/filtered_feature_bc_matrix/
+        ├── 3h/outs/filtered_feature_bc_matrix/
+        ├── 24h/outs/filtered_feature_bc_matrix/
+        └── ...
 ```
 
 ## Pipeline Workflow
@@ -144,7 +128,7 @@ graph TD
 
 ```bash
 # Navigate to the working directory
-cd $HOME/BINF7700_Capstone
+cd $WORK
 
 # Run the complete pipeline
 bash scripts/seurat/run_pipeline.sh
@@ -166,27 +150,6 @@ Rscript scripts/seurat/01_qc.R <sample_id> <output_dir> <input_rds>
 
 # Example: Run integration
 Rscript scripts/seurat/04_integrate.R <analysis_id> <output_dir> sample1.rds sample2.rds ...
-```
-
-### Submitting SLURM Jobs Manually
-
-```bash
-# Set required environment variables
-export ID=""                        # Main analysis ID
-export OUT="/path/to/output"        # Output directory
-export RESULT="/path/to/cellranger" # CellRanger results
-export WORK="$HOME/BINF7700_Capstone"
-export SMPS=("control" "3h" "24h" "72h" "7dpa" "14dpa" "22dpa" "33dpa")
-export TSV="/path/to/loc_map.tsv"
-
-# Submit preprocessing (array job for all samples)
-sbatch --export=ALL scripts/seurat/slurm/01_preprocess.sbatch
-
-# Submit integration (after preprocessing completes)
-sbatch --export=ALL scripts/seurat/slurm/02_integrate.sbatch
-
-# Submit clustering (after integration completes)
-sbatch --export=ALL scripts/seurat/slurm/03_cluster.sbatch
 ```
 
 ## Scripts Description
@@ -321,14 +284,14 @@ sbatch --export=ALL scripts/seurat/slurm/03_cluster.sbatch
 
 **Output**:
 - `<id>_08_markers.tsv`: All markers
-- `<id>_markers_filtered.tsv`: Filtered top markers
+- `<id>_08_markers_filtered.tsv`: Filtered top markers
 
 ---
 
 #### 09_score_markers.R
 **Purpose**: Score cells based on cell type markers (Schwann cells).
 
-**Default Markers**:
+**Default Schwann Markers**:
 ```r
 markers <- c("SOX10", "S100", "S100B", "NGFR", "p75NTR", "MPZ", "MBP",
              "PMP22", "PLP1", "PRX", "NCAM", "NCAM1", "L1CAM", "SCN7A",
@@ -348,8 +311,6 @@ markers <- c("SOX10", "S100", "S100B", "NGFR", "p75NTR", "MPZ", "MBP",
 **Purpose**: Subset data to specific clusters.
 
 **Usage**: `Rscript 10_subset_clusters.R <id> <outdir> <input_rds> <cluster_ids>`
-
-**Example**: `Rscript 10_subset_clusters.R cluster14 output/ data.rds "14"`
 
 **Output**: `<id>_00_subset.rds`, `<id>_00_subsetting_summary.tsv`
 
@@ -382,36 +343,6 @@ markers <- c("SOX10", "S100", "S100B", "NGFR", "p75NTR", "MPZ", "MBP",
 
 **Output**: `<id>_04_integrated.rds`, `<id>_04_integration_summary.tsv`
 
-## Parameters
-
-### Modifying Analysis Parameters
-
-To change parameters, edit the respective R script:
-
-```r
-# Example: Change clustering resolution in 06_cluster.R
-res <- 0.8  # Change from 0.5 to 0.8 for finer clusters
-```
-
-### Customizing Cell Type Markers
-
-Edit marker lists in `09_score_markers.R` or `11_subset_cells.R`:
-
-```r
-# Add your own cell type markers
-my_markers <- c("GENE1", "GENE2", "GENE3")
-```
-
-### Adjusting Resource Allocation
-
-Edit SLURM scripts to change computational resources:
-
-```bash
-#SBATCH --cpus-per-task=32    # Reduce from 64
-#SBATCH --mem=64G             # Reduce from 128G
-#SBATCH --time=02:00:00       # Reduce time
-```
-
 ## Output Files
 
 ### File Naming Convention
@@ -423,7 +354,7 @@ Example: `main_04_integrated.rds`
 ### Output Directory Structure
 
 ```
-outputs/seurat/
+results/seurat/
 ├── <id>_00_mapped/
 │   └── <sample>_mapped.rds
 ├── <id>_01_qc/
@@ -440,7 +371,7 @@ outputs/seurat/
 ├── <id>_06_clustered.rds
 ├── <id>_07_umap.rds
 ├── <id>_08_markers.tsv
-├── <id>_markers_filtered.tsv
+├── <id>_08_markers_filtered.tsv
 └── <id>_09_scored.rds
 ```
 
@@ -456,160 +387,6 @@ outputs/seurat/
 | `*_markers.tsv` | Differentially expressed genes per cluster |
 | `*_scored.rds` | Object with cell type scores added |
 | `*_summary.tsv` | Summary statistics for each step |
-
-## Advanced Usage
-
-### Running Custom Subsetting Workflows
-
-#### Subset by Multiple Clusters
-
-```bash
-# Subset clusters 5, 10, and 14
-export IDENT="5,10,14"
-export ID="multi_cluster"
-
-sbatch --export=ALL scripts/seurat/slurm/04_subcluster.sbatch
-```
-
-#### Chain Multiple Subsetting Steps
-
-```bash
-# First subset by cell type
-JOB1=$(sbatch --parsable --export=ALL,ID=step1 slurm/05_subcells.sbatch)
-
-# Then cluster the subset
-JOB2=$(sbatch --parsable --export=ALL,ID=step1 --dependency=afterok:$JOB1 slurm/03_cluster.sbatch)
-
-# Then subset again by cluster
-JOB3=$(sbatch --parsable --export=ALL,ID=step2,IDENT=2 --dependency=afterok:$JOB2 slurm/04_subcluster.sbatch)
-```
-
-### Parallel Processing Configuration
-
-Scripts use the `future` package for parallelization. Adjust in each R script:
-
-```r
-# Change number of workers
-plan("multicore", workers = 32)  # Use 32 cores instead of 64
-
-# Adjust memory limit
-options(future.globals.maxSize = 32000 * 1024^2)  # 32 GB instead of 64 GB
-```
-
-### Custom Integration
-
-For integrating specific samples only:
-
-```r
-Rscript scripts/seurat/04_integrate.R custom_id output_dir \
-    sample1_normalized.rds \
-    sample2_normalized.rds \
-    sample3_normalized.rds
-```
-
-## Troubleshooting
-
-### Common Issues
-
-#### 1. Out of Memory Errors
-
-**Symptoms**: Job killed with exit code 137 or "cannot allocate vector" errors
-
-**Solutions**:
-- Increase `--mem` in SLURM scripts
-- Reduce `future.globals.maxSize` in R scripts
-- Reduce `max.cells.per.ident` in marker finding
-- Process samples individually rather than in batches
-
-#### 2. Integration Fails
-
-**Symptoms**: "Cannot find integration anchors" or very few anchors found
-
-**Solutions**:
-- Check that samples have sufficient cells (>200 per sample)
-- Verify samples passed QC filtering
-- Ensure samples have overlapping gene sets
-- Try increasing `nfeatures` in integration step
-
-#### 3. Clustering Produces Too Many/Few Clusters
-
-**Symptoms**: Unexpected number of clusters
-
-**Solutions**:
-- Adjust `res` parameter in `06_cluster.R`:
-  - Decrease (e.g., 0.3) for fewer clusters
-  - Increase (e.g., 0.8) for more clusters
-- Check elbow plot to ensure correct number of PCs used
-- Verify data quality (filtered cells, integration success)
-
-#### 4. Gene Mapping Issues
-
-**Symptoms**: Many unmapped genes or duplicates
-
-**Solutions**:
-- Verify mapping file format (tab-separated, headers: gene_id, symbol)
-- Check that gene IDs match between data and mapping file
-- Review `*_mapping_summary.tsv` for mapping statistics
-
-#### 5. SLURM Job Dependencies Fail
-
-**Symptoms**: Jobs don't start or fail immediately
-
-**Solutions**:
-```bash
-# Check job status
-squeue -u $USER
-
-# Check job details
-scontrol show job <job_id>
-
-# Cancel and restart
-scancel <job_id>
-```
-
-#### 6. Missing Features in Scoring Scripts
-
-**Symptoms**: Warning about missing markers
-
-**Solutions**:
-- Check `*_score_summary.tsv` for available markers
-- Verify gene naming (uppercase for human, sentence case for mouse)
-- Update marker lists to match your organism
-
-### Debugging Tips
-
-1. **Check log files**: SLURM scripts write to `logs/` directory
-   ```bash
-   tail -f logs/preprocess_*.err
-   ```
-
-2. **Test with small data**: Subset data for quick testing
-   ```r
-   obj <- obj[, sample(ncol(obj), 1000)]  # Use 1000 cells
-   ```
-
-3. **Run interactively**: Test R scripts in interactive R session
-   ```bash
-   srun --pty --mem=32G --cpus-per-task=8 R
-   ```
-
-4. **Verify inputs**: Check that input files exist and are readable
-   ```bash
-   ls -lh $OUT/*.rds
-   file $OUT/*.rds
-   ```
-
-5. **Monitor resources**: Check memory and CPU usage
-   ```bash
-   sstat -j <job_id> --format=JobID,MaxRSS,MaxVMSize,AveCPU
-   ```
-
-### Getting Help
-
-- Check R session warnings: `warnings()`
-- Verify Seurat object structure: `print(obj)`
-- Examine metadata: `head(obj@meta.data)`
-- Review summary files generated at each step
 
 ---
 

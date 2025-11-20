@@ -58,7 +58,7 @@ dev.off()
 
 # Visualize distribution
 png(file.path(outdir, paste0(id, "_09_score_distribution.png")), width = 1600, height = 1200)
-hist(obj[[feature_name]], breaks = 50, main = "Score Distribution", xlab = "Score")
+hist(obj@meta.data[[feature_name]], breaks = 50, main = "Score Distribution", xlab = "Score")
 dev.off()
 
 # Save object

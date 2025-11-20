@@ -1,7 +1,7 @@
-# Bioinformatics Capstone
+# Bioinformatics Research Project
 
-This repository is for the capstone project as a part of my Master’s degree in Bioinformatics at Northeastern University.
-The project reproduces and critically re-analyzes Li et al. (2021): *Dynamic cell transition and immune response landscapes of axolotl limb regeneration revealed by single-cell analysis*, using the axolotl (*Ambystoma mexicanum*) as the model organism for regeneration studies.
+This repository is for the research project as a part of my Master’s degree in Bioinformatics at Northeastern University.
+The project reproduces Li et al. (2021): *Dynamic cell transition and immune response landscapes of axolotl limb regeneration revealed by single-cell analysis*, using the axolotl (*Ambystoma mexicanum*) as the model organism for regeneration studies.
 The aim is to use single-cell transcriptomic data to reconstruct Schwann cell trajectories and map their ligand-receptor interactions with immune cells across the regenerative timeline.
 
 ## Data

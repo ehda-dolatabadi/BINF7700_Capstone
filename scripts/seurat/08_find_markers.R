@@ -64,5 +64,5 @@ filtered_top <- filtered %>%
   ungroup()
 
 # Save filtered markers
-outfile <- file.path(outdir, paste0(id, "_markers_filtered.tsv"))
+outfile <- file.path(outdir, paste0(id, "_08_markers_filtered.tsv"))
 write.table(filtered_top, file = outfile, sep = "\t", quote = FALSE, row.names = FALSE)

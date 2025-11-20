@@ -79,9 +79,6 @@ abline(v = ery_thr, col = "red", lwd = 2, lty = 2)
 dev.off()
 
 # Filtering
-cells_to_keep <- which(obj$Epithelial_score1 < epi_thr & 
-                       obj$Erythrocyte_score1 < ery_thr)
-
 obj <- subset(
   obj,
   subset =

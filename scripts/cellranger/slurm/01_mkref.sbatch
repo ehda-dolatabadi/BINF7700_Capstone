@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=mkref
 #SBATCH --partition=courses
-#SBATCH --time=24:00:00			# limit is 24hr
-#SBATCH --cpus-per-task=16		# limit is 58
-#SBATCH --mem=60G			# limit is 185G
+#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=60G
 #SBATCH --chdir=/scratch/dolatabadi.e   # working directory
 #SBATCH --output=logs/%x_%j.out         # stdout log
 #SBATCH --error=logs/%x_%j.err          # stderr log

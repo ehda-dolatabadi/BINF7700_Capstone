@@ -12,9 +12,10 @@
 set -euo pipefail
 
 # Variables
+SMPS=("control" "3h" "24h" "72h" "7dpa" "14dpa" "22dpa" "33dpa")
 SMP="${SMPS[$SLURM_ARRAY_TASK_ID]}"
 
-DIR="$RESULT/cellranger/$SMP/outs/filtered_feature_bc_matrix"
+DIR="$DATA/outputs/cellranger/$SMP/outs/filtered_feature_bc_matrix"
 OUT_map="$OUT/${ID}_00_mapped"
 OUT_qc="$OUT/${ID}_01_qc/$SMP"
 OUT_filter="$OUT/${ID}_02_filtered/$SMP"
@@ -42,3 +43,6 @@ echo "Filtering of $SMP completed✅"
 echo "Normalizing of $SMP..."
 Rscript "$WORK/scripts/seurat/03_normalize.R"           "$SMP" "$OUT_normalize"	"$OUT_filter/${SMP}_filtered.rds"
 echo "Normalization of $SMP completed✅"
+
+# Sync
+rsync -av --update --info=progress2 --stats --exclude '*.rds' "$OUT/" "$WORK/results/seurat/"
