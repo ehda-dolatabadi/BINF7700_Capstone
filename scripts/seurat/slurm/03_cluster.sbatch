@@ -75,4 +75,4 @@ Rscript "$RUN/09_score_markers.R" \
 echo "Scoring completed✅"
 
 # Sync
-rsync -av --update --info=progress2 --stats --exclude '*.rds' "$OUT/" "$WORK/results/seurat/"
+rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/" "$WORK/results/seurat/"

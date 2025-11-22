@@ -73,4 +73,4 @@ Rscript "$RUN/03_normalize.R" \
 echo "Normalization of $SMP completed✅"
 
 # Sync
-rsync -av --update --info=progress2 --stats --exclude '*.rds' "$OUT/" "$WORK/results/seurat/"
+rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/" "$WORK/results/seurat/"

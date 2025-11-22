@@ -7,8 +7,8 @@ A comprehensive bioinformatics pipeline for analyzing single-cell RNA-seq data f
 This repository contains a reproducible computational workflow for analyzing single-cell transcriptomic data from the axolotl (*Ambystoma mexicanum*) limb regeneration model. The project aims to:
 
 - **Reproduce and extend** Li et al. (2021) using updated genome assemblies and analytical methods
-- **Reconstruct Schwann cell trajectories** during regeneration
-- **Map ligand-receptor interactions** between Schwann cells and immune cells
+- **Reconstruct neural cell trajectories** during regeneration
+- **Map ligand-receptor interactions** between neural cells and immune cells
 
 ### Dataset
 

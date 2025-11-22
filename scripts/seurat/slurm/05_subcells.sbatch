@@ -37,4 +37,4 @@ Rscript "$RUN/04_reintegrate_subset.R" \
 echo "Normalization and integration completed✅"
 
 # Sync
-rsync -av --update --info=progress2 --stats --exclude '*.rds' "$OUT/" "$WORK/results/seurat/"
+rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/" "$WORK/results/seurat/"

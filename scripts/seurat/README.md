@@ -307,13 +307,12 @@ Rscript scripts/seurat/04_integrate.R <analysis_id> <output_dir> sample1.rds sam
 ---
 
 #### 09_score_markers.R
-**Purpose**: Score cells based on cell type markers (Schwann cells).
+**Purpose**: Score cells based on cell type markers (Neural cells).
 
-**Default Schwann Markers**:
+**Default Neural Markers**:
 ```r
-markers <- c("SOX10", "S100", "S100B", "NGFR", "p75NTR", "MPZ", "MBP",
-             "PMP22", "PLP1", "PRX", "NCAM", "NCAM1", "L1CAM", "SCN7A",
-             "SOX2", "GAP43", "EGR2", "Krox20", "POU3F1", "OCT6")
+markers <- c("SOX2", "NES", "TUBB3", "MAP2", "S100B", "GFAP", "VIM",
+             "NCAM1", "CD24", "FABP7")
 ```
 
 **Usage**: `Rscript 09_score_markers.R <id> <outdir> <input_rds>`
