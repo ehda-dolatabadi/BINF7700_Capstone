@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-# Parameters
+# Default Parameters
 ID="${ID:-main}"
 MIN_CELLS="${MIN_CELLS:-5}"
 MIN_FEATURES="${MIN_FEATURES:-500}"

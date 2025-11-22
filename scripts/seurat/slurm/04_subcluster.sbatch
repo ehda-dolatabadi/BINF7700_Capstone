@@ -8,6 +8,7 @@
 set -euo pipefail
 
 # Pipeline parameters
+main_ID="${main_ID:-main}"
 ID="${ID:-cluster1}"
 IDENT="${IDENT:-1}"
 

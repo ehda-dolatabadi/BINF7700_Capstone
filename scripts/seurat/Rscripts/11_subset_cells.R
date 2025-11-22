@@ -106,7 +106,18 @@ dev.off()
 
 # Apply filtering
 filter_expr <- paste(filter_conditions, collapse = " & ")
-obj <- subset(obj, subset = eval(parse(text = filter_expr)))
+cat("Applying filter:", filter_expr, "\n")
+
+# Get cells that pass the filter
+cells_to_keep <- TRUE
+for (i in seq_along(cell_types)) {
+  score_col <- paste0(cell_types[i], "_score1")
+  threshold <- cell_thresholds[i]
+  cells_to_keep <- cells_to_keep & (obj[[score_col]][,1] < threshold)
+}
+
+# Subset to keep only cells that pass all filters
+obj <- obj[, cells_to_keep]
 
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_00_subset.rds")))

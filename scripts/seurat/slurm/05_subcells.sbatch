@@ -8,10 +8,11 @@
 set -euo pipefail
 
 # Parameters
+main_ID="${main_ID:-main}"
 ID="${ID:-no_epith-eryth}"
-CELL_TYPES="${CELL_TYPES:-Epithelial,Erythrocyte}"
+CELL_TYPES="${CELL_TYPES:-Epithelial;Erythrocyte}"
 CELL_MARKERS="${CELL_MARKERS:-KRT8,KRT18,KRT1,EPCAM,CLDN7,CDH1,DSP,DSG2,EPPK1,S100P;HBA1,HBB,HBA2,HEMGN,ALAS2,PRDX2,ANK1,HBBP1}"
-CELL_THRESHOLDS="${CELL_THRESHOLDS:-0.5,3.0}"
+CELL_THRESHOLDS="${CELL_THRESHOLDS:-0.5;3.0}"
 
 # Environment
 eval "$(conda shell.bash hook)"

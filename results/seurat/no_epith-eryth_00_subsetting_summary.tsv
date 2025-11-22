@@ -1,0 +1,2 @@
+id	n_cells_before	n_features_before	n_epithelial_markers_total	n_epithelial_markers_available	epithelial_threshold	n_cells_epithelial	pct_cells_epithelial	n_erythrocyte_markers_total	n_erythrocyte_markers_available	erythrocyte_threshold	n_cells_erythrocyte	pct_cells_erythrocyte	n_cells_after	n_features_after	pct_cells_kept
+no_epith-eryth	57167	18906	10	10	0.5	24092	42.1431945003236	8	8	3	4894	8.56088302692113	28207	18906	49.3414032571239
