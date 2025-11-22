@@ -34,6 +34,8 @@ The pipeline is designed to run on HPC systems using SLURM job scheduling and pr
 ```
 scripts/cellranger/
 ├── README.md                      # This file
+├── run_pipeline.sh                # Automated pipeline execution script
+├── gtf_remove_whitespace.sh       # Utility for cleaning GTF files
 │
 └── slurm/                         # SLURM batch scripts
     ├── 01_mkref.sbatch            # Build reference genomes
@@ -79,12 +81,17 @@ export PATH=/path/to/cellranger-9.0.1:$PATH
 
 ### 3. Configure paths
 
-Edit the SLURM scripts to set your directory paths:
+Edit `run_pipeline.sh` to set your directory paths:
 
 ```bash
-SCRATCH="/path/to/scratch"	# Scratch directory for processing
-DATA="/path/to/data"            # Data directory for storage
+SCRATCH="/path/to/scratch"                          # Scratch directory for processing
+DATA="/path/to/data"                                # Data directory for storage
+LOG="$SCRATCH/logs"                                 # Log file directory
+WORK="$HOME/your-project-directory"                 # Working directory (repository root)
+SLURM="$WORK/scripts/cellranger/slurm"             # SLURM scripts directory
 ```
+
+These paths are automatically exported to all SLURM jobs via `--export=ALL`.
 
 ### 4. Prepare input data
 
@@ -126,19 +133,37 @@ graph TD
 
 ## Usage
 
-### Full Pipeline
+### Automated Pipeline Execution (Recommended)
+
+The `run_pipeline.sh` script automates the entire pipeline with proper job dependencies:
+
+```bash
+# Run the complete pipeline with automatic dependency management
+bash scripts/cellranger/run_pipeline.sh
+```
+
+This script will:
+1. Submit the reference genome building job
+2. Submit Cell Ranger count with dependency on Step 1
+3. Submit both aggregation jobs with dependency on Step 2
+4. Create log files in `$LOG/` directory with format: `{job_name}_{job_id}.out/err`
+5. Display all submitted job IDs for tracking
+
+### Manual Pipeline Execution
+
+You can also run individual steps manually:
 
 ```bash
 # Step 1: Build reference genomes
 sbatch scripts/cellranger/slurm/01_mkref.sbatch
 
-# Step 2: Process samples
+# Step 2: Process samples (wait for Step 1 to complete)
 sbatch scripts/cellranger/slurm/02_cellranger.sbatch
 
-# Step 3a: Aggregate without normalization (optional)
+# Step 3a: Aggregate without normalization (wait for Step 2 to complete)
 sbatch scripts/cellranger/slurm/03_aggr.sbatch
 
-# Step 3b: Aggregate with normalization (optional)
+# Step 3b: Aggregate with normalization (wait for Step 2 to complete)
 sbatch scripts/cellranger/slurm/03_aggr_normalize.sbatch
 ```
 
@@ -151,8 +176,9 @@ sbatch scripts/cellranger/slurm/03_aggr_normalize.sbatch
 **Purpose**: Build Cell Ranger-compatible reference genomes from FASTA and GTF files.
 
 **Parameters**:
-- `--nthreads = 16`: Number of CPU threads
-- `--memgb = 40`: Memory in GB (60GB total - 20GB buffer)
+- `--array=0-1`: Processes 2 reference genomes in parallel
+- `--nthreads=16`: Number of CPU threads
+- `--memgb`: Memory in GB (calculated as total memory - 20GB buffer)
 
 **Usage**: `sbatch scripts/cellranger/slurm/01_mkref.sbatch`
 
@@ -165,10 +191,11 @@ sbatch scripts/cellranger/slurm/03_aggr_normalize.sbatch
 **Purpose**: Align reads and quantify gene expression using Cell Ranger count.
 
 **Parameters**:
-- `--create-bam = false`: Skip BAM creation
+- `--array=0-15`: Processes 16 samples in parallel (2 references × 8 timepoints)
+- `--create-bam=false`: Skip BAM creation
 - `--nosecondary`: Skip secondary analysis
-- `--localcores = 4`: Number of CPU cores
-- `--localmem = 180`: Memory in GB
+- `--localcores=4`: Number of CPU cores
+- `--localmem`: Memory in GB (calculated as total memory - 20GB buffer)
 
 **Usage**: `sbatch scripts/cellranger/slurm/02_cellranger.sbatch`
 
@@ -184,10 +211,11 @@ sbatch scripts/cellranger/slurm/03_aggr_normalize.sbatch
 **Purpose**: Aggregate multiple samples without depth normalization.
 
 **Parameters**:
-- `--normalize = none`: Disable depth normalization
+- `--array=0-1`: Processes 2 reference genomes in parallel
+- `--normalize=none`: Disable depth normalization
 - `--disable-ui`: Disable User Interface
-- `--localcores = 28`: Number of CPU cores
-- `--localmem = 160`: Memory in GB
+- `--localcores=28`: Number of CPU cores
+- `--localmem`: Memory in GB (calculated as total memory - 20GB buffer)
 
 **Input**: Requires `aggr_samples.csv` with sample paths
 
@@ -209,10 +237,11 @@ control,/path/to/control/outs/molecule_info.h5
 **Purpose**: Aggregate multiple samples with depth normalization enabled.
 
 **Parameters**:
+- `--array=0-5`: Processes 6 jobs in parallel (2 references × 3 CSV configurations)
 - Normalization method: `mapped` (default)
 - `--disable-ui`: Disable User Interface
-- `--localcores = 28`: Number of CPU cores
-- `--localmem = 160`: Memory in GB
+- `--localcores=28`: Number of CPU cores
+- `--localmem`: Memory in GB (calculated as total memory - 20GB buffer)
 
 **Input**: Requires `aggr_samples.csv` with sample paths
 
@@ -225,7 +254,7 @@ control,/path/to/control/outs/molecule_info.h5
 
 **Usage**: `sbatch scripts/cellranger/slurm/03_aggr_normalize.sbatch`
 
-**Output**: Combined count matrix in `aggr_samples/outs/count/filtered_feature_bc_matrix/`
+**Output**: Combined count matrix in `{csv_name}/outs/count/filtered_feature_bc_matrix/`
 
 ---
 
@@ -287,4 +316,4 @@ $SCRATCH/outputs/ref_<genome>/cellranger/
 
 ---
 
-**Last Updated**: 2025-11-20
+**Last Updated**: 2025-11-22

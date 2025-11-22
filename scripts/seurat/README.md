@@ -94,11 +94,11 @@ Edit `run_pipeline.sh` to set your directory paths:
 
 ```bash
 DATA="/path/to/your/data"       # Base data directory
-LOG="/path/to/logs"		# Logs directory
-WORK="/path/to/root"  		# Working directory
-TSV="/path/to/loc_map.tsv"	# Gene mapping file
-OUT="/path/to/out"	10X Genomics. Cell Ranger Software. https://www.10xgenomics.com/support/software/cell-ranger	# Seurat outputs directory
-
+LOG="/path/to/logs"             # Logs directory
+WORK="/path/to/root"            # Working directory
+TSV="/path/to/loc_map.tsv"      # Gene mapping file
+OUT="/path/to/out"              # Seurat outputs directory
+main_ID=""                      # Main analysis ID (leave empty for default)
 ```
 
 ### 2. Prepare input data
@@ -158,14 +158,20 @@ The pipeline will automatically:
 
 ### Running Individual Steps
 
-Each R script can be run independently:
+Each R script or SLURM batch script can be run independently:
 
 ```bash
 # Example: Run QC on a single sample
-Rscript scripts/seurat/01_qc.R <sample_id> <output_dir> <input_rds>
+Rscript scripts/seurat/Rscripts/01_qc.R <sample_id> <output_dir> <input_rds>
 
 # Example: Run integration
-Rscript scripts/seurat/04_integrate.R <analysis_id> <output_dir> sample1.rds sample2.rds ...
+Rscript scripts/seurat/Rscripts/04_integrate.R <analysis_id> <output_dir> sample1.rds sample2.rds ...
+
+# Example: Submit preprocessing SLURM job
+sbatch --export=ALL,ID=main scripts/seurat/slurm/01_preprocess.sbatch
+
+# Example: Submit clustering with custom parameters
+sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_cluster.sbatch
 ```
 
 ---
@@ -307,19 +313,20 @@ Rscript scripts/seurat/04_integrate.R <analysis_id> <output_dir> sample1.rds sam
 ---
 
 #### 09_score_markers.R
-**Purpose**: Score cells based on cell type markers (Neural cells).
+**Purpose**: Score cells based on cell type markers.
 
-**Default Neural Markers**:
-```r
-markers <- c("SOX2", "NES", "TUBB3", "MAP2", "S100B", "GFAP", "VIM",
-             "NCAM1", "CD24", "FABP7")
-```
+**Parameters**:
+- Cell type name and markers are passed as arguments
+- `group_by`: Metadata column for grouping in plots (default: "seurat_clusters")
 
-**Usage**: `Rscript 09_score_markers.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 09_score_markers.R <id> <outdir> <input_rds> <cell_name> <group_by> <markers>`
 
 **Output**:
 - `<id>_09_scored.rds`: Object with added score
-- Feature plots, violin plots, individual marker plots
+- `<id>_09_feature_score.png`: Feature plot
+- `<id>_09_violin_score.png`: Violin plot by group
+- `<id>_09_individual_markers_violin.png`: Individual marker expression
+- `<id>_09_score_distribution.png`: Score distribution histogram
 - `<id>_09_score_summary.tsv`
 
 ---
@@ -334,21 +341,23 @@ markers <- c("SOX2", "NES", "TUBB3", "MAP2", "S100B", "GFAP", "VIM",
 ---
 
 #### 11_subset_cells.R
-**Purpose**: Remove epithelial and erythrocyte contamination.
+**Purpose**: Filter out unwanted cell types based on module scores.
 
 **Parameters**:
-- `epi_thr = 0.5`: Epithelial score threshold
-- `ery_thr = 3.0`: Erythrocyte score threshold
+- Cell types, markers, and thresholds are passed as arguments
+- Cells with scores below thresholds are kept
 
-**Markers**:
-- **Epithelial**: KRT8, KRT18, KRT1, EPCAM, CLDN7, CDH1, DSP, DSG2, EPPK1, S100P
-- **Erythrocyte**: HBA1, HBB, HBA2, HEMGN, ALAS2, PRDX2, ANK1, HBBP1
+**Usage**: `Rscript 11_subset_cells.R <id> <outdir> <input_rds> <cell_types> <cell_markers> <cell_thresholds>`
 
-**Usage**: `Rscript 11_subset_cells.R <id> <outdir> <input_rds>`
+**Arguments Format**:
+- `cell_types`: Semicolon-separated (e.g., "Epithelial;Erythrocyte")
+- `cell_markers`: Semicolon-separated lists, comma-separated within (e.g., "KRT8,KRT18;HBA1,HBB")
+- `cell_thresholds`: Semicolon-separated values (e.g., "0.5;3.0")
 
 **Output**:
 - `<id>_00_subset.rds`: Filtered object
-- Score distribution plots
+- `<id>_00_<celltype>_score_distribution.png`: Score distribution per cell type
+- `<id>_00_violin_score.png`: Violin plot of all scores
 - `<id>_00_subsetting_summary.tsv`
 
 ---
@@ -419,4 +428,4 @@ results/seurat/
 
 ---
 
-**Last Updated**: 2025-11-20
+**Last Updated**: 2025-11-22

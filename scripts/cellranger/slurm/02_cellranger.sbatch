@@ -1,12 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=cellranger
 #SBATCH --partition=courses
-#SBATCH --time=24:00:00			# limit is 24hr
-#SBATCH --cpus-per-task=4		# limit is 128/node
-#SBATCH --mem=200G			# limit is 515G/node
-#SBATCH --chdir=/scratch/dolatabadi.e   # working directory
-#SBATCH --output=logs/%x_%j.out         # stdout log
-#SBATCH --error=logs/%x_%j.err          # stderr log
+#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=200G
 #SBATCH --array=0-15
 
 set -euo pipefail

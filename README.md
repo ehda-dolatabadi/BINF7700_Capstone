@@ -36,8 +36,7 @@ git clone https://github.com/ehda-dolatabadi/axolotl-regeneration-scrna.git
 cd axolotl-regeneration-scrna
 
 # Run Cell Ranger alignment (Step 1)
-sbatch scripts/cellranger/slurm/01_mkref.sbatch
-sbatch scripts/cellranger/slurm/02_cellranger.sbatch
+bash scripts/cellranger/run_pipeline.sh
 
 # Run Seurat analysis (Step 2)
 bash scripts/seurat/run_pipeline.sh
@@ -77,27 +76,22 @@ bash scripts/seurat/run_pipeline.sh
 
 ### Full Pipeline Execution
 
-**Step 1: Build Reference Genomes**
+**Step 1: Cell Ranger Alignment (Automated)**
 ```bash
-sbatch scripts/cellranger/slurm/01_mkref.sbatch
+bash scripts/cellranger/run_pipeline.sh
 ```
 
-**Step 2: Process FASTQ Files**
-```bash
-sbatch scripts/cellranger/slurm/02_cellranger.sbatch
-```
-
-**Step 3: Run Seurat Analysis**
+**Step 2: Run Seurat Analysis**
 ```bash
 bash scripts/seurat/run_pipeline.sh
 ```
 
-**Step 4: Trajectory Inference with Monocle3** *(Coming soon)*
+**Step 3: Trajectory Inference with Monocle3** *(Coming soon)*
 ```bash
 bash scripts/monocle3/run_monocle3.sh
 ```
 
-**Step 5: Cell-Cell Communication with CellChat** *(Coming soon)*
+**Step 4: Cell-Cell Communication with CellChat** *(Coming soon)*
 ```bash
 bash scripts/cellchat/run_cellchat.sh
 ```
@@ -261,6 +255,6 @@ Email: [dolatabadi.e@northeastern.edu](mailto:dolatabadi.e@northeastern.edu)
 
 ---
 
-**Last Updated**: November 20, 2025
+**Last Updated**: November 22, 2025
 **Status**: Active Development
 **Version**: 1.0.0

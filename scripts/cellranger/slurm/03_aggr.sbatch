@@ -1,12 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=aggr
 #SBATCH --partition=courses
-#SBATCH --time=2:00:00			# limit is 24hr
-#SBATCH --cpus-per-task=28		# limit is 128/node
-#SBATCH --mem=180G			# limit is 515G/node
-#SBATCH --chdir=/scratch/dolatabadi.e   # working directory
-#SBATCH --output=logs/%x_%j.out         # stdout log
-#SBATCH --error=logs/%x_%j.err          # stderr log
+#SBATCH --time=2:00:00
+#SBATCH --cpus-per-task=28
+#SBATCH --mem=180G
 #SBATCH --array=0-1
 
 set -euo pipefail

@@ -1,2 +1,2 @@
 id	n_cells	n_features	n_markers_total	n_markers_available	markers_available
-main	57167	18906	20	13	SOX10,NGFR,MPZ,MBP,PMP22,PLP1,PRX,NCAM1,L1CAM,SOX2,GAP43,EGR2,POU3F1
+main	57167	18906	10	6	SOX2,TUBB3,MAP2,VIM,NCAM1,FABP7
