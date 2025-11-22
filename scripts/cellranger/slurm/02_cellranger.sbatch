@@ -9,10 +9,12 @@
 set -euo pipefail
 
 # Paths
-source "../../../config/default_paths.sh"
-if [ -f "../../../config/local_paths.sh" ]; then
-    source "../../../config/local_paths.sh"
-fi
+cd "$SLURM_SUBMIT_DIR"
+source "config/default_paths.sh"
+[ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
+
+exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}.log"
+exec 2>&1
 
 OUT_ref="$DATA/ref_genomes/cellranger_mkref"
 
@@ -28,10 +30,10 @@ REF="$OUT_ref/$REF_name"
 OUT_cellranger="$OUT/cellranger/ref_${REF_name}"
 
 mkdir -p "$OUT_cellranger"
-cd "$OUT_cellranger"
 
 # Run Pipeline
 cellranger count \
+  --output-dir="$OUT_cellranger" \
   --id="$SMP" \
   --transcriptome="$REF" \
   --fastqs="$FQ_name" \

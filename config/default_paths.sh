@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Set the project root. Change this to an absolute path if needed.
-export WORK=".."
+# Set the working directory. Modify with absolute path if needed.
+export WORK="$(readlink -f .)"
 
 # Set the data directory. Modify if needed.
 export DATA="$WORK/data"

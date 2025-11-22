@@ -15,10 +15,12 @@ CELL_MARKERS="${CELL_MARKERS:-KRT8,KRT18,KRT1,EPCAM,CLDN7,CDH1,DSP,DSG2,EPPK1,S1
 CELL_THRESHOLDS="${CELL_THRESHOLDS:-0.5;3.0}"
 
 # Paths
-source "../../../config/default_paths.sh"
-if [ -f "../../../config/local_paths.sh" ]; then
-    source "../../../config/local_paths.sh"
-fi
+cd "$SLURM_SUBMIT_DIR"
+source "config/default_paths.sh"
+[ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
+
+exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}.log"
+exec 2>&1
 
 RUN="$WORK/scripts/seurat/Rscripts"
 

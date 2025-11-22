@@ -19,10 +19,12 @@ MAX_MT="${MAX_MT:-10}"
 MAX_RIBO="${MAX_RIBO:-30}"
 
 # Paths
-source "../../../config/default_paths.sh"
-if [ -f "../../../config/local_paths.sh" ]; then
-    source "../../../config/local_paths.sh"
-fi
+cd "$SLURM_SUBMIT_DIR"
+source "config/default_paths.sh"
+[ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
+
+exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}.log"
+exec 2>&1
 
 RUN="$WORK/scripts/seurat/Rscripts"
 TSV="$REF_FILES/loc_map.tsv"
@@ -30,7 +32,7 @@ TSV="$REF_FILES/loc_map.tsv"
 SMPS=("control" "3h" "24h" "72h" "7dpa" "14dpa" "22dpa" "33dpa")
 SMP="${SMPS[$SLURM_ARRAY_TASK_ID]}"
 
-DIR="$DATA/outputs/cellranger/$SMP/outs/filtered_feature_bc_matrix"
+DIR="$OUT/cellranger/$SMP/outs/filtered_feature_bc_matrix"
 OUT_map="$OUT/seurat/${ID}_00_mapped"
 OUT_qc="$OUT/seurat/${ID}_01_qc/$SMP"
 OUT_filter="$OUT/seurat/${ID}_02_filtered/$SMP"

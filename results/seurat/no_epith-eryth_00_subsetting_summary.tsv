@@ -1,2 +1,2 @@
 id	n_cells_before	n_features_before	n_epithelial_markers_total	n_epithelial_markers_available	epithelial_threshold	n_cells_epithelial	pct_cells_epithelial	n_cells_after	n_features_after	pct_cells_kept
-no_epith-eryth	57167	18906	1	1	0.5	14548	25.4482481151713	42619	18906	74.5517518848287
+no_epith-eryth	57167	18906	1	1	0.5	14547	25.4464988542341	42620	18906	74.5535011457659

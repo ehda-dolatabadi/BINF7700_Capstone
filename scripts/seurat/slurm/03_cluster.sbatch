@@ -23,10 +23,12 @@ GROUP_BY="${GROUP_BY:-seurat_clusters}"
 MARKERS="${MARKERS:-SOX2,NES,TUBB3,MAP2,S100B,GFAP,VIM,NCAM1,CD24,FABP7}"
 
 # Paths
-source "../../../config/default_paths.sh"
-if [ -f "../../../config/local_paths.sh" ]; then
-    source "../../../config/local_paths.sh"
-fi
+cd "$SLURM_SUBMIT_DIR"
+source "config/default_paths.sh"
+[ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
+
+exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}.log"
+exec 2>&1
 
 RUN="$WORK/scripts/seurat/Rscripts"
 

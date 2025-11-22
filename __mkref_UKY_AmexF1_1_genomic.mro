@@ -1,0 +1,11 @@
+@include "rna/make_reference.mro"
+
+call MAKE_REFERENCE(
+    genome_names  = ["UKY_AmexF1_1_genomic"],
+    fasta_files   = ["/courses/BINF7700.202610/students/dolatabadi.e/ref_genomes/ref_files/GCF_040938575.1_UKY_AmexF1_1_genomic.fna"],
+    gtf_files     = ["/courses/BINF7700.202610/students/dolatabadi.e/ref_genomes/ref_files/GCF_040938575.1_UKY_AmexF1_1_genomic.gtf"],
+    ref_version   = null,
+    mkref_version = "cellranger-9.0.1",
+    num_threads   = 16,
+    mem_gb        = 40,
+)

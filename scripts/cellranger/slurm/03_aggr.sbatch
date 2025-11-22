@@ -12,10 +12,12 @@ set -euo pipefail
 CSV="aggr_samples.csv"
 
 # Paths
-source "../../../config/default_paths.sh"
-if [ -f "../../../config/local_paths.sh" ]; then
-    source "../../../config/local_paths.sh"
-fi
+cd "$SLURM_SUBMIT_DIR"
+source "config/default_paths.sh"
+[ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
+
+exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}.log"
+exec 2>&1
 
 # Derive indices
 NORM_FLAGS=("none" "mapped")
@@ -29,10 +31,10 @@ NORM=${NORM_FLAGS[$norm_idx]}
 SUFFIX=${SUFFIXES[$norm_idx]}
 
 OUT_cellranger="$OUT/cellranger/ref_${REF}"
-cd "$OUT_cellranger"
 
 # Run pipeline
 cellranger aggr \
+  --output-dir="$OUT_cellranger" \
   --id="${CSV%.*}_${SUFFIX}" \
   --csv="$CSV" \
   --localcores="$SLURM_CPUS_PER_TASK" \

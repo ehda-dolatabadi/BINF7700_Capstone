@@ -13,10 +13,8 @@ export CELL_NAME="Neural"
 export CELL_MARKERS="SOX2, NES, TUBB3, MAP2, S100B, GFAP, VIM, NCAM1, CD24, FABP7"
 
 # ==================== PATHS ======================
-source "../../config/default_paths.sh"
-if [ -f "../../config/local_paths.sh" ]; then
-    source "../../config/local_paths.sh"
-fi
+source "config/default_paths.sh"
+[ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
 
 SLURM="$WORK/scripts/seurat/slurm"
 
