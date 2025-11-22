@@ -14,10 +14,8 @@ args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
-
-# Parameters
-dims <- 10
-res <- 0.5
+dims    <- as.numeric(args[4])
+res     <- as.numeric(args[5])
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB

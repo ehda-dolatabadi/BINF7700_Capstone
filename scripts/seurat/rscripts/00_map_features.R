@@ -10,14 +10,12 @@ set.seed(777)
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
-id      <- args[1]
-outdir  <- args[2]
-input   <- args[3]
-tsv	<- args[4]
-
-# Parameters
-min_cells       <- 5
-min_features    <- 500
+id           <- args[1]
+outdir       <- args[2]
+input        <- args[3]
+tsv          <- args[4]
+min_cells    <- as.numeric(args[5])
+min_features <- as.numeric(args[6])
 
 # Load and create Seurat object
 counts <- Read10X(input)

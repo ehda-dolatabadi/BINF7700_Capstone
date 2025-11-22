@@ -15,12 +15,9 @@ args <- commandArgs(trailingOnly = TRUE)
 id <- args[1]
 outdir <- args[2]
 input <- args[3]
-
-# Parameters
-cell_name <- "Schwann"
-markers <- c("SOX10", "S100", "S100B", "NGFR", "p75NTR", "MPZ", "MBP", "PMP22", "PLP1", "PRX",
-             "NCAM", "NCAM1", "L1CAM", "SCN7A", "SOX2", "GAP43", "EGR2", "Krox20", "POU3F1", "OCT6")
-group_by <- "seurat_clusters"
+cell_name <- args[4]
+group_by <- args[5]
+markers <- unlist(strsplit(args[6], ","))
 
 # Load clustered object
 obj <- readRDS(input)

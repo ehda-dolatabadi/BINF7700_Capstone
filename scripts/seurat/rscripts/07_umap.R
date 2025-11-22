@@ -14,10 +14,10 @@ args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
+dims    <- as.numeric(args[4])
+metric  <- args[5]
 
 # Parameters
-dims	<- 10
-metric	<- "cosine"
 seed	<- 777
 
 # Set up parallelization

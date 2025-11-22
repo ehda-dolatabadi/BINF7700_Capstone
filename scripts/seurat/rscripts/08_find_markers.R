@@ -12,19 +12,17 @@ set.seed(777)
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
-id      <- args[1]
-outdir  <- args[2]
-input   <- args[3]
+id           <- args[1]
+outdir       <- args[2]
+input        <- args[3]
+significance <- as.numeric(args[4])
+regulation   <- as.numeric(args[5])
+enrichment   <- as.numeric(args[6])
+top          <- as.numeric(args[7])
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 64)
-
-# Parameters
-significance <- 0.05
-regulation <- 1
-enrichment <- 0.2
-top <- 30
 
 # Load clustered object
 obj <- readRDS(input)

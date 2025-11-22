@@ -15,13 +15,11 @@ args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
+npcs    <- as.numeric(args[4])
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 64)
-
-# Parameters
-npcs <- 50
 
 # Load integrated object
 obj <- readRDS(input)

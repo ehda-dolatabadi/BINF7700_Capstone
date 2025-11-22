@@ -7,29 +7,71 @@
 
 set -euo pipefail
 
+# Parameters
+ID="${ID:-main}"
+NPCS="${NPCS:-50}"
+DIMS="${DIMS:-10}"
+RES="${RES:-0.5}"
+UMAP_DIMS="${UMAP_DIMS:-10}"
+UMAP_METRIC="${UMAP_METRIC:-cosine}"
+SIGNIFICANCE="${SIGNIFICANCE:-0.05}"
+REGULATION="${REGULATION:-1}"
+ENRICHMENT="${ENRICHMENT:-0.2}"
+TOP_MARKERS="${TOP_MARKERS:-30}"
+CELL_NAME="${CELL_NAME:-Schwann}"
+GROUP_BY="${GROUP_BY:-seurat_clusters}"
+MARKERS="${MARKERS:-SOX10,S100,S100B,NGFR,p75NTR,MPZ,MBP,PMP22,PLP1,PRX,NCAM,NCAM1,L1CAM,SCN7A,SOX2,GAP43,EGR2,Krox20,POU3F1,OCT6}"
+
 # Environment
 eval "$(conda shell.bash hook)"
 conda activate seurat
 
 # Workflow
 echo "Running PCA..."
-Rscript "$WORK/scripts/seurat/05_pca.R"			"$ID"	"$OUT"	"$OUT/${ID}_04_integrated.rds"
+Rscript "$RUN/05_pca.R" \
+  "$ID" \
+  "$OUT" \
+  "$OUT/${ID}_04_integrated.rds" \
+  "$NPCS"
 echo "PCA completed✅"
 
 echo "Clustering..."
-Rscript "$WORK/scripts/seurat/06_cluster.R"           	"$ID"	"$OUT"	"$OUT/${ID}_05_pca.rds"
+Rscript "$RUN/06_cluster.R" \
+  "$ID" \
+  "$OUT" \
+  "$OUT/${ID}_05_pca.rds" \
+  "$DIMS" \
+  "$RES"
 echo "Clustering completed✅"
 
 echo "Running UMAP..."
-Rscript "$WORK/scripts/seurat/07_umap.R"               	"$ID"	"$OUT"	"$OUT/${ID}_06_clustered.rds"
+Rscript "$RUN/07_umap.R" \
+  "$ID" \
+  "$OUT" \
+  "$OUT/${ID}_06_clustered.rds" \
+  "$UMAP_DIMS" \
+  "$UMAP_METRIC"
 echo "UMAP completed✅"
 
 echo "Finding Markers..."
-Rscript "$WORK/scripts/seurat/08_find_markers.R"        "$ID"	"$OUT"	"$OUT/${ID}_06_clustered.rds"
+Rscript "$RUN/08_find_markers.R" \
+  "$ID" \
+  "$OUT" \
+  "$OUT/${ID}_06_clustered.rds" \
+  "$SIGNIFICANCE" \
+  "$REGULATION" \
+  "$ENRICHMENT" \
+  "$TOP_MARKERS"
 echo "Markers finding completed✅"
 
-echo "Scoring markers..."
-Rscript "$WORK/scripts/seurat/09_score_markers.R"	"$ID"   "$OUT"  "$OUT/${ID}_06_clustered.rds"
+echo "Scoring $CELL_NAME markers..."
+Rscript "$RUN/09_score_markers.R" \
+  "$ID" \
+  "$OUT" \
+  "$OUT/${ID}_06_clustered.rds" \
+  "$CELL_NAME" \
+  "$GROUP_BY" \
+  "$MARKERS"
 echo "Scoring completed✅"
 
 # Sync

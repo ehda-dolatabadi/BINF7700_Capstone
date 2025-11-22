@@ -7,7 +7,10 @@
 
 set -euo pipefail
 
-# Variables
+# Parameters
+ID="${ID:-main}"
+
+# Paths
 OUT_normalize="$OUT/${ID}_03_normalized"
 
 # Environment
@@ -16,5 +19,5 @@ conda activate seurat
 
 # Workflow
 echo "Integrating normalized samples..."
-Rscript "$WORK/scripts/seurat/04_integrate.R" "$ID" "$OUT" "$OUT_normalize"/*_normalized.rds
+Rscript "$RUN/04_integrate.R" "$ID" "$OUT" "$OUT_normalize"/*_normalized.rds
 echo "Integration completed✅"

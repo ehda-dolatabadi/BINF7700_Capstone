@@ -1,0 +1,126 @@
+#!/usr/bin/env Rscript
+
+suppressPackageStartupMessages({
+  library(Seurat)
+  library(ggplot2)
+  library(dplyr)
+  library(future)
+})
+
+set.seed(777)
+
+# Set up parallelization
+options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
+plan("multicore", workers = 16)
+
+# Close any open graphics devices
+while (!is.null(dev.list())) dev.off()
+
+# Args
+args <- commandArgs(trailingOnly = TRUE)
+id               <- args[1]
+outdir           <- args[2]
+input            <- args[3]
+cell_types_str   <- args[4]
+cell_markers_str <- args[5]
+cell_thresholds_str <- args[6]
+
+# Parse arguments
+cell_types <- unlist(strsplit(cell_types_str, ";"))
+cell_markers_list <- strsplit(unlist(strsplit(cell_markers_str, ";")), ",")
+cell_thresholds <- as.numeric(unlist(strsplit(cell_thresholds_str, ";")))
+
+# Validate inputs
+if (length(cell_types) != length(cell_markers_list) || length(cell_types) != length(cell_thresholds)) {
+  stop("Number of cell types, marker lists, and thresholds must match")
+}
+
+# Load clustered object
+obj <- readRDS(input)
+
+# Use SCT assay
+DefaultAssay(obj) <- "SCT"
+
+n_cells_before = ncol(obj)
+n_features_before = nrow(obj)
+
+# Initialize summary data
+summary_data <- data.frame(
+  id = id,
+  n_cells_before = n_cells_before,
+  n_features_before = n_features_before
+)
+
+# Process each cell type
+score_features <- c()
+filter_conditions <- c()
+
+for (i in seq_along(cell_types)) {
+  cell_type <- cell_types[i]
+  markers <- cell_markers_list[[i]]
+  threshold <- cell_thresholds[i]
+
+  # Find available markers
+  markers_available <- markers[markers %in% rownames(obj)]
+
+  # Add module score
+  score_name <- paste0(cell_type, "_score")
+  obj <- AddModuleScore(
+    obj,
+    features = list(markers_available),
+    name = score_name
+  )
+
+  # Note: AddModuleScore adds "1" to the name
+  score_col <- paste0(score_name, "1")
+  score_features <- c(score_features, score_col)
+
+  # Count cells above threshold
+  n_cells_above <- sum(obj[[score_col]] >= threshold)
+
+  # Create visualizations
+  png(file.path(outdir, paste0(id, "_00_", tolower(cell_type), "_score_distribution.png")),
+      width = 1600, height = 1200)
+  hist(obj[[score_col]][,1], breaks = 50,
+       main = paste(cell_type, "Score Distribution"),
+       xlab = paste(cell_type, "Score"))
+  abline(v = threshold, col = "red", lwd = 2, lty = 2)
+  dev.off()
+
+  # Add to filter condition
+  filter_conditions <- c(filter_conditions, paste0(score_col, " < ", threshold))
+
+  # Add to summary
+  summary_data[[paste0("n_", tolower(cell_type), "_markers_total")]] <- length(markers)
+  summary_data[[paste0("n_", tolower(cell_type), "_markers_available")]] <- length(markers_available)
+  summary_data[[paste0(tolower(cell_type), "_threshold")]] <- threshold
+  summary_data[[paste0("n_cells_", tolower(cell_type))]] <- n_cells_above
+  summary_data[[paste0("pct_cells_", tolower(cell_type))]] <- n_cells_above / n_cells_before * 100
+}
+
+# Plot VlnPlot for all scores
+png(file.path(outdir, paste0(id, "_00_violin_score.png")), width = 1600, height = 1200)
+print(VlnPlot(obj, features = score_features, pt.size = 0, group.by = "orig.ident") +
+  labs(x = NULL))
+dev.off()
+
+# Apply filtering
+filter_expr <- paste(filter_conditions, collapse = " & ")
+obj <- subset(obj, subset = eval(parse(text = filter_expr)))
+
+# Save object
+saveRDS(obj, file = file.path(outdir, paste0(id, "_00_subset.rds")))
+
+# Complete summary
+summary_data$n_cells_after <- ncol(obj)
+summary_data$n_features_after <- nrow(obj)
+summary_data$pct_cells_kept <- ncol(obj) / n_cells_before * 100
+
+# Save summary
+write.table(
+  summary_data,
+  file = file.path(outdir, paste0(id, "_00_subsetting_summary.tsv")),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
+)
