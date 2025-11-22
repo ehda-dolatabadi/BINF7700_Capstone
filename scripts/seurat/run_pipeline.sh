@@ -2,28 +2,23 @@
 
 set -euo pipefail
 
-# ==================== PATHS ======================
-DATA="/courses/BINF7700.202610/students/dolatabadi.e"
-LOG="/scratch/dolatabadi.e/logs"
-WORK="$HOME/axolotl-regeneration-scrna"
-RUN="$WORK/scripts/seurat/Rscripts"
-SLURM="$WORK/scripts/seurat/slurm"
-TSV="$DATA/ref_genomes/ref_files/loc_map.tsv"
-OUT="$DATA/outputs/seurat"
-main_ID=""
+# ================ MAIN PROJECT ID ================
+export main_ID=""
 
 # =========== CELL TYPES TO INVESTIGATE ===========
-#CELL_NAME="Schwann"
-#CELL_MARKERS="SOX10,S100,S100B,NGFR,p75NTR,MPZ,MBP,PMP22,PLP1,PRX,NCAM,NCAM1,L1CAM,SCN7A,SOX2,GAP43,EGR2,Krox20,POU3F1,OCT6"
+#export CELL_NAME="Schwann"
+#export CELL_MARKERS="SOX10,S100,S100B,NGFR,p75NTR,MPZ,MBP,PMP22,PLP1,PRX,NCAM,NCAM1,L1CAM,SCN7A,SOX2,GAP43,EGR2,Krox20,POU3F1,OCT6"
 
-CELL_NAME="Neural"
-CELL_MARKERS="SOX2, NES, TUBB3, MAP2, S100B, GFAP, VIM, NCAM1, CD24, FABP7"
+export CELL_NAME="Neural"
+export CELL_MARKERS="SOX2, NES, TUBB3, MAP2, S100B, GFAP, VIM, NCAM1, CD24, FABP7"
 
-# ==================== EXPORTS ====================
-export DATA LOG WORK RUN SLURM TSV OUT main_ID
-export CELL_NAME CELL_MARKERS
+# ==================== PATHS ======================
+source "../../config/default_paths.sh"
+if [ -f "../../config/local_paths.sh" ]; then
+    source "../../config/local_paths.sh"
+fi
 
-mkdir -p "$OUT" "$LOG"
+SLURM="$WORK/scripts/seurat/slurm"
 
 # Common sbatch options
 SBATCH_OPTS="--parsable --output=$LOG/%x_%j.out --error=$LOG/%x_%j.err"

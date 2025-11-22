@@ -1,2 +1,5 @@
 # Scripts
-scripts/seurat/old
+config/local_paths.sh
+data/
+outputs/
+logs/

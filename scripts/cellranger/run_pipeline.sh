@@ -3,16 +3,12 @@
 set -euo pipefail
 
 # ==================== PATHS ======================
-SCRATCH="/scratch/dolatabadi.e"
-DATA="/courses/BINF7700.202610/students/dolatabadi.e"
-LOG="$SCRATCH/logs"
-WORK="$HOME/axolotl-regeneration-scrna"
+source "../../config/default_paths.sh"
+if [ -f "../../config/local_paths.sh" ]; then
+    source "../../config/local_paths.sh"
+fi
+
 SLURM="$WORK/scripts/cellranger/slurm"
-
-# ==================== EXPORTS ====================
-export SCRATCH DATA LOG WORK SLURM
-
-mkdir -p "$LOG"
 
 # Common sbatch options
 SBATCH_OPTS="--parsable --output=$LOG/%x_%j.out --error=$LOG/%x_%j.err"
@@ -34,20 +30,12 @@ JOB2=$(sbatch $SBATCH_OPTS \
   $SLURM/02_cellranger.sbatch)
 echo "  Job ID: $JOB2"
 
-# Step 3a: Aggregate samples without normalization (optional)
+# Step 3: Aggregate samples (optional)
 echo "Submitting aggregation without normalization..."
 JOB3=$(sbatch $SBATCH_OPTS \
   --export=ALL \
   --dependency=afterok:$JOB2 \
   $SLURM/03_aggr.sbatch)
 echo "  Job ID: $JOB3"
-
-# Step 3b: Aggregate samples with normalization (optional)
-echo "Submitting aggregation with normalization..."
-JOB4=$(sbatch $SBATCH_OPTS \
-  --export=ALL \
-  --dependency=afterok:$JOB2 \
-  $SLURM/03_aggr_normalize.sbatch)
-echo "  Job ID: $JOB4"
 
 echo "Cell Ranger pipeline submitted successfully!"
