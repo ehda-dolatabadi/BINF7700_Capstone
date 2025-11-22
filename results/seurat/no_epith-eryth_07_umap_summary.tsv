@@ -1,2 +1,2 @@
 id	n_cells	n_features	n_clusters	dims	metric	seed
-cluster14	1263	3000	7	10	cosine	777
+no_epith-eryth	42619	3000	14	10	cosine	777

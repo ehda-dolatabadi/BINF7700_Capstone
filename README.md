@@ -134,31 +134,33 @@ bash scripts/cellchat/run_cellchat.sh
 │   │   └── README.md         # Cell Ranger documentation
 │   │
 │   ├── seurat/               # Seurat scRNA-seq analysis pipeline
-│   │   ├── 00_map_features.R      # Gene ID mapping
-│   │   ├── 01_qc.R                # Quality control
-│   │   ├── 02_filter.R            # Cell filtering
-│   │   ├── 03_normalize.R         # SCTransform normalization
-│   │   ├── 04_integrate.R         # Batch correction
-│   │   ├── 05_pca.R               # PCA
-│   │   ├── 06_cluster.R           # Clustering
-│   │   ├── 07_umap.R              # UMAP
-│   │   ├── 08_find_markers.R      # Marker identification
-│   │   ├── 09_score_markers.R     # Cell type scoring
-│   │   ├── 10_subset_clusters.R   # Cluster subsetting
-│   │   ├── 11_subset_cells.R      # Cell type filtering
-│   │   ├── run_pipeline.sh        # Pipeline orchestration
+│   │   ├── Rscripts/         # R analysis scripts
+│   │   │   ├── 00_map_features.R      # Gene ID mapping
+│   │   │   ├── 01_qc.R                # Quality control
+│   │   │   ├── 02_filter.R            # Cell filtering
+│   │   │   ├── 03_normalize.R         # SCTransform normalization
+│   │   │   ├── 04_integrate.R         # Batch correction
+│   │   │   ├── 04_reintegrate_subset.R # Re-integration of subsets
+│   │   │   ├── 05_pca.R               # PCA
+│   │   │   ├── 06_cluster.R           # Clustering
+│   │   │   ├── 07_umap.R              # UMAP
+│   │   │   ├── 08_find_markers.R      # Marker identification
+│   │   │   ├── 09_score_markers.R     # Cell type scoring
+│   │   │   ├── 10_subset_clusters.R   # Cluster subsetting
+│   │   │   └── 11_subset_cells.R      # Cell type filtering
 │   │   ├── slurm/                 # SLURM batch scripts
+│   │   ├── run_pipeline.sh        # Pipeline orchestration
 │   │   └── README.md              # Seurat documentation
 │   │
-│   ├── monocle3/                  # Trajectory inference (Coming soon)
-│   │   └── README.md              # Monocle3 documentation
+│   ├── monocle3/             # Trajectory inference (Coming soon)
+│   │   └── README.md         # Monocle3 documentation
 │   │
-│   └── cellchat/             	   # Cell-cell communication (Coming soon)
-│       └── README.md              # CellChat documentation
+│   └── cellchat/             # Cell-cell communication (Coming soon)
+│       └── README.md         # CellChat documentation
 │
 ├── data/                     # Input data (not tracked)
 │   ├── Li_dataset/           # Raw sequencing data
-│   └── ref_genomes/	      # Reference genomes and annotations
+│   └── ref_genomes/          # Reference genomes and annotations
 │
 ├── results/                  # Analysis outputs (not tracked)
 │   ├── cellranger/           # Alignment results
