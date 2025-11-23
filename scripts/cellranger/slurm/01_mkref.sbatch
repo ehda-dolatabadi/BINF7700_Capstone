@@ -15,7 +15,7 @@ cd "$SLURM_SUBMIT_DIR"
 source "config/default_paths.sh"
 [ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
 
-exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}.log"
+exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log"
 exec 2>&1
 
 # Derive indices
@@ -25,9 +25,7 @@ REF="${REF_names[$SLURM_ARRAY_TASK_ID]}"
 
 OUT_ref="$DATA/ref_genomes/cellranger_mkref"
 mkdir -p "$OUT_ref"
-
-rm -rf ./"$REF"/
-rm -rf ./"mkref_${REF}"/
+cd "$OUT_ref"
 
 # Run pipeline
 cellranger mkref \

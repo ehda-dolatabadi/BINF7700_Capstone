@@ -20,16 +20,13 @@ SIGNIFICANCE="${SIGNIFICANCE:-0.05}"
 REGULATION="${REGULATION:-1}"
 ENRICHMENT="${ENRICHMENT:-0.2}"
 TOP_MARKERS="${TOP_MARKERS:-30}"
-CELL_NAME="${CELL_NAME:-Neural}"
-GROUP_BY="${GROUP_BY:-seurat_clusters}"
-MARKERS="${MARKERS:-SOX2,NES,TUBB3,MAP2,S100B,GFAP,VIM,NCAM1,CD24,FABP7}"
 
 # Paths
 cd "$SLURM_SUBMIT_DIR"
 source "config/default_paths.sh"
 [ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
 
-exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}.log"
+exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_JOB_ID}.log"
 exec 2>&1
 
 RUN="$WORK/scripts/seurat/Rscripts"
@@ -40,51 +37,41 @@ conda activate seurat
 
 # Workflow
 echo "Running PCA..."
-Rscript "$RUN/05_pca.R" \
+Rscript "$RUN/06_pca.R" \
   "$ID" \
   "$OUT/seurat" \
-  "$OUT/seurat/${ID}_04_integrated.rds" \
+  "$OUT/seurat/${ID}_05_integrated.rds" \
   "$NPCS"
 echo "PCA completed✅"
 
 echo "Clustering..."
-Rscript "$RUN/06_cluster.R" \
+Rscript "$RUN/07_cluster.R" \
   "$ID" \
   "$OUT/seurat" \
-  "$OUT/seurat/${ID}_05_pca.rds" \
+  "$OUT/seurat/${ID}_06_pca.rds" \
   "$DIMS" \
   "$RES"
 echo "Clustering completed✅"
 
 echo "Running UMAP..."
-Rscript "$RUN/07_umap.R" \
+Rscript "$RUN/08_umap.R" \
   "$ID" \
   "$OUT/seurat" \
-  "$OUT/seurat/${ID}_06_clustered.rds" \
+  "$OUT/seurat/${ID}_07_clustered.rds" \
   "$UMAP_DIMS" \
   "$UMAP_METRIC"
 echo "UMAP completed✅"
 
 echo "Finding Markers..."
-Rscript "$RUN/08_find_markers.R" \
+Rscript "$RUN/09_find_markers.R" \
   "$ID" \
   "$OUT/seurat" \
-  "$OUT/seurat/${ID}_06_clustered.rds" \
+  "$OUT/seurat/${ID}_07_clustered.rds" \
   "$SIGNIFICANCE" \
   "$REGULATION" \
   "$ENRICHMENT" \
   "$TOP_MARKERS"
 echo "Markers finding completed✅"
-
-echo "Scoring $CELL_NAME markers..."
-Rscript "$RUN/09_score_markers.R" \
-  "$ID" \
-  "$OUT/seurat" \
-  "$OUT/seurat/${ID}_06_clustered.rds" \
-  "$CELL_NAME" \
-  "$GROUP_BY" \
-  "$MARKERS"
-echo "Scoring completed✅"
 
 # Sync
 rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

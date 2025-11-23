@@ -1,0 +1,56 @@
+#!/bin/bash
+#SBATCH --job-name=MarkerScore
+#SBATCH --partition=courses
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=8G
+#SBATCH --array=0-4
+#SBATCH --output=/dev/null
+#SBATCH --error=/dev/null
+
+set -euo pipefail
+
+# Parameters
+ID="${ID:-main}"
+GROUP_BY="${GROUP_BY:-seurat_clusters}"
+
+# Paths
+cd "$SLURM_SUBMIT_DIR"
+source "config/default_paths.sh"
+[ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
+
+exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log"
+exec 2>&1
+
+# Source marker file
+source ${MARKER_FILE}
+cells=($(grep -E '^[a-zA-Z_]+=' ${MARKER_FILE} | cut -d'=' -f1))
+
+# Safety check: exit if array task exceeds number of cells
+if [ ${SLURM_ARRAY_TASK_ID} -ge ${#cells[@]} ]; then
+  echo "End of cell names. Exiting..."
+  exit 0
+fi
+
+CELL_NAME="${cells[$((SLURM_ARRAY_TASK_ID))]}"
+MARKERS="${!CELL_NAME}"
+
+RUN="$WORK/scripts/seurat/Rscripts"
+
+# Environment
+eval "$(conda shell.bash hook)"
+conda activate seurat
+
+# Workflow
+echo "Scoring $CELL_NAME markers..."
+Rscript "$RUN/10_score_markers.R" \
+  "$ID" \
+  "$OUT/seurat" \
+  "$OUT/seurat/${ID}_07_clustered.rds" \
+  "$CELL_NAME" \
+  "$GROUP_BY" \
+  "$MARKERS"
+echo "Scoring completed✅"
+
+# Sync
+rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

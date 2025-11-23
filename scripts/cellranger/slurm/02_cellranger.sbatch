@@ -15,7 +15,7 @@ cd "$SLURM_SUBMIT_DIR"
 source "config/default_paths.sh"
 [ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
 
-exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}.log"
+exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log"
 exec 2>&1
 
 OUT_ref="$DATA/ref_genomes/cellranger_mkref"
@@ -30,8 +30,8 @@ SMP=${SMPS[$fq_idx]}
 
 REF="$OUT_ref/$REF_name"
 OUT_cellranger="$OUT/cellranger/ref_${REF_name}"
-
 mkdir -p "$OUT_cellranger"
+cd "$OUT_cellranger"
 
 # Run Pipeline
 cellranger count \
@@ -44,3 +44,5 @@ cellranger count \
   --nosecondary \
   --localcores="$SLURM_CPUS_PER_TASK" \
   --localmem=$(( SLURM_MEM_PER_NODE / 1024 - 20))
+
+rsync -av --info=progress2 --stats "$OUT_cellranger/$SMP/outs/web_summary.html" "$WORK/results/cellranger/ref_${REF_name}/$SMP/"

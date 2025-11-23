@@ -11,12 +11,10 @@
 set -euo pipefail
 
 # Paths
-SRC="$SCRATCH"
-FQ_src="$SRC/Li_dataset"
-OUT="$DATA/outputs/fastqc"
+OUT_qc="$OUT/fastqc"
 
-mkdir -p $OUT
-cd $OUT
+mkdir -p "$OUT_qc"
+cd "$OUT_qc"
 
 # Environment
 eval "$(conda shell.bash hook)"
@@ -24,12 +22,12 @@ conda activate preprocess
 
 # Run FastQC
 fastqc $FQ_src/*/*.fastq.gz \
-  --outdir=$OUT \
+  --outdir="$OUT_qc" \
   --threads=16
 
 # Run MultiQC
-multiqc $OUT\
-  --outdir $OUT
+multiqc "$OUT_qc"\
+  --outdir "$OUT_qc"
 
 # Sync
-rsync -av --update --info=progress2 --stats --exclude 'cellranger/' --exclude '*.rds' "$DATA/outputs/" "$WORK/results/"
+rsync -av --info=progress2 --stats --exclude 'multiqc_data/' --exclude '*.zip' "$OUT_qc/" "$WORK/results/qc/"

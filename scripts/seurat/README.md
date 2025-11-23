@@ -21,6 +21,7 @@ A comprehensive pipeline for processing and analyzing single-cell RNA-seq data f
 This pipeline processes 10X Genomics single-cell RNA-seq data through a complete analysis workflow including:
 
 - Quality control and filtering
+- Doublet detection and removal
 - Normalization using SCTransform
 - Batch correction and integration
 - Dimensionality reduction (PCA and UMAP)
@@ -43,22 +44,23 @@ scripts/seurat/
 ├── R Scripts (Analysis Steps)
 ├── 00_map_features.R               # Map gene IDs to symbols
 ├── 01_qc.R                         # Quality control metrics and plots
-├── 02_filter.R                     # Cell filtering
-├── 03_normalize.R                  # SCTransform normalization
-├── 04_integrate.R                  # Batch correction and integration
-├── 04_reintegrate_subset.R         # Re-integrate subset data
-├── 05_pca.R                        # Principal component analysis
-├── 06_cluster.R                    # Graph-based clustering
-├── 07_umap.R                       # UMAP dimensionality reduction
-├── 08_find_markers.R               # Differential expression analysis
-├── 09_score_markers.R              # Cell type scoring (Schwann cells)
-├── 10_subset_clusters.R            # Subset by cluster identity
-├── 11_subset_cells.R               # Subset by cell type scores
+├── 02_remove_doublets.R            # Doublet detection and removal
+├── 03_filter.R                     # Cell filtering
+├── 04_normalize.R                  # SCTransform normalization
+├── 05_integrate.R                  # Batch correction and integration
+├── 05_reintegrate_subset.R         # Re-integrate subset data
+├── 06_pca.R                        # Principal component analysis
+├── 07_cluster.R                    # Graph-based clustering
+├── 08_umap.R                       # UMAP dimensionality reduction
+├── 09_find_markers.R               # Differential expression analysis
+├── 10_score_markers.R              # Cell type scoring
+├── 11_subset_clusters.R            # Subset by cluster identity
+├── 12_subset_cells.R               # Subset by cell type scores
 │
 └── slurm/                          # SLURM batch scripts
-    ├── 01_preprocess.sbatch        # Steps 00-03 (mapping, QC, filtering, normalization)
-    ├── 02_integrate.sbatch         # Step 04 (integration)
-    ├── 03_cluster.sbatch           # Steps 05-09 (PCA, clustering, UMAP, markers)
+    ├── 01_preprocess.sbatch        # Steps 00-04 (mapping, QC, doublet removal, filtering, normalization)
+    ├── 02_integrate.sbatch         # Step 05 (integration)
+    ├── 03_cluster.sbatch           # Steps 06-10 (PCA, clustering, UMAP, markers, scoring)
     ├── 04_subcluster.sbatch        # Subset by cluster and re-integrate
     └── 05_subcells.sbatch          # Subset by cell type and re-integrate
 ```
@@ -78,6 +80,8 @@ scripts/seurat/
 - ggplot2
 - dplyr
 - future (for parallelization)
+- SingleCellExperiment
+- scDblFinder (for doublet detection)
 
 ### Input Data
 
@@ -121,19 +125,20 @@ $DATA/outputs/
 graph TD
     A[10X Data] --> B[00: Map Features]
     B --> C[01: QC]
-    C --> D[02: Filter]
-    D --> E[03: Normalize - SCTransform]
-    E --> F[04: Integrate - Batch Correction]
-    F --> G[05: PCA]
-    G --> H[06: Cluster - Leiden]
-    H --> I[07: UMAP]
-    H --> J[08: Find Markers]
-    H --> K[09: Score Cell Types]
-    H --> L[10: Subset Clusters]
-    F --> M[11: Subset Cell Types]
-    L --> N[04: Re-integrate Subset]
-    M --> N
-    N --> G
+    C --> D[02: Remove Doublets]
+    D --> E[03: Filter]
+    E --> F[04: Normalize - SCTransform]
+    F --> G[05: Integrate - Batch Correction]
+    G --> H[06: PCA]
+    H --> I[07: Cluster - Leiden]
+    I --> J[08: UMAP]
+    I --> K[09: Find Markers]
+    I --> L[10: Score Cell Types]
+    I --> M[11: Subset Clusters]
+    G --> N[12: Subset Cell Types]
+    M --> O[05: Re-integrate Subset]
+    N --> O
+    O --> H
 ```
 
 ---
@@ -165,7 +170,7 @@ Each R script or SLURM batch script can be run independently:
 Rscript scripts/seurat/Rscripts/01_qc.R <sample_id> <output_dir> <input_rds>
 
 # Example: Run integration
-Rscript scripts/seurat/Rscripts/04_integrate.R <analysis_id> <output_dir> sample1.rds sample2.rds ...
+Rscript scripts/seurat/Rscripts/05_integrate.R <analysis_id> <output_dir> sample1.rds sample2.rds ...
 
 # Example: Submit preprocessing SLURM job
 sbatch --export=ALL,ID=main scripts/seurat/slurm/01_preprocess.sbatch
@@ -209,7 +214,21 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 ---
 
-#### 02_filter.R
+#### 02_remove_doublets.R
+**Purpose**: Detect and remove doublets (multiplets) using scDblFinder.
+
+**Method**: Uses the scDblFinder algorithm to identify and remove doublet cells that result from capturing two or more cells in a single droplet.
+
+**Usage**: `Rscript 02_remove_doublets.R <id> <outdir> <input_rds>`
+
+**Output**:
+- `<id>_DB_removed.rds`: Seurat object with doublets removed
+- `<id>_DB_removed_summary.tsv`: Summary statistics
+- QC plots showing metrics after doublet removal
+
+---
+
+#### 03_filter.R
 **Purpose**: Filter cells based on QC thresholds.
 
 **Default Thresholds**:
@@ -220,26 +239,26 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 - `max_mt = 10`: Maximum mitochondrial %
 - `max_ribo = 30`: Maximum ribosomal %
 
-**Usage**: `Rscript 02_filter.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 03_filter.R <id> <outdir> <input_rds>`
 
 **Output**: `<id>_filtered.rds`, `<id>_filtering_summary.tsv`, QC plots
 
 ---
 
-#### 03_normalize.R
+#### 04_normalize.R
 **Purpose**: Normalize data using SCTransform method.
 
 **Parameters**:
 - `ncells = 5000`: Number of cells for model training
 - `variable.features.n = 3000`: Number of variable features
 
-**Usage**: `Rscript 03_normalize.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 04_normalize.R <id> <outdir> <input_rds>`
 
 **Output**: `<id>_normalized.rds`, `<id>_normalization_summary.tsv`
 
 ---
 
-#### 04_integrate.R
+#### 05_integrate.R
 **Purpose**: Integrate multiple samples with batch correction.
 
 **Method**: SCTransform-based integration using CCA anchors
@@ -247,25 +266,25 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 **Parameters**:
 - `nfeatures = 3000`: Number of integration features
 
-**Usage**: `Rscript 04_integrate.R <id> <outdir> <sample1.rds> <sample2.rds> ...`
+**Usage**: `Rscript 05_integrate.R <id> <outdir> <sample1.rds> <sample2.rds> ...`
 
-**Output**: `<id>_04_integrated.rds`, `<id>_04_integration_summary.tsv`
+**Output**: `<id>_05_integrated.rds`, `<id>_05_integration_summary.tsv`
 
 ---
 
-#### 05_pca.R
+#### 06_pca.R
 **Purpose**: Perform principal component analysis.
 
 **Parameters**:
 - `npcs = 50`: Number of PCs to compute
 
-**Usage**: `Rscript 05_pca.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 06_pca.R <id> <outdir> <input_rds>`
 
-**Output**: `<id>_05_pca.rds`, `<id>_05_pca_elbow.png`, `<id>_05_pca_summary.tsv`
+**Output**: `<id>_06_pca.rds`, `<id>_06_pca_elbow.png`, `<id>_06_pca_summary.tsv`
 
 ---
 
-#### 06_cluster.R
+#### 07_cluster.R
 **Purpose**: Graph-based clustering using Leiden algorithm.
 
 **Parameters**:
@@ -273,13 +292,13 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 - `res = 0.5`: Clustering resolution
 - `algorithm = 4`: Leiden clustering
 
-**Usage**: `Rscript 06_cluster.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 07_cluster.R <id> <outdir> <input_rds>`
 
-**Output**: `<id>_06_clustered.rds`, `<id>_06_clustering_summary.tsv`
+**Output**: `<id>_07_clustered.rds`, `<id>_07_clustering_summary.tsv`
 
 ---
 
-#### 07_umap.R
+#### 08_umap.R
 **Purpose**: UMAP dimensionality reduction for visualization.
 
 **Parameters**:
@@ -287,13 +306,13 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 - `metric = "cosine"`: Distance metric
 - `seed = 777`: Random seed for reproducibility
 
-**Usage**: `Rscript 07_umap.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 08_umap.R <id> <outdir> <input_rds>`
 
-**Output**: `<id>_07_umap.rds`, `<id>_07_umap.png`, `<id>_07_umap_summary.tsv`
+**Output**: `<id>_08_umap.rds`, `<id>_08_umap.png`, `<id>_08_umap_summary.tsv`
 
 ---
 
-#### 08_find_markers.R
+#### 09_find_markers.R
 **Purpose**: Identify cluster-specific marker genes.
 
 **Parameters**:
@@ -304,50 +323,50 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 - `enrichment = 0.2`: Difference in detection rate (pct.1 - pct.2)
 - `top = 30`: Top markers per cluster per direction
 
-**Usage**: `Rscript 08_find_markers.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 09_find_markers.R <id> <outdir> <input_rds>`
 
 **Output**:
-- `<id>_08_markers.tsv`: All markers
-- `<id>_08_markers_filtered.tsv`: Filtered top markers
+- `<id>_09_markers.tsv`: All markers
+- `<id>_09_markers_filtered.tsv`: Filtered top markers
 
 ---
 
-#### 09_score_markers.R
+#### 10_score_markers.R
 **Purpose**: Score cells based on cell type markers.
 
 **Parameters**:
 - Cell type name and markers are passed as arguments
 - `group_by`: Metadata column for grouping in plots (default: "seurat_clusters")
 
-**Usage**: `Rscript 09_score_markers.R <id> <outdir> <input_rds> <cell_name> <group_by> <markers>`
+**Usage**: `Rscript 10_score_markers.R <id> <outdir> <input_rds> <cell_name> <group_by> <markers>`
 
 **Output**:
-- `<id>_09_scored.rds`: Object with added score
-- `<id>_09_feature_score.png`: Feature plot
-- `<id>_09_violin_score.png`: Violin plot by group
-- `<id>_09_individual_markers_violin.png`: Individual marker expression
-- `<id>_09_score_distribution.png`: Score distribution histogram
-- `<id>_09_score_summary.tsv`
+- `<id>_10_scored.rds`: Object with added score
+- `<id>_10_feature_score.png`: Feature plot
+- `<id>_10_violin_score.png`: Violin plot by group
+- `<id>_10_individual_markers_violin.png`: Individual marker expression
+- `<id>_10_score_distribution.png`: Score distribution histogram
+- `<id>_10_score_summary.tsv`
 
 ---
 
-#### 10_subset_clusters.R
+#### 11_subset_clusters.R
 **Purpose**: Subset data to specific clusters.
 
-**Usage**: `Rscript 10_subset_clusters.R <id> <outdir> <input_rds> <cluster_ids>`
+**Usage**: `Rscript 11_subset_clusters.R <id> <outdir> <input_rds> <cluster_ids>`
 
 **Output**: `<id>_00_subset.rds`, `<id>_00_subsetting_summary.tsv`
 
 ---
 
-#### 11_subset_cells.R
+#### 12_subset_cells.R
 **Purpose**: Filter out unwanted cell types based on module scores.
 
 **Parameters**:
 - Cell types, markers, and thresholds are passed as arguments
 - Cells with scores below thresholds are kept
 
-**Usage**: `Rscript 11_subset_cells.R <id> <outdir> <input_rds> <cell_types> <cell_markers> <cell_thresholds>`
+**Usage**: `Rscript 12_subset_cells.R <id> <outdir> <input_rds> <cell_types> <cell_markers> <cell_thresholds>`
 
 **Arguments Format**:
 - `cell_types`: Semicolon-separated (e.g., "Epithelial;Erythrocyte")
@@ -362,12 +381,12 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 ---
 
-#### 04_reintegrate_subset.R
+#### 05_reintegrate_subset.R
 **Purpose**: Re-normalize and re-integrate subset data.
 
-**Usage**: `Rscript 04_reintegrate_subset.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 05_reintegrate_subset.R <id> <outdir> <input_rds>`
 
-**Output**: `<id>_04_integrated.rds`, `<id>_04_integration_summary.tsv`
+**Output**: `<id>_05_integrated.rds`, `<id>_05_integration_summary.tsv`
 
 ---
 
@@ -388,19 +407,23 @@ results/seurat/
 ├── <id>_01_qc/
 │   └── <sample>/
 │       └── QC plots and PDFs
-├── <id>_02_filtered/
+├── <id>_02_DB_removed/
+│   └── <sample>/
+│       ├── <sample>_DB_removed.rds
+│       └── QC plots
+├── <id>_03_filtered/
 │   └── <sample>/
 │       ├── <sample>_filtered.rds
 │       └── QC plots
-├── <id>_03_normalized/
+├── <id>_04_normalized/
 │   └── <sample>_normalized.rds
-├── <id>_04_integrated.rds
-├── <id>_05_pca.rds
-├── <id>_06_clustered.rds
-├── <id>_07_umap.rds
-├── <id>_08_markers.tsv
-├── <id>_08_markers_filtered.tsv
-└── <id>_09_scored.rds
+├── <id>_05_integrated.rds
+├── <id>_06_pca.rds
+├── <id>_07_clustered.rds
+├── <id>_08_umap.rds
+├── <id>_09_markers.tsv
+├── <id>_09_markers_filtered.tsv
+└── <id>_10_scored.rds
 ```
 
 ### Key Output Files
@@ -408,6 +431,7 @@ results/seurat/
 | File | Description |
 |------|-------------|
 | `*_mapped.rds` | Seurat object with mapped gene symbols |
+| `*_DB_removed.rds` | Seurat object with doublets removed |
 | `*_filtered.rds` | Quality-filtered Seurat object |
 | `*_normalized.rds` | SCTransform-normalized object |
 | `*_integrated.rds` | Batch-corrected integrated object |
@@ -421,6 +445,8 @@ results/seurat/
 ## Citation
 
 - **Seurat**: Hao, Y., Stuart, T., Kowalski, M.H., Choudhary, S., Hoffman, P., Hartman, A., Srivastava, A., Molla, G., Madad, S., Fernandez-Granda, C., & Satija, R. (2024). Dictionary learning for integrative, multimodal and scalable single-cell analysis. *Nature Biotechnology, 42*, 293-304. https://doi.org/10.1038/s41587-023-01767-y
+
+- **scDblFinder**: Germain, P.L., Lun, A., Garcia Meixide, C., Macnair, W., & Robinson, M.D. (2022). Doublet identification in single-cell sequencing data using scDblFinder. *F1000Research, 10*, 979. https://doi.org/10.12688/f1000research.73600.2
 
 - **SCTransform**: Hafemeister, C., & Satija, R. (2019). Normalization and variance stabilization of single-cell RNA-seq data using regularized negative binomial regression. *Genome Biology, 20*, 296. https://doi.org/10.1186/s13059-019-1874-1
 

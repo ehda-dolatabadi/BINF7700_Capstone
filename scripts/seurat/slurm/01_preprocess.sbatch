@@ -25,7 +25,7 @@ cd "$SLURM_SUBMIT_DIR"
 source "config/default_paths.sh"
 [ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
 
-exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}.log"
+exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log"
 exec 2>&1
 
 RUN="$WORK/scripts/seurat/Rscripts"
@@ -37,10 +37,11 @@ SMP="${SMPS[$SLURM_ARRAY_TASK_ID]}"
 DIR="$OUT/cellranger/$SMP/outs/filtered_feature_bc_matrix"
 OUT_map="$OUT/seurat/${ID}_00_mapped"
 OUT_qc="$OUT/seurat/${ID}_01_qc/$SMP"
-OUT_filter="$OUT/seurat/${ID}_02_filtered/$SMP"
-OUT_normalize="$OUT/seurat/${ID}_03_normalized"
+OUT_db="$OUT/seurat/${ID}_02_DB_removed/$SMP"
+OUT_filter="$OUT/seurat/${ID}_03_filtered/$SMP"
+OUT_normalize="$OUT/seurat/${ID}_04_normalized"
 
-mkdir -p "$OUT_map" "$OUT_qc" "$OUT_filter" "$OUT_normalize"
+mkdir -p "$OUT_map" "$OUT_qc" "$OUT_db" "$OUT_filter" "$OUT_normalize"
 
 # Environment
 eval "$(conda shell.bash hook)"
@@ -64,11 +65,18 @@ Rscript "$RUN/01_qc.R" \
   "$OUT_map/${SMP}_mapped.rds"
 echo "QC of $SMP completed✅"
 
+echo "Removing doublets from $SMP..."
+Rscript "$RUN/02_remove_doublets.R" \
+  "$SMP" \
+  "$OUT_db" \
+  "$OUT_map/${SMP}_mapped.rds"
+echo "Doublet removal of $SMP completed✅"
+
 echo "Filtering of $SMP..."
-Rscript "$RUN/02_filter.R" \
+Rscript "$RUN/03_filter.R" \
   "$SMP" \
   "$OUT_filter" \
-  "$OUT_map/${SMP}_mapped.rds" \
+  "$OUT_db/${SMP}_DB_removed.rds" \
   "$MIN_COUNTS" \
   "$MAX_COUNTS" \
   "$MIN_FEATURES" \
@@ -78,7 +86,7 @@ Rscript "$RUN/02_filter.R" \
 echo "Filtering of $SMP completed✅"
 
 echo "Normalizing of $SMP..."
-Rscript "$RUN/03_normalize.R" \
+Rscript "$RUN/04_normalize.R" \
   "$SMP" \
   "$OUT_normalize" \
   "$OUT_filter/${SMP}_filtered.rds"

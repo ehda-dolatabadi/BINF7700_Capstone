@@ -1,0 +1,52 @@
+# Neural cell marker categories for module scoring
+
+# Pan-neuronal markers - all mature neurons across subtypes
+pan_neuronal="SNAP25,RBFOX3,MAP2,SYP,ELAVL3,ELAVL4,ENO2"
+
+# Early and developing neuronal markers
+early_neuronal="TUBB3,DCX,STMN2"
+
+# Excitatory glutamatergic neurons
+excitatory="SLC17A7,SLC17A6"
+
+# Inhibitory GABAergic neurons
+inhibitory="GAD1,GAD2,SLC32A1,PVALB,SST,VIP,DLX1,DLX2"
+
+# Cholinergic neurons
+cholinergic="CHAT,SLC18A3"
+
+# Monoaminergic neurons
+monoaminergic="TH,TPH2,SLC6A4"
+
+# Astrocytes
+astrocytes="ALDH1L1,AQP4,SLC1A2,SLC1A3,GLUL,GJA1,SOX9,APOE,GFAP"
+
+# Oligodendrocytes
+oligodendrocytes="MBP,PLP1,MOG,MAG,CNP,MOBP,SOX10,MYRF,OLIG1,OLIG2,NKX2.2,QKI,ASPA,OPALIN"
+
+# Oligodendrocyte precursor cells
+opcs="PDGFRA,GPR17,PTPRZ1"
+
+# Microglia
+microglia="TMEM119,P2RY12,HEXB,SIGLECH,CX3CR1,C1QA,C1QB,C1QC,GPR34,P2RY13"
+
+# Ependymal cells
+ependymal="FOXJ1,TUBA1A,PIFO,DYNLRB2,TMEM212,CCDC153,TM4SF1,RARRES2"
+
+# Schwann cells
+schwann="MPZ,PMP22,PRX,CDH2,L1CAM,NCAM1,GAP43,PMP2,EGR2"
+
+# Neural stem cells
+neural_stem="SOX2,NESTIN,PAX6,HES1,HES5,NOTCH1,PROM1,MSI1,BMI1,CXCR4"
+
+# Radial glia
+radial_glia="FABP7,ATP1A2,TNC"
+
+# Intermediate progenitors
+intermediate_progenitors="EOMES"
+
+# Neurogenic progenitors
+neurogenic_progenitors="ASCL1,NEUROG1,NEUROG2"
+
+# Neuroepithelial cells
+neuroepithelial="SOX1,TJP1,OCLN"

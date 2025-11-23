@@ -6,11 +6,10 @@ set -euo pipefail
 export main_ID=""
 
 # =========== CELL TYPES TO INVESTIGATE ===========
-#export CELL_NAME="Schwann"
-#export CELL_MARKERS="SOX10,S100,S100B,NGFR,p75NTR,MPZ,MBP,PMP22,PLP1,PRX,NCAM,NCAM1,L1CAM,SCN7A,SOX2,GAP43,EGR2,Krox20,POU3F1,OCT6"
 
-export CELL_NAME="Neural"
-export CELL_MARKERS="SOX2, NES, TUBB3, MAP2, S100B, GFAP, VIM, NCAM1, CD24, FABP7"
+# Source the marker file
+export MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt"
+count=$(grep -cE '^[a-zA-Z_]+=' ${MARKER_FILE})
 
 # ==================== PATHS ======================
 source "config/default_paths.sh"
@@ -61,24 +60,35 @@ UMAP_METRIC="cosine",\
 SIGNIFICANCE=0.05,\
 REGULATION=1,\
 ENRICHMENT=0.2,\
-TOP_MARKERS=30,\
-GROUP_BY="seurat_clusters" \
+TOP_MARKERS=30\
   --dependency=afterok:$JOB2  \
   $SLURM/03_cluster.sbatch)
 echo "  Job ID: $JOB3"
 
+# Optional step: Marker-based scoring
+echo "Submitting marker-based scoring..."
+JOB4=$(sbatch $SBATCH_OPTS  \
+  --array=0-${count}  \
+  --export=ALL,\
+GROUP_BY="seurat_clusters"\
+  --dependency=afterok:$JOB3  \
+  $SLURM/04_score_markers.sbatch)
+echo "  Job ID: $JOB4"
+
+
+
 # Optional step: Subclustering
 echo "Submitting subclustering..."
-JOB4=$(sbatch $SBATCH_OPTS  \
+JOB5=$(sbatch $SBATCH_OPTS  \
   --export=ALL,\
 ID="cluster14",\
 IDENT="14"  \
   --dependency=afterok:$JOB3  \
-  $SLURM/04_subcluster.sbatch)
-echo "  Job ID: $JOB4"
+  $SLURM/05_subcluster.sbatch)
+echo "  Job ID: $JOB5"
 
 echo "Submitting clustering for subcluster..."
-JOB5=$(sbatch $SBATCH_OPTS  \
+JOB6=$(sbatch $SBATCH_OPTS  \
   --export=ALL,\
 ID="cluster14",\
 NPCS=50,\
@@ -92,24 +102,24 @@ ENRICHMENT=0.2,\
 TOP_MARKERS=30,\
 GROUP_BY="seurat_clusters" \
   --job-name=cluster_subcluster  \
-  --dependency=afterok:$JOB4  \
+  --dependency=afterok:$JOB5  \
   $SLURM/03_cluster.sbatch)
-echo "  Job ID: $JOB5"
+echo "  Job ID: $JOB6"
 
 # Optional step: Removing abundant cells
 echo "Submitting subcells removal..."
-JOB6=$(sbatch $SBATCH_OPTS  \
+JOB7=$(sbatch $SBATCH_OPTS  \
   --export=ALL,\
 ID="no_epith-eryth",\
 CELL_TYPES="Epithelial",\
 CELL_MARKERS="KRT8,KRT18,KRT1,EPCAM,CLDN7,CDH1,DSP,DSG2,EPPK1,S100P",\
 CELL_THRESHOLDS="0.5" \
   --dependency=afterok:$JOB2  \
-  $SLURM/05_subcells.sbatch)
-echo "  Job ID: $JOB6"
+  $SLURM/06_subcells.sbatch)
+echo "  Job ID: $JOB7"
 
-echo "Submitting clustering for subcells..."
-JOB7=$(sbatch $SBATCH_OPTS  \
+#echo "Submitting clustering for subcells..."
+JOB8=$(sbatch $SBATCH_OPTS  \
   --export=ALL,\
 ID="no_epith-eryth",\
 NPCS=50,\
@@ -123,8 +133,8 @@ ENRICHMENT=0.2,\
 TOP_MARKERS=30,\
 GROUP_BY="seurat_clusters" \
   --job-name=cluster_subcells  \
-  --dependency=afterok:$JOB6  \
+  --dependency=afterok:$JOB7  \
   $SLURM/03_cluster.sbatch)
-echo "  Job ID: $JOB7"
+echo "  Job ID: $JOB8"
 
 echo "Pipeline submitted successfully!"

@@ -26,7 +26,7 @@ obj[["percent.rrna"]]	<- PercentageFeatureSet(obj, pattern = "^RRN")
 obj[["percent.trna"]]	<- PercentageFeatureSet(obj, pattern = "^TRNA")
 obj[["log10UMIsPerGene"]] <- log10(obj$nCount_RNA / obj$nFeature_RNA)
 
-qc_metrics <- c("nCount_RNA", "nFeature_RNA", "percent.mt","percent.ribo","percent.rrna","percent.trna", "UMIsPerGene")
+qc_metrics <- c("nCount_RNA", "nFeature_RNA", "percent.mt","percent.ribo","percent.rrna","percent.trna")
 df <- as_tibble(obj[[]], rownames="Cell.Barcode")
 
 # Plots
