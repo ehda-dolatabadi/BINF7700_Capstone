@@ -3,8 +3,10 @@
 #SBATCH --partition=courses
 #SBATCH --time=24:00:00
 #SBATCH --cpus-per-task=16
-#SBATCH --mem=60G
+#SBATCH --mem=180G
 #SBATCH --array=0-1
+#SBATCH --output=/dev/null
+#SBATCH --error=/dev/null
 
 set -euo pipefail
 

@@ -9,7 +9,7 @@ source "config/default_paths.sh"
 SLURM="$WORK/scripts/cellranger/slurm"
 
 # Common sbatch options
-SBATCH_OPTS="--parsable --output=$LOG/%x_%j.out --error=$LOG/%x_%j.err"
+SBATCH_OPTS="--parsable"
 
 # ==================== PIPELINE ====================
 

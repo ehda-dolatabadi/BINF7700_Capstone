@@ -7,5 +7,5 @@ call MAKE_REFERENCE(
     ref_version   = null,
     mkref_version = "cellranger-9.0.1",
     num_threads   = 16,
-    mem_gb        = 40,
+    mem_gb        = 160,
 )

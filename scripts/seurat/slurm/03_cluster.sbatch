@@ -4,6 +4,8 @@
 #SBATCH --time=04:00:00
 #SBATCH --cpus-per-task=64
 #SBATCH --mem=128G
+#SBATCH --output=/dev/null
+#SBATCH --error=/dev/null
 
 set -euo pipefail
 
