@@ -1,2 +1,0 @@
-id	n_cells	n_features	n_clusters	dims	metric	seed
-cluster14	1163	3000	8	10	cosine	777
