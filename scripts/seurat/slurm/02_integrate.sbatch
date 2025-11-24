@@ -22,6 +22,9 @@ exec 2>&1
 
 RUN="$WORK/scripts/seurat/Rscripts"
 OUT_normalize="$OUT/seurat/${ID}_04_normalized"
+OUT_integrate="$OUT/seurat/${ID}_05_integrated"
+
+mkdir -p "$OUT_integrate"
 
 # Environment
 eval "$(conda shell.bash hook)"
@@ -29,5 +32,5 @@ conda activate seurat
 
 # Workflow
 echo "Integrating normalized samples..."
-Rscript "$RUN/05_integrate.R" "$ID" "$OUT/seurat" "$OUT_normalize"/*_normalized.rds
+Rscript "$RUN/05_integrate.R" "$ID" "$OUT_integrate" "$OUT_normalize"/*_normalized.rds
 echo "Integration completed✅"

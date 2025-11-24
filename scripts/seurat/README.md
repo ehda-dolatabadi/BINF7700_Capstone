@@ -40,29 +40,31 @@ The pipeline is designed to run on HPC systems using SLURM job scheduling and pr
 scripts/seurat/
 ├── README.md                       # This file
 ├── run_pipeline.sh                 # Main pipeline orchestration script
+├── cell_markers.txt                # Cell type marker gene definitions
 │
-├── R Scripts (Analysis Steps)
-├── 00_map_features.R               # Map gene IDs to symbols
-├── 01_qc.R                         # Quality control metrics and plots
-├── 02_remove_doublets.R            # Doublet detection and removal
-├── 03_filter.R                     # Cell filtering
-├── 04_normalize.R                  # SCTransform normalization
-├── 05_integrate.R                  # Batch correction and integration
-├── 05_reintegrate_subset.R         # Re-integrate subset data
-├── 06_pca.R                        # Principal component analysis
-├── 07_cluster.R                    # Graph-based clustering
-├── 08_umap.R                       # UMAP dimensionality reduction
-├── 09_find_markers.R               # Differential expression analysis
-├── 10_score_markers.R              # Cell type scoring
-├── 11_subset_clusters.R            # Subset by cluster identity
-├── 12_subset_cells.R               # Subset by cell type scores
+├── Rscripts/                       # R analysis scripts
+│   ├── 00_map_features.R           # Map gene IDs to symbols
+│   ├── 01_qc.R                     # Quality control metrics and plots
+│   ├── 02_remove_doublets.R        # Doublet detection and removal
+│   ├── 03_filter.R                 # Cell filtering
+│   ├── 04_normalize.R              # SCTransform normalization
+│   ├── 05_integrate.R              # Batch correction and integration
+│   ├── 05_reintegrate_subset.R     # Re-integrate subset data
+│   ├── 06_pca.R                    # Principal component analysis
+│   ├── 07_cluster.R                # Graph-based clustering
+│   ├── 08_umap.R                   # UMAP dimensionality reduction
+│   ├── 09_find_markers.R           # Differential expression analysis
+│   ├── 10_score_markers.R          # Cell type scoring
+│   ├── 11_subset_clusters.R        # Subset by cluster identity
+│   └── 12_subset_cells.R           # Subset by cell type scores
 │
 └── slurm/                          # SLURM batch scripts
     ├── 01_preprocess.sbatch        # Steps 00-04 (mapping, QC, doublet removal, filtering, normalization)
     ├── 02_integrate.sbatch         # Step 05 (integration)
-    ├── 03_cluster.sbatch           # Steps 06-10 (PCA, clustering, UMAP, markers, scoring)
-    ├── 04_subcluster.sbatch        # Subset by cluster and re-integrate
-    └── 05_subcells.sbatch          # Subset by cell type and re-integrate
+    ├── 03_cluster.sbatch           # Steps 06-09 (PCA, clustering, UMAP, markers)
+    ├── 04_score_markers.sbatch     # Step 10 (cell type scoring)
+    ├── 05_subcluster.sbatch        # Step 11 (subset by cluster and re-integrate)
+    └── 06_subcells.sbatch          # Step 12 (subset by cell type and re-integrate)
 ```
 
 ---
@@ -94,27 +96,42 @@ scripts/seurat/
 
 ### 1. Configure paths
 
-Edit `run_pipeline.sh` to set your directory paths:
+The pipeline uses configuration files in the `config/` directory. Paths are set in `config/default_paths.sh` and can be overridden in `config/local_paths.sh`.
 
+**Default paths** (`config/default_paths.sh`):
 ```bash
-DATA="/path/to/your/data"       # Base data directory
-LOG="/path/to/logs"             # Logs directory
-WORK="/path/to/root"            # Working directory
-TSV="/path/to/loc_map.tsv"      # Gene mapping file
-OUT="/path/to/out"              # Seurat outputs directory
-main_ID=""                      # Main analysis ID (leave empty for default)
+WORK="$(readlink -f .)"         # Working directory (project root)
+DATA="$WORK/data"               # Data directory
+OUT="$WORK/outputs"             # Outputs directory
+LOG="$WORK/logs"                # Logs directory
+REF_FILES="$DATA/ref_files"     # Reference genome files
+```
+
+**Optional overrides** (`config/local_paths.sh`):
+- Create this file to override any paths from default_paths.sh
+- Useful for custom data locations or cluster-specific paths
+
+**Main analysis ID**: Set in `run_pipeline.sh`:
+```bash
+export main_ID=""               # Main analysis ID (leave empty for "main")
 ```
 
 ### 2. Prepare input data
 
 Ensure your data is organized as:
 ```
-$DATA/outputs/
-└── cellranger/
+$OUT/cellranger/
+└── ref_<genome>/
     ├── control/outs/filtered_feature_bc_matrix/
     ├── 3h/outs/filtered_feature_bc_matrix/
     ├── 24h/outs/filtered_feature_bc_matrix/
     └── ...
+```
+
+And ensure you have a gene mapping file:
+```
+$REF_FILES/
+└── loc_map.tsv                 # Gene ID to symbol mapping (gene_id, symbol)
 ```
 
 ---
@@ -192,7 +209,7 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 - `min_cells = 5`: Keep genes detected in ≥5 cells
 - `min_features = 500`: Keep cells with ≥500 genes
 
-**Usage**: `Rscript 00_map_features.R <id> <outdir> <input_dir> <mapping_tsv>`
+**Usage**: `Rscript 00_map_features.R <id> <outdir> <input_dir> <mapping_tsv> <min_cells> <min_features>`
 
 **Output**: `<id>_mapped.rds`, `<id>_mapping_summary.tsv`
 
@@ -239,7 +256,7 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 - `max_mt = 10`: Maximum mitochondrial %
 - `max_ribo = 30`: Maximum ribosomal %
 
-**Usage**: `Rscript 03_filter.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 03_filter.R <id> <outdir> <input_rds> <min_counts> <max_counts> <min_features> <max_features> <max_mt> <max_ribo>`
 
 **Output**: `<id>_filtered.rds`, `<id>_filtering_summary.tsv`, QC plots
 
@@ -278,7 +295,7 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 **Parameters**:
 - `npcs = 50`: Number of PCs to compute
 
-**Usage**: `Rscript 06_pca.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 06_pca.R <id> <outdir> <input_rds> <npcs>`
 
 **Output**: `<id>_06_pca.rds`, `<id>_06_pca_elbow.png`, `<id>_06_pca_summary.tsv`
 
@@ -292,7 +309,7 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 - `res = 0.5`: Clustering resolution
 - `algorithm = 4`: Leiden clustering
 
-**Usage**: `Rscript 07_cluster.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 07_cluster.R <id> <outdir> <input_rds> <dims> <res>`
 
 **Output**: `<id>_07_clustered.rds`, `<id>_07_clustering_summary.tsv`
 
@@ -306,7 +323,7 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 - `metric = "cosine"`: Distance metric
 - `seed = 777`: Random seed for reproducibility
 
-**Usage**: `Rscript 08_umap.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 08_umap.R <id> <outdir> <input_rds> <dims> <metric>`
 
 **Output**: `<id>_08_umap.rds`, `<id>_08_umap.png`, `<id>_08_umap_summary.tsv`
 
@@ -323,7 +340,7 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 - `enrichment = 0.2`: Difference in detection rate (pct.1 - pct.2)
 - `top = 30`: Top markers per cluster per direction
 
-**Usage**: `Rscript 09_find_markers.R <id> <outdir> <input_rds>`
+**Usage**: `Rscript 09_find_markers.R <id> <outdir> <input_rds> <significance> <regulation> <enrichment> <top>`
 
 **Output**:
 - `<id>_09_markers.tsv`: All markers
@@ -353,7 +370,7 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 #### 11_subset_clusters.R
 **Purpose**: Subset data to specific clusters.
 
-**Usage**: `Rscript 11_subset_clusters.R <id> <outdir> <input_rds> <cluster_ids>`
+**Usage**: `Rscript 11_subset_clusters.R <id> <outdir> <input_rds> <cluster_ident>`
 
 **Output**: `<id>_00_subset.rds`, `<id>_00_subsetting_summary.tsv`
 
@@ -396,7 +413,10 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 Files follow the pattern: `<analysis_id>_<step_number>_<description>.<extension>`
 
-Example: `main_04_integrated.rds`
+Examples:
+- `control_mapped.rds` (step 00, per-sample)
+- `main_05_integrated.rds` (step 05, integrated samples)
+- `main_07_clustered.rds` (step 07, clustered data)
 
 ### Output Directory Structure
 
@@ -417,13 +437,42 @@ results/seurat/
 │       └── QC plots
 ├── <id>_04_normalized/
 │   └── <sample>_normalized.rds
-├── <id>_05_integrated.rds
-├── <id>_06_pca.rds
-├── <id>_07_clustered.rds
-├── <id>_08_umap.rds
-├── <id>_09_markers.tsv
-├── <id>_09_markers_filtered.tsv
-└── <id>_10_scored.rds
+├── <id>_05_integrated/
+│   ├── <id>_05_integrated.rds
+│   └── <id>_05_integration_summary.tsv
+├── <id>_06_pca/
+│   ├── <id>_06_pca.rds
+│   ├── <id>_06_pca_elbow.png
+│   └── <id>_06_pca_summary.tsv
+├── <id>_07_clustered/
+│   ├── <id>_07_clustered.rds
+│   └── <id>_07_clustering_summary.tsv
+├── <id>_08_umap/
+│   ├── <id>_08_umap.rds
+│   ├── <id>_08_umap.png
+│   └── <id>_08_umap_summary.tsv
+├── <id>_09_markers/
+│   ├── <id>_09_markers.tsv
+│   └── <id>_09_markers_filtered.tsv
+├── <id>_10_scored/
+│   ├── <celltype>_10_scored.rds
+│   ├── <celltype>_10_feature_score.png
+│   ├── <celltype>_10_violin_score.png
+│   ├── <celltype>_10_individual_markers_violin.png
+│   ├── <celltype>_10_score_distribution.png
+│   └── <celltype>_10_score_summary.tsv
+├── <id>_11_subset/
+│   ├── <id>_00_subset.rds
+│   ├── <id>_00_subsetting_summary.tsv
+│   ├── <id>_05_integrated.rds
+│   └── <id>_05_integration_summary.tsv
+└── <id>_12_subcells/
+    ├── <id>_00_subset.rds
+    ├── <id>_00_<celltype>_score_distribution.png
+    ├── <id>_00_violin_score.png
+    ├── <id>_00_subsetting_summary.tsv
+    ├── <id>_05_integrated.rds
+    └── <id>_05_integration_summary.tsv
 ```
 
 ### Key Output Files
@@ -454,4 +503,4 @@ results/seurat/
 
 ---
 
-**Last Updated**: 2025-11-22
+**Last Updated**: 2025-11-23

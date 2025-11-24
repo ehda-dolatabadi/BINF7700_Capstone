@@ -40,8 +40,7 @@ scripts/cellranger/
 └── slurm/                         # SLURM batch scripts
     ├── 01_mkref.sbatch            # Build reference genomes
     ├── 02_cellranger.sbatch       # Align and quantify reads
-    ├── 03_aggr.sbatch             # Aggregate samples (no normalization)
-    └── 03_aggr_normalize.sbatch   # Aggregate samples (with normalization)
+    └── 03_aggr.sbatch             # Aggregate samples (both with and without normalization)
 ```
 
 ---
@@ -122,11 +121,10 @@ graph TD
     A[Reference FASTA + GTF] --> B[01: mkref - Build Reference]
     C[FASTQ Files] --> D[02: cellranger count - Align & Quantify]
     B --> D
-    D --> E[03: aggr - Aggregate No Normalization]
-    D --> F[03: aggr_normalize - Aggregate With Normalization]
+    D --> E[03: aggr - Aggregate Samples]
     D --> I[Filtered Count Matrix - Per Sample]
-    E --> G[Raw Count Matrix]
-    F --> H[Normalized Count Matrix]
+    E --> G[Raw Count Matrix - No Normalization]
+    E --> H[Normalized Count Matrix - With Normalization]
 ```
 
 ---
@@ -145,7 +143,7 @@ bash scripts/cellranger/run_pipeline.sh
 This script will:
 1. Submit the reference genome building job
 2. Submit Cell Ranger count with dependency on Step 1
-3. Submit both aggregation jobs with dependency on Step 2
+3. Submit aggregation job (handles both normalized and raw outputs) with dependency on Step 2
 4. Create log files in `$LOG/` directory with format: `{job_name}_{job_id}.out/err`
 5. Display all submitted job IDs for tracking
 
@@ -160,11 +158,8 @@ sbatch scripts/cellranger/slurm/01_mkref.sbatch
 # Step 2: Process samples (wait for Step 1 to complete)
 sbatch scripts/cellranger/slurm/02_cellranger.sbatch
 
-# Step 3a: Aggregate without normalization (wait for Step 2 to complete)
+# Step 3: Aggregate samples with and without normalization (wait for Step 2 to complete)
 sbatch scripts/cellranger/slurm/03_aggr.sbatch
-
-# Step 3b: Aggregate with normalization (wait for Step 2 to complete)
-sbatch scripts/cellranger/slurm/03_aggr_normalize.sbatch
 ```
 
 ---
@@ -208,13 +203,14 @@ sbatch scripts/cellranger/slurm/03_aggr_normalize.sbatch
 
 ### 03_aggr.sbatch
 
-**Purpose**: Aggregate multiple samples without depth normalization.
+**Purpose**: Aggregate multiple samples with or without depth normalization.
 
 **Parameters**:
-- `--array=0-1`: Processes 2 reference genomes in parallel
-- `--normalize=none`: Disable depth normalization
+- `--array=0-3`: Processes 4 jobs in parallel (2 references × 2 normalization methods)
+  - Array indices 0,2: No normalization (`--normalize=none`)
+  - Array indices 1,3: With normalization (`--normalize=mapped`)
 - `--disable-ui`: Disable User Interface
-- `--localcores=28`: Number of CPU cores
+- `--localcores=16`: Number of CPU cores
 - `--localmem`: Memory in GB (calculated as total memory - 20GB buffer)
 
 **Input**: Requires `aggr_samples.csv` with sample paths
@@ -228,33 +224,9 @@ control,/path/to/control/outs/molecule_info.h5
 
 **Usage**: `sbatch scripts/cellranger/slurm/03_aggr.sbatch`
 
-**Output**: Combined count matrix in `aggr_samples_raw/outs/count/filtered_feature_bc_matrix/`
-
----
-
-### 03_aggr_normalize.sbatch
-
-**Purpose**: Aggregate multiple samples with depth normalization enabled.
-
-**Parameters**:
-- `--array=0-5`: Processes 6 jobs in parallel (2 references × 3 CSV configurations)
-- Normalization method: `mapped` (default)
-- `--disable-ui`: Disable User Interface
-- `--localcores=28`: Number of CPU cores
-- `--localmem`: Memory in GB (calculated as total memory - 20GB buffer)
-
-**Input**: Requires `aggr_samples.csv` with sample paths
-
-**CSV format**:
-```csv
-library_id,molecule_h5
-control,/path/to/control/outs/molecule_info.h5
-3h,/path/to/3h/outs/molecule_info.h5
-```
-
-**Usage**: `sbatch scripts/cellranger/slurm/03_aggr_normalize.sbatch`
-
-**Output**: Combined count matrix in `{csv_name}/outs/count/filtered_feature_bc_matrix/`
+**Output**:
+- Raw (no normalization): `aggr_samples_raw/outs/count/filtered_feature_bc_matrix/`
+- Normalized: `aggr_samples_normalized/outs/count/filtered_feature_bc_matrix/`
 
 ---
 
@@ -316,4 +288,4 @@ $SCRATCH/outputs/ref_<genome>/cellranger/
 
 ---
 
-**Last Updated**: 2025-11-22
+**Last Updated**: 2025-11-23

@@ -64,8 +64,14 @@ bash scripts/seurat/run_pipeline.sh
 ## Prerequisites
 
 **Software Requirements:**
-- Cell Ranger
-- R with packages: Seurat, dplyr, ggplot2, future
+- Cell Ranger (tested with v9.0.1)
+- R (tested with v4.5.1) with packages:
+  - Seurat (tested with v5.3.0)
+  - ggplot2
+  - dplyr
+  - future (for parallelization)
+  - SingleCellExperiment
+  - scDblFinder (for doublet detection)
 - Monocle3 (for trajectory analysis - coming soon)
 - CellChat (for communication analysis - coming soon)
 - SLURM job scheduler
@@ -124,31 +130,43 @@ bash scripts/cellchat/run_cellchat.sh
 
 ```
 .
+├── config/                   # Configuration files
+│   ├── default_paths.sh      # Default path configurations
+│   └── local_paths.sh        # Optional local overrides
+│
 ├── scripts/
 │   ├── cellranger/           # Cell Ranger alignment pipeline
 │   │   ├── slurm/            # SLURM batch scripts
 │   │   │   ├── 01_mkref.sbatch
 │   │   │   ├── 02_cellranger.sbatch
-│   │   │   ├── 03_aggr.sbatch
-│   │   │   └── 03_aggr_normalize.sbatch
+│   │   │   └── 03_aggr.sbatch
+│   │   ├── run_pipeline.sh
 │   │   └── README.md         # Cell Ranger documentation
 │   │
 │   ├── seurat/               # Seurat scRNA-seq analysis pipeline
 │   │   ├── Rscripts/         # R analysis scripts
-│   │   │   ├── 00_map_features.R      # Gene ID mapping
-│   │   │   ├── 01_qc.R                # Quality control
-│   │   │   ├── 02_filter.R            # Cell filtering
-│   │   │   ├── 03_normalize.R         # SCTransform normalization
-│   │   │   ├── 04_integrate.R         # Batch correction
-│   │   │   ├── 04_reintegrate_subset.R # Re-integration of subsets
-│   │   │   ├── 05_pca.R               # PCA
-│   │   │   ├── 06_cluster.R           # Clustering
-│   │   │   ├── 07_umap.R              # UMAP
-│   │   │   ├── 08_find_markers.R      # Marker identification
-│   │   │   ├── 09_score_markers.R     # Cell type scoring
-│   │   │   ├── 10_subset_clusters.R   # Cluster subsetting
-│   │   │   └── 11_subset_cells.R      # Cell type filtering
+│   │   │   ├── 00_map_features.R       # Gene ID mapping
+│   │   │   ├── 01_qc.R                 # Quality control
+│   │   │   ├── 02_remove_doublets.R    # Doublet detection and removal
+│   │   │   ├── 03_filter.R             # Cell filtering
+│   │   │   ├── 04_normalize.R          # SCTransform normalization
+│   │   │   ├── 05_integrate.R          # Batch correction
+│   │   │   ├── 05_reintegrate_subset.R # Re-integration of subsets
+│   │   │   ├── 06_pca.R                # PCA
+│   │   │   ├── 07_cluster.R            # Clustering
+│   │   │   ├── 08_umap.R               # UMAP
+│   │   │   ├── 09_find_markers.R       # Marker identification
+│   │   │   ├── 10_score_markers.R      # Cell type scoring
+│   │   │   ├── 11_subset_clusters.R    # Cluster subsetting
+│   │   │   └── 12_subset_cells.R       # Cell type filtering
 │   │   ├── slurm/                 # SLURM batch scripts
+│   │   │   ├── 01_preprocess.sbatch
+│   │   │   ├── 02_integrate.sbatch
+│   │   │   ├── 03_cluster.sbatch
+│   │   │   ├── 04_score_markers.sbatch
+│   │   │   ├── 05_subcluster.sbatch
+│   │   │   └── 06_subcells.sbatch
+│   │   ├── cell_markers.txt       # Cell type marker definitions
 │   │   ├── run_pipeline.sh        # Pipeline orchestration
 │   │   └── README.md              # Seurat documentation
 │   │
@@ -160,13 +178,19 @@ bash scripts/cellchat/run_cellchat.sh
 │
 ├── data/                     # Input data (not tracked)
 │   ├── Li_dataset/           # Raw sequencing data
-│   └── ref_genomes/          # Reference genomes and annotations
+│   └── ref_files/            # Reference genomes and annotations
 │
-├── results/                  # Analysis outputs (not tracked)
-│   ├── cellranger/           # Alignment results
-│   ├── seurat/               # Analysis results
+├── outputs/                  # Working outputs (not tracked)
+│   ├── cellranger/           # Cell Ranger outputs (large .rds files)
+│   └── seurat/               # Seurat outputs (large .rds files)
+│
+├── results/                  # Synced analysis results (not tracked)
+│   ├── cellranger/           # Alignment results (QC reports, summaries)
+│   ├── seurat/               # Analysis results (plots, tables, summaries)
 │   ├── monocle3/             # Trajectory analysis results
 │   └── cellchat/             # Cell communication results
+│
+├── logs/                     # SLURM job logs (not tracked)
 │
 └── README.md                 # This file
 ```
@@ -224,7 +248,9 @@ This project uses two axolotl reference genomes:
 ### Software and Methods
 - **Cell Ranger**: 10X Genomics. (2023). Cell Ranger Software. https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger
 
-- **10X Genomics Chromium**: Zheng, G.X.Y., Terry, J.M., Belgrader, P., Ryvkin, P., Bent, Z.W., Wilson, R., Ziraldo, S.B., Wheeler, T.D., McDermott, G.P., Zhu, J., Grego>
+- **10X Genomics Chromium**: Zheng, G.X.Y., Terry, J.M., Belgrader, P., Ryvkin, P., Bent, Z.W., Wilson, R., Ziraldo, S.B., Wheeler, T.D., McDermott, G.P., Zhu, J., Gregory, M.T., Shuga, J., Montesclaros, L., Underwood, J.G., Masquelier, D.A., Nishimura, S.Y., Schnall-Levin, M., Wyatt, P.W., Hindson, C.M., Bharadwaj, R., et al. (2017). Massively parallel digital transcriptional profiling of single cells. *Nature Communications, 8*, 14049. https://doi.org/10.1038/ncomms14049
+
+- **scDblFinder**: Germain, P.L., Lun, A., Garcia Meixide, C., Macnair, W., & Robinson, M.D. (2022). Doublet identification in single-cell sequencing data using scDblFinder. *F1000Research, 10*, 979. https://doi.org/10.12688/f1000research.73600.2
 
 - **Seurat**: Hao, Y., Stuart, T., Kowalski, M.H., Choudhary, S., Hoffman, P., Hartman, A., Srivastava, A., Molla, G., Madad, S., Fernandez-Granda, C., & Satija, R. (2024). Dictionary learning for integrative, multimodal and scalable single-cell analysis. *Nature Biotechnology, 42*, 293-304. https://doi.org/10.1038/s41587-023-01767-y
 
@@ -257,6 +283,6 @@ Email: [dolatabadi.e@northeastern.edu](mailto:dolatabadi.e@northeastern.edu)
 
 ---
 
-**Last Updated**: November 22, 2025
+**Last Updated**: November 23, 2025
 **Status**: Active Development
 **Version**: 1.0.0

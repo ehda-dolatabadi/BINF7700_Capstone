@@ -30,6 +30,13 @@ exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_JOB_ID}.log"
 exec 2>&1
 
 RUN="$WORK/scripts/seurat/Rscripts"
+OUT_integrate="$OUT/seurat/${ID}_05_integrated"
+OUT_pca="$OUT/seurat/${ID}_06_pca"
+OUT_cluster="$OUT/seurat/${ID}_07_clustered"
+OUT_umap="$OUT/seurat/${ID}_08_umap"
+OUT_markers="$OUT/seurat/${ID}_09_markers"
+
+mkdir -p "$OUT_pca" "$OUT_cluster" "$OUT_umap" "$OUT_markers"
 
 # Environment
 eval "$(conda shell.bash hook)"
@@ -39,16 +46,16 @@ conda activate seurat
 echo "Running PCA..."
 Rscript "$RUN/06_pca.R" \
   "$ID" \
-  "$OUT/seurat" \
-  "$OUT/seurat/${ID}_05_integrated.rds" \
+  "$OUT_pca" \
+  "$OUT_integrate/${ID}_05_integrated.rds" \
   "$NPCS"
 echo "PCA completed✅"
 
 echo "Clustering..."
 Rscript "$RUN/07_cluster.R" \
   "$ID" \
-  "$OUT/seurat" \
-  "$OUT/seurat/${ID}_06_pca.rds" \
+  "$OUT_cluster" \
+  "$OUT_pca/${ID}_06_pca.rds" \
   "$DIMS" \
   "$RES"
 echo "Clustering completed✅"
@@ -56,8 +63,8 @@ echo "Clustering completed✅"
 echo "Running UMAP..."
 Rscript "$RUN/08_umap.R" \
   "$ID" \
-  "$OUT/seurat" \
-  "$OUT/seurat/${ID}_07_clustered.rds" \
+  "$OUT_umap" \
+  "$OUT_cluster/${ID}_07_clustered.rds" \
   "$UMAP_DIMS" \
   "$UMAP_METRIC"
 echo "UMAP completed✅"
@@ -65,8 +72,8 @@ echo "UMAP completed✅"
 echo "Finding Markers..."
 Rscript "$RUN/09_find_markers.R" \
   "$ID" \
-  "$OUT/seurat" \
-  "$OUT/seurat/${ID}_07_clustered.rds" \
+  "$OUT_markers" \
+  "$OUT_cluster/${ID}_07_clustered.rds" \
   "$SIGNIFICANCE" \
   "$REGULATION" \
   "$ENRICHMENT" \

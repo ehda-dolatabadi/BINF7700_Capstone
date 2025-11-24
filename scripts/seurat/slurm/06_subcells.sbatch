@@ -25,6 +25,10 @@ exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_JOB_ID}.log"
 exec 2>&1
 
 RUN="$WORK/scripts/seurat/Rscripts"
+OUT_integrate="$OUT/seurat/${main_ID}_05_integrated"
+OUT_subcells="$OUT/seurat/${ID}_12_subcells"
+
+mkdir -p "$OUT_subcells"
 
 # Environment
 eval "$(conda shell.bash hook)"
@@ -34,8 +38,8 @@ conda activate seurat
 echo "Subsetting data..."
 Rscript "$RUN/12_subset_cells.R" \
   "$ID" \
-  "$OUT/seurat" \
-  "$OUT/seurat/${main_ID}_05_integrated.rds" \
+  "$OUT_subcells" \
+  "$OUT_integrate/${main_ID}_05_integrated.rds" \
   "$CELL_TYPES" \
   "$CELL_MARKERS" \
   "$CELL_THRESHOLDS"
@@ -44,8 +48,8 @@ echo "Subset completed✅"
 echo "Re-running normalization and integration..."
 Rscript "$RUN/05_reintegrate_subset.R" \
   "$ID" \
-  "$OUT/seurat" \
-  "$OUT/seurat/${ID}_00_subset.rds"
+  "$OUT_subcells" \
+  "$OUT_subcells/${ID}_00_subset.rds"
 echo "Normalization and integration completed✅"
 
 # Sync
