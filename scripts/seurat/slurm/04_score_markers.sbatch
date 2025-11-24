@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=MarkerScore
+#SBATCH --job-name=markerScore
 #SBATCH --partition=courses
 #SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=4
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # Parameters
-ID="${ID:-main}"
+main_ID="${main_ID:-main}"
 GROUP_BY="${GROUP_BY:-seurat_clusters}"
 
 # Paths
@@ -33,6 +33,7 @@ if [ ${SLURM_ARRAY_TASK_ID} -ge ${#cells[@]} ]; then
 fi
 
 CELL_NAME="${cells[$((SLURM_ARRAY_TASK_ID))]}"
+ID="${ID:-$CELL_NAME}"
 MARKERS="${!CELL_NAME}"
 
 RUN="$WORK/scripts/seurat/Rscripts"
@@ -46,7 +47,7 @@ echo "Scoring $CELL_NAME markers..."
 Rscript "$RUN/10_score_markers.R" \
   "$ID" \
   "$OUT/seurat" \
-  "$OUT/seurat/${ID}_07_clustered.rds" \
+  "$OUT/seurat/${main_ID}_07_clustered.rds" \
   "$CELL_NAME" \
   "$GROUP_BY" \
   "$MARKERS"
