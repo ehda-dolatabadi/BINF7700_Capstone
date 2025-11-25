@@ -11,7 +11,8 @@
 set -euo pipefail
 
 # Default Parameters
-ID="${ID:-main}"
+ID="${ID:-all}"
+REF="${REF:-UKY_AmexF1_1_genomic}"
 MIN_CELLS="${MIN_CELLS:-5}"
 MIN_FEATURES="${MIN_FEATURES:-500}"
 MAX_FEATURES="${MAX_FEATURES:-5000}"
@@ -34,7 +35,7 @@ TSV="$REF_FILES/loc_map.tsv"
 SMPS=("control" "3h" "24h" "72h" "7dpa" "14dpa" "22dpa" "33dpa")
 SMP="${SMPS[$SLURM_ARRAY_TASK_ID]}"
 
-DIR="$OUT/cellranger/$SMP/outs/filtered_feature_bc_matrix"
+DIR="$OUT/cellranger/ref_${REF}/$SMP/outs/filtered_feature_bc_matrix"
 OUT_map="$OUT/seurat/${ID}_00_mapped"
 OUT_qc="$OUT/seurat/${ID}_01_qc/$SMP"
 OUT_db="$OUT/seurat/${ID}_02_DB_removed/$SMP"

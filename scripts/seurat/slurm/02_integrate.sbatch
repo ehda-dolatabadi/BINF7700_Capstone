@@ -10,7 +10,7 @@
 set -euo pipefail
 
 # Parameters
-ID="${ID:-main}"
+ID="${ID:-all}"
 
 # Paths
 cd "$SLURM_SUBMIT_DIR"

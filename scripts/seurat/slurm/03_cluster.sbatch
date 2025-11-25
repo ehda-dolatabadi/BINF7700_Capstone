@@ -10,7 +10,7 @@
 set -euo pipefail
 
 # Parameters
-ID="${ID:-main}"
+ID="${ID:-all}"
 NPCS="${NPCS:-50}"
 DIMS="${DIMS:-10}"
 RES="${RES:-0.5}"

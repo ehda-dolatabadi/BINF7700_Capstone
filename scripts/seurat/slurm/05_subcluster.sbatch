@@ -10,7 +10,7 @@
 set -euo pipefail
 
 # Pipeline parameters
-main_ID="${main_ID:-main}"
+main_ID="${main_ID:-all}"
 ID="${ID:-cluster1}"
 IDENT="${IDENT:-1}"
 
@@ -24,7 +24,7 @@ exec 2>&1
 
 RUN="$WORK/scripts/seurat/Rscripts"
 OUT_cluster="$OUT/seurat/${main_ID}_07_clustered"
-OUT_subset="$OUT/seurat/${ID}_11_subset"
+OUT_subset="$OUT/seurat/${ID}_05_integrated"
 
 mkdir -p "$OUT_subset"
 

@@ -1,10 +1,45 @@
-# Neural cell marker categories for module scoring
+# Epithelial
+# Pan-cytokeratins (most broadly expressed and specific)
+pan_cytokeratins="KRT8,KRT18,KRT19"
 
+# Basal epithelial cytokeratins (exclude KRT15, KRT17 - can be in stem cells/wound)
+basal_cytokeratins="KRT5,KRT14"
+
+# Stratified epithelial cytokeratins
+stratified_cytokeratins="KRT1,KRT10,KRT13"
+
+# Simple epithelial cytokeratins
+simple_cytokeratins="KRT7"
+
+# Cell adhesion molecules (highly specific)
+adhesion="EPCAM,CDH1"
+
+# Tight junction proteins (exclude TJP1 - can be in endothelial cells)
+tight_junction="TJP2,TJP3,OCLN"
+
+# Claudins (only most epithelial-specific, exclude CLDN10, CLDN2)
+claudins="CLDN1,CLDN3,CLDN4,CLDN7"
+
+# Desmosomal proteins (highly epithelial-specific)
+desmosomes="DSP,DSG1,DSG2,DSG3,PKP1,PKP2,PKP3"
+
+
+
+# Erythrocytes
+# Hemoglobin genes (most reliable)
+hemoglobin="HBA1,HBA2,HBB,HBD,HBE1,HBG1,HBG2"
+
+# Other erythroid markers
+erythroid="ALAS2,SLC4A1,GYPA,KLF1,GATA1"
+
+
+
+# Neural
 # Pan-neuronal markers - all mature neurons across subtypes
 pan_neuronal="SNAP25,RBFOX3,MAP2,SYP,ELAVL3,ELAVL4,ENO2"
 
 # Early and developing neuronal markers
-early_neuronal="TUBB3,DCX,STMN2"
+early_neuronal="TUBB3,TUBA1A,DCX,STMN2"
 
 # Excitatory glutamatergic neurons
 excitatory="SLC17A7,SLC17A6"
@@ -28,10 +63,10 @@ oligodendrocytes="MBP,PLP1,MOG,MAG,CNP,MOBP,SOX10,MYRF,OLIG1,OLIG2,NKX2.2,QKI,AS
 opcs="PDGFRA,GPR17,PTPRZ1"
 
 # Microglia
-microglia="TMEM119,P2RY12,HEXB,SIGLECH,CX3CR1,C1QA,C1QB,C1QC,GPR34,P2RY13"
+microglia="TMEM119,P2RY12,HEXB,CX3CR1,C1QA,C1QB,C1QC,GPR34,P2RY13"
 
 # Ependymal cells
-ependymal="FOXJ1,TUBA1A,PIFO,DYNLRB2,TMEM212,CCDC153,TM4SF1,RARRES2"
+ependymal="FOXJ1,PIFO,DYNLRB2,TMEM212,CCDC153,TM4SF1,RARRES2"
 
 # Schwann cells
 schwann="MPZ,PMP22,PRX,CDH2,L1CAM,NCAM1,GAP43,PMP2,EGR2"
@@ -49,4 +84,4 @@ intermediate_progenitors="EOMES"
 neurogenic_progenitors="ASCL1,NEUROG1,NEUROG2"
 
 # Neuroepithelial cells
-neuroepithelial="SOX1,TJP1,OCLN"
+neuroepithelial="SOX1,PAX6,HES5,RAX"

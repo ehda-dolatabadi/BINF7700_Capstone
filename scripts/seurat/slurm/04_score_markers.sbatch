@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # Parameters
-main_ID="${main_ID:-main}"
+main_ID="${main_ID:-all}"
 GROUP_BY="${GROUP_BY:-seurat_clusters}"
 
 # Paths
@@ -23,6 +23,7 @@ exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log"
 exec 2>&1
 
 # Source marker file
+MARKER_FILE="${MARKER_FILE:-$WORK/scripts/seurat/cell_markers.txt}"
 source ${MARKER_FILE}
 cells=($(grep -E '^[a-zA-Z_]+=' ${MARKER_FILE} | cut -d'=' -f1))
 
