@@ -3,8 +3,8 @@
 #SBATCH --partition=courses
 #SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=16G
-#SBATCH --array=0-4
+#SBATCH --mem=32G
+#SBATCH --array=0-2
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
