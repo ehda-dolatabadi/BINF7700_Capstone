@@ -11,10 +11,10 @@ set -euo pipefail
 
 # Parameters
 main_ID="${main_ID:-all}"
-ID="${ID:-clean}"
-CELL_TYPES="${CELL_TYPES:-Epithelial;Erythrocyte}"
-CELL_MARKERS="${CELL_MARKERS:-KRT8,KRT18,KRT1,EPCAM,CLDN7,CDH1,DSP,DSG2,EPPK1,S100P;HBA1,HBB,HBA2,HEMGN,ALAS2,PRDX2,ANK1,HBBP1}"
-CELL_THRESHOLDS="${CELL_THRESHOLDS:-0.5;3.0}"
+ID="${ID:-enriched}"
+CELL_TYPES="${CELL_TYPES:-cell}"
+CELL_MARKERS="${CELL_MARKERS:-XXX}"
+CELL_THRESHOLDS="${CELL_THRESHOLDS:-5.0}"
 
 # Paths
 cd "$SLURM_SUBMIT_DIR"
@@ -23,6 +23,11 @@ source "config/default_paths.sh"
 
 exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_JOB_ID}.log"
 exec 2>&1
+
+if [ "$CELL_MARKERS" = "XXX" ]; then
+        echo "Cell markers not provided!"
+        exit 1
+fi
 
 RUN="$WORK/scripts/seurat/Rscripts"
 OUT_integrate="$OUT/seurat/${main_ID}_05_integrated"
