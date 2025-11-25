@@ -1,2 +1,2 @@
 id	n_cells_before	n_features_before	n_epithelial_markers_total	n_epithelial_markers_available	epithelial_threshold	n_cells_epithelial	pct_cells_epithelial	n_erythrocytes_markers_total	n_erythrocytes_markers_available	erythrocytes_threshold	n_cells_erythrocytes	pct_cells_erythrocytes	n_cells_after	n_features_after	pct_cells_kept
-enriched	51852	18730	25	20	5	0	0	12	7	5	0	0	51852	18730	100
+enriched	51852	18730	25	20	0.4	20810	40.1334567615521	12	7	2.5	4597	8.86561752680707	26445	18730	51.0009257116408

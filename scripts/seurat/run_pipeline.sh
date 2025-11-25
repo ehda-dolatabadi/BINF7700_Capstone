@@ -23,8 +23,8 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=false
 integrate=false
-subset=false
-cluster=false
+subset=true
+cluster=true
 score=true
 subcluster=false
 
@@ -67,10 +67,11 @@ ALAS2,GATA1,GYPA,HBA1,HBA2,HBB,HBD,HBE1,HBG1,HBG2,KLF1,SLC4A1"
       --export=ALL,\
 ID="enriched",\
 CELL_TYPES="Epithelial;Erythrocytes",\
-CELL_THRESHOLDS="5.0;5.0" \
+CELL_THRESHOLDS="0.4;2.5" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/06_subcells.sbatch)
     echo "  Job ID: $JOB3"
+fi
 
 # Step 3: Clustering
 if [ "$cluster" = true ]; then
@@ -101,8 +102,9 @@ fi
 if [ "$score" = true ]; then
     echo "Submitting marker-based scoring..."
     JOB5=$(sbatch $SBATCH_OPTS \
-      --array=0-${count} \
+      --array=0-$((count-1)) \
       --export=ALL,\
+main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
 GROUP_BY="seurat_clusters" \
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4") \
       $SLURM/04_score_markers.sbatch)
@@ -119,6 +121,7 @@ if [ "$subcluster" = true ]; then
     echo "Submitting subclustering..."
     JOB7=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
+main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
 ID="cluster15",\
 IDENT="15" \
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4") \
@@ -127,6 +130,7 @@ IDENT="15" \
 
     JOB6=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
+main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
 ID="cluster15",\
 NPCS=50,\
 DIMS=10,\
