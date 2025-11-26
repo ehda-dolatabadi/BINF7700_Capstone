@@ -23,9 +23,9 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=false
 integrate=false
-subset=false
-cluster=false
-score=true
+subset=true
+cluster=true
+score=false
 subcluster=false
 
 # Step 1: Preprocessing
@@ -59,7 +59,8 @@ fi
 # Optional step: Removing abundant cells
 if [ "$subset" = true ]; then
         export CELL_MARKERS="CDH1,CLDN1,CLDN3,CLDN4,CLDN7,DSP,DSG1,DSG2,DSG3,EPCAM,\
-KRT1,KRT5,KRT7,KRT8,KRT10,KRT13,KRT14,KRT18,KRT19,OCLN,PKP1,PKP2,PKP3,TJP2,TJP3;\
+KRT1,KRT5,KRT7,KRT8,KRT10,KRT13,KRT14,KRT18,KRT19,OCLN,PKP1,PKP2,PKP3,TJP2,TJP3,\
+ITGB4,ITGA6,COL17A1,LAMB3,LAMA3,EPPK1,SPINT2,CGN,SPINT2,AGR2,TGM3;\
 ALAS2,GATA1,GYPA,HBA1,HBA2,HBB,HBD,HBE1,HBG1,HBG2,KLF1,SLC4A1"
 
     echo "Submitting subcells removal..."
