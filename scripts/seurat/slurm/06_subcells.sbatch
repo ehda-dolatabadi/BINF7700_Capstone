@@ -50,12 +50,12 @@ Rscript "$RUN/12_subset_cells.R" \
   "$CELL_THRESHOLDS"
 echo "Subset completed✅"
 
-#echo "Re-running normalization and integration..."
-#Rscript "$RUN/05_reintegrate_subset.R" \
-#  "$ID" \
-#  "$OUT_subcells" \
-#  "$OUT_subcells/${ID}_00_subset.rds"
-#echo "Normalization and integration completed✅"
+echo "Re-running normalization and integration..."
+Rscript "$RUN/05_reintegrate_subset.R" \
+  "$ID" \
+  "$OUT_subcells" \
+  "$OUT_subcells/${ID}_00_subset.rds"
+echo "Normalization and integration completed✅"
 
 # Sync
 rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

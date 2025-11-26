@@ -68,7 +68,7 @@ ALAS2,GATA1,GYPA,HBA1,HBA2,HBB,HBD,HBE1,HBG1,HBG2,KLF1,SLC4A1"
       --export=ALL,\
 ID="enriched",\
 CELL_TYPES="Epithelial;Erythrocytes",\
-CELL_THRESHOLDS="0.4;2.5" \
+CELL_THRESHOLDS="0.3;2.0" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/06_subcells.sbatch)
     echo "  Job ID: $JOB3"
