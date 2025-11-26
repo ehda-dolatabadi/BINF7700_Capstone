@@ -93,5 +93,17 @@ Rscript "$RUN/04_normalize.R" \
   "$OUT_filter/${SMP}_filtered.rds"
 echo "Normalization of $SMP completed✅"
 
+# Create PDF
+echo "Creating PDF for $SMP..."
+metrics=("nFeature_RNA" "percent.mt" "percent.ribo")
+files=()
+for metric in "${metrics[@]}"; do
+  files+=("$OUT_qc/${SMP}_${metric}_vs_nCount_RNA.png")
+  files+=("$OUT_db/${SMP}_${metric}_vs_nCount_RNA_DB_removed.png")
+  files+=("$OUT_filter/${SMP}_${metric}_vs_nCount_RNA_filtered.png")
+done
+convert "${files[@]}" "${SMP}_preprocessing_summary.pdf"
+echo "PDF for $SMP created✅"
+
 # Sync
 rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

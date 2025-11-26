@@ -51,19 +51,21 @@ dev.off()
 
 # Plot individual markers
 for (marker in markers_available){
-  png(file.path(outdir, paste0(id, marker, "_clusters_violin_score.png")), width = 1600, height = 1200, res = 150)
-  print(VlnPlot(obj, features = marker, group.by = "seurat_clusters", pt.size = 0) +
-    geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-    labs(x = NULL))
-  dev.off()
-}
-
-for (marker in markers_available){
   png(file.path(outdir, paste0(id, marker, "_timepoints_violin_score.png")), width = 1600, height = 1200, res = 150)
   print(VlnPlot(obj, features = marker, group.by = "orig.ident", pt.size = 0) +
     geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
     labs(x = NULL))
   dev.off()
+}
+
+if ("seurat_clusters" %in% colnames(obj@meta.data)) {
+  for (marker in markers_available){
+    png(file.path(outdir, paste0(id, marker, "_clusters_violin_score.png")), width = 1600, height = 1200, res = 150)
+    print(VlnPlot(obj, features = marker, group.by = "seurat_clusters", pt.size = 0) +
+      geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+      labs(x = NULL))
+    dev.off()
+  }
 }
 
 # Visualize distribution

@@ -28,7 +28,7 @@ cells=($(grep -E '^[a-zA-Z_]+=' ${MARKER_FILE} | cut -d'=' -f1))
 
 # Safety check: exit if array task exceeds number of cells
 if [ ${SLURM_ARRAY_TASK_ID} -ge ${#cells[@]} ]; then
-  echo "End of cell names. Exiting..."
+  echo "End of cell names."
   exit 0
 fi
 
