@@ -20,7 +20,7 @@ erythrocydes="ALAS2,GATA1,GYPA,HBA1,HBA2,HBB,HBD,HBE1,HBG1,HBG2,KLF1,SLC4A1"
 pan_neuronal="SNAP25,RBFOX3,MAP2,SYP,ELAVL3,ELAVL4,ENO2"
 
 # Early and developing neuronal markers
-early_neuronal="TUBB3,TUBA1A,DCX,STMN2"
+early_neuronal="TUBB3,DCX,STMN2"
 
 # Excitatory glutamatergic neurons
 excitatory="SLC17A7,SLC17A6"
@@ -35,28 +35,28 @@ cholinergic="CHAT,SLC18A3"
 monoaminergic="TH,TPH2,SLC6A4"
 
 # Astrocytes
-astrocytes="ALDH1L1,AQP4,SLC1A2,SLC1A3,GLUL,GJA1,SOX9,APOE,GFAP"
+astrocytes="ALDH1L1,AQP4,SLC1A2,SLC1A3,GLUL,GJA1,SOX9,GFAP"
 
 # Oligodendrocytes
 oligodendrocytes="MBP,PLP1,MOG,MAG,CNP,MOBP,SOX10,MYRF,OLIG1,OLIG2,NKX2.2,QKI,ASPA,OPALIN"
 
 # Oligodendrocyte precursor cells
-opcs="PDGFRA,GPR17,PTPRZ1"
+opcs="PDGFRA,GPR17"
 
 # Microglia
 microglia="TMEM119,P2RY12,HEXB,CX3CR1,C1QA,C1QB,C1QC,GPR34,P2RY13"
 
 # Ependymal cells
-ependymal="FOXJ1,PIFO,DYNLRB2,TMEM212,CCDC153,TM4SF1,RARRES2"
+ependymal="FOXJ1,PIFO,DYNLRB2,TMEM212,CCDC153,RARRES2"
 
 # Schwann cells
 schwann="MPZ,PMP22,PRX,CDH2,L1CAM,NCAM1,GAP43,PMP2,EGR2"
 
 # Neural stem cells
-neural_stem="SOX2,NESTIN,PAX6,HES1,HES5,NOTCH1,PROM1,MSI1,BMI1,CXCR4"
+neural_stem="SOX2,NESTIN,PAX6,HES1,HES5,MSI1"
 
 # Radial glia
-radial_glia="FABP7,ATP1A2,TNC"
+radial_glia="FABP7,ATP1A2"
 
 # Intermediate progenitors
 intermediate_progenitors="EOMES"

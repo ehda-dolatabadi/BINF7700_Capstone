@@ -1,2 +1,2 @@
 id	n_cells	n_features	n_markers_total	n_markers_available	markers_available
-neural_stem	26445	17975	10	9	SOX2,PAX6,HES1,HES5,NOTCH1,PROM1,MSI1,BMI1,CXCR4
+neural_stem	23192	17826	10	9	SOX2,PAX6,HES1,HES5,NOTCH1,PROM1,MSI1,BMI1,CXCR4
