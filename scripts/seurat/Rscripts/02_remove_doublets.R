@@ -52,29 +52,3 @@ write.table(
   quote = FALSE,
   row.names = FALSE
 )
-
-# QC metrics
-obj[["percent.mt"]]     <- PercentageFeatureSet(obj, pattern = "^(COX|ND|CYTB|ATP)")
-obj[["percent.ribo"]]   <- PercentageFeatureSet(obj, pattern = "^RPS|^RPL")
-obj[["log10UMIsPerGene"]] <- log10(obj$nCount_RNA / obj$nFeature_RNA)
-
-qc_metrics <- c("nCount_RNA", "nFeature_RNA", "percent.mt", "percent.ribo")
-df <- as_tibble(obj[[]], rownames="Cell.Barcode")
-
-# Plots
-pdf(file.path(outdir, paste0(id, "_DB_removed_plots.pdf")), width = 15, height = 9)
-
-# QC plots
-for (i in qc_metrics) {
-  # scatter plots
-  if (i != "nCount_RNA") {
-    p <- FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = i) +
-      theme(legend.title = element_blank())
-
-    ggsave(file.path(outdir, paste0(id, "_", i, "_vs_nCount_RNA_DB_removed.png")), p,
-           width = 15, height = 9, dpi = 300, bg = "white")
-    print(p)
-  }
-}
-
-dev.off()

@@ -37,9 +37,9 @@ SMP="${SMPS[$SLURM_ARRAY_TASK_ID]}"
 
 DIR="$OUT/cellranger/ref_${REF}/$SMP/outs/filtered_feature_bc_matrix"
 OUT_map="$OUT/seurat/${ID}_00_mapped"
-OUT_qc="$OUT/seurat/${ID}_01_qc/$SMP"
-OUT_db="$OUT/seurat/${ID}_02_DB_removed/$SMP"
-OUT_filter="$OUT/seurat/${ID}_03_filtered/$SMP"
+OUT_qc="$OUT/seurat/${ID}_01_qc"
+OUT_db="$OUT/seurat/${ID}_02_DB_removed"
+OUT_filter="$OUT/seurat/${ID}_03_filtered"
 OUT_normalize="$OUT/seurat/${ID}_04_normalized"
 
 mkdir -p "$OUT_map" "$OUT_qc" "$OUT_db" "$OUT_filter" "$OUT_normalize"
@@ -92,18 +92,6 @@ Rscript "$RUN/04_normalize.R" \
   "$OUT_normalize" \
   "$OUT_filter/${SMP}_filtered.rds"
 echo "Normalization of $SMP completed✅"
-
-# Create PDF
-echo "Creating PDF for $SMP..."
-metrics=("nFeature_RNA" "percent.mt" "percent.ribo")
-files=()
-for metric in "${metrics[@]}"; do
-  files+=("$OUT_qc/${SMP}_${metric}_vs_nCount_RNA.png")
-  files+=("$OUT_db/${SMP}_${metric}_vs_nCount_RNA_DB_removed.png")
-  files+=("$OUT_filter/${SMP}_${metric}_vs_nCount_RNA_filtered.png")
-done
-convert "${files[@]}" "$OUT_filter/$SMP/${SMP}_preprocessing_summary.pdf"
-echo "PDF for $SMP created✅"
 
 # Sync
 rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

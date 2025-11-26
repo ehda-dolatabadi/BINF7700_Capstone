@@ -26,11 +26,14 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=true
 integrate=true
-subset_score=true
 subset=false
 cluster=true
-score=false
-subcluster=true
+subset_score=true
+score=true
+subcluster=false
+
+
+
 
 # Step 1: Preprocessing
 if [ "$preprocess" = true ]; then
@@ -45,10 +48,15 @@ MAX_COUNTS=30000,\
 MIN_FEATURES_FILTER=500,\
 MAX_FEATURES=5000,\
 MAX_MT=10,\
-MAX_RIBO=30 \
+MAX_RIBO=35 \
       $SLURM/01_preprocess.sbatch)
     echo "  Job ID: $JOB1"
 fi
+
+
+
+
+
 
 # Step 2: Integration
 if [ "$integrate" = true ]; then
@@ -64,30 +72,18 @@ fi
 
 
 
-# Optional step: Abundent cells scoring
-if [ "$subset_score" = true ]; then
-    echo "Submitting marker-based scoring..."
-    JOB3=$(sbatch $SBATCH_OPTS \
-      --array=0-$((n_subset-1)) \
-      --export=ALL,\
-main_ID=$main_ID,\
-MARKER_FILE="$(pwd)/scripts/seurat/abundant_cells.txt" \
-      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
-      $SLURM/04_score_markers.sbatch)
-    echo "  Job ID: $JOB3"
-fi
 
 # Optional step: Removing abundant cells
 if [ "$subset" = true ]; then
     echo "Submitting subcells removal..."
-    JOB4=$(sbatch $SBATCH_OPTS \
+    JOB3=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID="enriched",\
 SUBSET_FILE="$(pwd)/scripts/seurat/abundant_cells.txt",\
 CELL_THRESHOLDS="0.3;2.0" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/06_subcells.sbatch)
-    echo "  Job ID: $JOB4"
+    echo "  Job ID: $JOB3"
 fi
 
 
@@ -97,7 +93,7 @@ fi
 # Step 3: Clustering
 if [ "$cluster" = true ]; then
     echo "Submitting clustering..."
-    JOB5=$(sbatch $SBATCH_OPTS \
+    JOB4=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
 NPCS=50,\
@@ -112,8 +108,28 @@ TOP_MARKERS=30 \
       $([ "$subset" = true ] && echo "--dependency=afterok:$JOB4" \
 		|| ([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2")) \
       $SLURM/03_cluster.sbatch)
+    echo "  Job ID: $JOB4"
+fi
+
+
+
+
+
+
+
+# Optional step: Abundent cells scoring
+if [ "$subset_score" = true ]; then
+    echo "Submitting marker-based scoring..."
+    JOB5=$(sbatch $SBATCH_OPTS \
+      --array=0-$((n_subset-1)) \
+      --export=ALL,\
+main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
+MARKER_FILE="$(pwd)/scripts/seurat/abundant_cells.txt" \
+      $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4") \
+      $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB5"
 fi
+
 
 
 
@@ -134,6 +150,8 @@ MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB6"
 fi
+
+
 
 
 

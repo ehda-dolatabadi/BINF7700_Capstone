@@ -69,20 +69,3 @@ write.table(
   quote = FALSE,
   row.names = FALSE
 )
-
-# Plots
-pdf(file.path(outdir, paste0(id, "_filtered_plots.pdf")), width = 15, height = 9)
-for (i in qc_metrics) {
-
-  # scatter plots
-  if (i != "nCount_RNA") {
-    p <- FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = i) +
-      theme(legend.title = element_blank())
-
-    ggsave(file.path(outdir, paste0(id, "_", i, "_vs_nCount_RNA_filtered.png")), p,
-           width = 15, height = 9, dpi = 300, bg = "white")
-    print(p)
-  }
-}
-
-dev.off()
