@@ -102,7 +102,7 @@ for metric in "${metrics[@]}"; do
   files+=("$OUT_db/${SMP}_${metric}_vs_nCount_RNA_DB_removed.png")
   files+=("$OUT_filter/${SMP}_${metric}_vs_nCount_RNA_filtered.png")
 done
-convert "${files[@]}" "${SMP}_preprocessing_summary.pdf"
+convert "${files[@]}" "$OUT_filter/${SMP}_preprocessing_summary.pdf"
 echo "PDF for $SMP created✅"
 
 # Sync
