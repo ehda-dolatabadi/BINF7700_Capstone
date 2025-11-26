@@ -32,5 +32,8 @@ conda activate seurat
 
 # Workflow
 echo "Integrating normalized samples..."
-Rscript "$RUN/05_integrate.R" "$ID" "$OUT_integrate" "$OUT_normalize"/*_normalized.rds
+Rscript "$RUN/05_integrate.R"\
+    "$ID"\
+    "$OUT_integrate"\
+    "$OUT_normalize"/*_normalized.rds
 echo "Integration completed✅"

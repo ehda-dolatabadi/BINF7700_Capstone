@@ -20,11 +20,11 @@ plan("multicore", workers = 8)
 
 # Load subset object
 obj <- readRDS(input)
-n_cells_before <- ncol(obj)
-n_features_before <- nrow(obj)
 
 # Switch back to RNA assay
 DefaultAssay(obj) <- "RNA"
+n_cells_before <- ncol(obj)
+n_features_before <- nrow(obj)
 
 # Split by sample to check cell counts
 obj_list <- SplitObject(obj, split.by = "orig.ident")
@@ -35,18 +35,18 @@ if (length(samples) > 0) {
   cat("Some samples had less than 30 cells:", paste(samples, collapse = ", "), "\n")
   cat("Running SCTransform on whole object without re-integration\n")
   
-  # Run SCTransform on the WHOLE object (not split)
+  # Run SCTransform on the whole object (not split)
   obj <- SCTransform(
     obj,
     assay = "RNA",
     new.assay.name = "SCT"
   )
   
-  # Set default to SCT (not integrated, since we skipped integration)
+  # Set default to SCT (not integrated, since integration was skipped)
   DefaultAssay(obj) <- "SCT"
   
   # Save object
-  saveRDS(obj, file = file.path(outdir, paste0(id, "_05_integrated.rds")))
+  saveRDS(obj, file = file.path(outdir, paste0(id, "_integrated.rds")))
 
   # Summary table
   write.table(
@@ -58,7 +58,7 @@ if (length(samples) > 0) {
       n_features_after = nrow(obj),
       integration_performed = FALSE
     ),
-    file = file.path(outdir, paste0(id, "_05_integration_summary.tsv")),
+    file = file.path(outdir, paste0(id, "_integration_summary.tsv")),
     sep = "\t",
     quote = FALSE,
     row.names = FALSE
@@ -103,7 +103,7 @@ timepoint_order <- c("control", "3h", "24h", "72h", "7dpa", "14dpa", "22dpa", "3
 obj$orig.ident <- factor(obj$orig.ident, levels = timepoint_order)
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_05_integrated.rds")))
+saveRDS(obj, file = file.path(outdir, paste0(id, "_integrated.rds")))
 
 # Summary table
 write.table(
@@ -114,7 +114,7 @@ write.table(
     n_features_before,
     n_features_after = nrow(obj)
   ),
-  file = file.path(outdir, paste0(id, "_05_integration_summary.tsv")),
+  file = file.path(outdir, paste0(id, "_integration_summary.tsv")),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE

@@ -72,41 +72,38 @@ for (i in seq_along(cell_types)) {
   )
 
   # Note: AddModuleScore adds "1" to the name
-  score_col <- paste0(score_name, "1")
-  score_features <- c(score_features, score_col)
+  score_name <- paste0(score_name, "1")
+  score_features <- c(score_features, score_name)
 
   # Count cells above threshold
-  n_cells_above <- sum(obj[[score_col]] >= threshold)
+  n_cells_above <- sum(obj[[score_name]] >= threshold)
 
-  # Create visualizations
-  png(file.path(outdir, paste0(id, "_00_", tolower(cell_type), "_score_distribution.png")),
-      width = 1600, height = 1200)
-  hist(obj[[score_col]][,1], breaks = 50,
+  # Distribution plot
+  png(file.path(outdir, paste0(id, "_", cell_type, "_score_distribution.png")),
+      width = 1600, height = 1200, res=150)
+  hist(obj[[score_name]][,1], breaks = 50,
        main = paste(cell_type, "Score Distribution"),
        xlab = paste(cell_type, "Score"))
-  abline(v = threshold, col = "red", lwd = 2, lty = 2)
+  abline(v = c(0, threshold), col = "red", lwd = 2, lty = 2)
+  dev.off()
+  
+  # Violin plot
+  png(file.path(outdir, paste0(id, "_", cell_type, "_violin_score.png")), width = 1600, height = 1200, res=150)
+  print(VlnPlot(obj, features = score_name, pt.size = 0, group.by = "orig.ident") +
+    geom_hline(yintercept = c(0, threshold), linetype = "dashed", color = "red") +
+    labs(x = NULL))
   dev.off()
 
   # Add to filter condition
-  filter_conditions <- c(filter_conditions, paste0(score_col, " < ", threshold))
+  filter_conditions <- c(filter_conditions, paste0(score_name, " < ", threshold))
 
   # Add to summary
-  summary_data[[paste0("n_", tolower(cell_type), "_markers_total")]] <- length(markers)
-  summary_data[[paste0("n_", tolower(cell_type), "_markers_available")]] <- length(markers_available)
-  summary_data[[paste0(tolower(cell_type), "_threshold")]] <- threshold
-  summary_data[[paste0("n_cells_", tolower(cell_type))]] <- n_cells_above
-  summary_data[[paste0("pct_cells_", tolower(cell_type))]] <- n_cells_above / n_cells_before * 100
+  summary_data[[paste0("n_", cell_type, "_markers_total")]] <- length(markers)
+  summary_data[[paste0("n_", cell_type, "_markers_available")]] <- length(markers_available)
+  summary_data[[paste0(cell_type, "_threshold")]] <- threshold
+  summary_data[[paste0("n_cells_", cell_type)]] <- n_cells_above
+  summary_data[[paste0("pct_cells_", cell_type)]] <- n_cells_above / n_cells_before * 100
 }
-
-# Plot VlnPlot for all scores
-png(file.path(outdir, paste0(id, "_00_violin_score.png")), width = 1600, height = 1200)
-print(VlnPlot(obj, features = score_features, pt.size = 0, group.by = "orig.ident") +
-  labs(x = NULL))
-dev.off()
-
-# Apply filtering
-filter_expr <- paste(filter_conditions, collapse = " & ")
-cat("Applying filter:", filter_expr, "\n")
 
 # Get cells that pass the filter
 cells_to_keep <- TRUE
@@ -120,7 +117,7 @@ for (i in seq_along(cell_types)) {
 obj <- obj[, cells_to_keep]
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_00_subset.rds")))
+saveRDS(obj, file = file.path(outdir, paste0(id, "_subset.rds")))
 
 # Complete summary
 summary_data$n_cells_after <- ncol(obj)
@@ -130,7 +127,7 @@ summary_data$pct_cells_kept <- ncol(obj) / n_cells_before * 100
 # Save summary
 write.table(
   summary_data,
-  file = file.path(outdir, paste0(id, "_00_subsetting_summary.tsv")),
+  file = file.path(outdir, paste0(id, "_subsetting_summary.tsv")),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE

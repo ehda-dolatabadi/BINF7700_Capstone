@@ -36,24 +36,22 @@ total_var <- sum(pca_stdev^2)
 pct_var_pc1 <- (pca_stdev[1]^2 / total_var) * 100
 
 # Elbow plot
-png(file.path(outdir, paste0(id, "_06_pca_elbow.png")), width=1200, height=720)
+png(file.path(outdir, paste0(id, "_pca_elbow.png")), width=1600, height=1200, res=150)
 print(ElbowPlot(obj, ndims = npcs) +
 	geom_vline(xintercept = 10, linetype = "dashed", color = "red"))
 dev.off()
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_06_pca.rds")))
+saveRDS(obj, file = file.path(outdir, paste0(id, "_pca.rds")))
 
 # Summary table
 write.table(
   data.frame(
     id,
-    n_cells = ncol(obj),
-    n_features = nrow(obj),
     npcs,
     pct_var_pc1
   ),
-  file = file.path(outdir, paste0(id, "_06_pca_summary.tsv")),
+  file = file.path(outdir, paste0(id, "_pca_summary.tsv")),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE

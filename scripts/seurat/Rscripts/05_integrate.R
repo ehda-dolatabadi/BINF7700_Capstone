@@ -53,7 +53,7 @@ timepoint_order <- c("control", "3h", "24h", "72h", "7dpa", "14dpa", "22dpa", "3
 obj$orig.ident <- factor(obj$orig.ident, levels = timepoint_order)
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_05_integrated.rds")))
+saveRDS(obj, file = file.path(outdir, paste0(id, "_integrated.rds")))
 
 # Summary table
 write.table(
@@ -68,7 +68,7 @@ write.table(
     n_features_integrated = nrow(obj),
     n_anchors
   ),
-  file = file.path(outdir, paste0(id, "_05_integration_summary.tsv")),
+  file = file.path(outdir, paste0(id, "_integration_summary.tsv")),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE

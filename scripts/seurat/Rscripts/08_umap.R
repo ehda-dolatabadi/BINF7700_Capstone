@@ -36,25 +36,22 @@ obj <- RunUMAP(
 )
 
 # Plot
-png(file.path(outdir, paste0(id, "_08_umap.png")), width = 1600, height = 1200)
+png(file.path(outdir, paste0(id, "_umap.png")), width = 1600, height = 1200, res=150)
 print(DimPlot(obj, reduction = "umap", label = TRUE, pt.size = 0.5))
 dev.off()
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_08_umap.rds")))
+saveRDS(obj, file = file.path(outdir, paste0(id, "_umap.rds")))
 
 # Summary table
 write.table(
   data.frame(
     id,
-    n_cells = ncol(obj),
-    n_features = nrow(obj),
     n_clusters = length(unique(obj$seurat_clusters)),
     dims,
-    metric,
-    seed
+    metric
   ),
-  file = file.path(outdir, paste0(id, "_08_umap_summary.tsv")),
+  file = file.path(outdir, paste0(id, "_umap_summary.tsv")),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE

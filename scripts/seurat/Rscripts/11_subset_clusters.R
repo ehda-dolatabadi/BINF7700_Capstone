@@ -28,7 +28,7 @@ n_features_before <- nrow(obj)
 obj <- subset(obj, idents = idents)
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_00_subset.rds")))
+saveRDS(obj, file = file.path(outdir, paste0(id, "_subset.rds")))
 
 # Summary table
 write.table(
@@ -40,7 +40,7 @@ write.table(
     n_features_before,
     n_features_after = nrow(obj)
   ),
-  file = file.path(outdir, paste0(id, "_00_subsetting_summary.tsv")),
+  file = file.path(outdir, paste0(id, "_subsetting_summary.tsv")),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE

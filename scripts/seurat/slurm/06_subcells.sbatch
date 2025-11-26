@@ -44,7 +44,7 @@ echo "Subsetting data..."
 Rscript "$RUN/12_subset_cells.R" \
   "$ID" \
   "$OUT_subcells" \
-  "$OUT_integrate/${main_ID}_05_integrated.rds" \
+  "$OUT_integrate/${main_ID}_integrated.rds" \
   "$CELL_TYPES" \
   "$CELL_MARKERS" \
   "$CELL_THRESHOLDS"
@@ -54,7 +54,7 @@ echo "Re-running normalization and integration..."
 Rscript "$RUN/05_reintegrate_subset.R" \
   "$ID" \
   "$OUT_subcells" \
-  "$OUT_subcells/${ID}_00_subset.rds"
+  "$OUT_subcells/${ID}_subset.rds"
 echo "Normalization and integration completed✅"
 
 # Sync

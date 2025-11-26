@@ -50,7 +50,8 @@ fi
 if [ "$integrate" = true ]; then
     echo "Submitting integration..."
     JOB2=$(sbatch $SBATCH_OPTS \
-      --export=ALL,ID=$main_ID \
+      --export=ALL,\
+ID=$main_ID \
       $([ "$preprocess" = true ] && echo "--dependency=afterok:$JOB1") \
       $SLURM/02_integrate.sbatch)
     echo "  Job ID: $JOB2"
@@ -105,8 +106,7 @@ if [ "$score" = true ]; then
     JOB5=$(sbatch $SBATCH_OPTS \
       --array=0-$((count-1)) \
       --export=ALL,\
-main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
-GROUP_BY="seurat_clusters" \
+main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")"\
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4") \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB5"
@@ -141,8 +141,7 @@ UMAP_METRIC="cosine",\
 SIGNIFICANCE=0.05,\
 REGULATION=0.5,\
 ENRICHMENT=0.2,\
-TOP_MARKERS=30,\
-GROUP_BY="seurat_clusters" \
+TOP_MARKERS=30\
       --job-name=cluster_subcluster \
       --dependency=afterok:$JOB6 \
       $SLURM/03_cluster.sbatch)

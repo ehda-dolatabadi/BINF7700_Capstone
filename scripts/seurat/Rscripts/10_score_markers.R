@@ -16,8 +16,7 @@ id <- args[1]
 outdir <- args[2]
 input <- args[3]
 cell_name <- args[4]
-group_by <- args[5]
-markers <- unlist(strsplit(args[6], ","))
+markers <- unlist(strsplit(args[5], ","))
 
 # Load clustered object
 obj <- readRDS(input)
@@ -27,51 +26,65 @@ DefaultAssay(obj) <- "SCT"
 
 # Detect markers
 markers_available <- markers[markers %in% rownames(obj)]
+markers_missing <- markers[!markers %in% rownames(obj)]
+
+if (length(markers_available) == 0) {
+  cat("None of the markers found in dataset.")
+  quit(save = "no", status = 0)
+}
 
 # Add module score
+cell_name <- paste0(cell_name, "_score")
 obj <- AddModuleScore(
   obj,
   features = list(markers_available),
-  name = cell_name
+  name = score_name
 )
 feature_name = paste0(cell_name, "1")
 
-# Plot FeaturePlot
-png(file.path(outdir, paste0(id, "_10_feature_score.png")), width = 1600, height = 1200)
-FeaturePlot(obj, features = feature_name)
-dev.off()
-
 # Plot VlnPlot
-png(file.path(outdir, paste0(id, "_10_violin_score.png")), width = 1600, height = 1200)
+png(file.path(outdir, paste0(id, "_violin_score.png")), width = 1600, height = 1200, res = 150)
 VlnPlot(obj, features = feature_name, group.by = group_by, pt.size = 0) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
   labs(x = NULL)
 dev.off()
 
-# Check individual marker expression
-png(file.path(outdir, paste0(id, "_10_individual_markers_violin.png")), width = 1600, height = 1200)
-VlnPlot(obj, features = markers_available, ncol = 2, pt.size = 0) +
-  labs(x = NULL)
-dev.off()
+# Plot individual markers
+for (marker in markers_available){
+  png(file.path(outdir, paste0(id, marker, "_clusters_violin_score.png")), width = 1600, height = 1200, res = 150)
+  print(VlnPlot(obj, features = marker, group.by = "seurat_clusters", pt.size = 0) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+    labs(x = NULL))
+  dev.off()
+}
+
+for (marker in markers_available){
+  png(file.path(outdir, paste0(id, marker, "_timepoints_violin_score.png")), width = 1600, height = 1200, res = 150)
+  print(VlnPlot(obj, features = marker, group.by = "orig.ident", pt.size = 0) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+    labs(x = NULL))
+  dev.off()
+}
 
 # Visualize distribution
-png(file.path(outdir, paste0(id, "_10_score_distribution.png")), width = 1600, height = 1200)
+png(file.path(outdir, paste0(id, "_score_distribution.png")), width = 1600, height = 1200, res = 150)
 hist(obj@meta.data[[feature_name]], breaks = 50, main = "Score Distribution", xlab = "Score")
+abline(v = 0, col = "red", lty = 2, lwd = 2)
 dev.off()
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_10_scored.rds")))
+saveRDS(obj, file = file.path(outdir, paste0(id, "_scored.rds")))
 
 # Summary table
 write.table(
   data.frame(
     id,
-    n_cells = ncol(obj),
-    n_features = nrow(obj),
     n_markers_total = length(markers),
     n_markers_available = length(markers_available),
-    markers_available = paste(markers_available, collapse = ",")
+    markers_available = paste(markers_available, collapse = ","),
+    markers_missing = paste(markers_missing, collapse = ",")
   ),
-  file = file.path(outdir, paste0(id, "_10_score_summary.tsv")),
+  file = file.path(outdir, paste0(id, "_score_summary.tsv")),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE

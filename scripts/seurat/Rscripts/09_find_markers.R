@@ -34,15 +34,14 @@ obj <- PrepSCTFindMarkers(obj)
 # Find markers
 markers <- FindAllMarkers(
   obj,
-  max.cells.per.ident = 500,
-  only.pos = FALSE,
+  only.pos = FALSE
 )
 
 # Order markers
 markers <- markers[order(markers$cluster, markers$p_val_adj, -markers$avg_log2FC), ]
 
 # Save markers
-outfile <- file.path(outdir, paste0(id, "_09_markers.tsv"))
+outfile <- file.path(outdir, paste0(id, "_markers.tsv"))
 write.table(markers, file = outfile, sep = "\t", quote = FALSE, row.names = FALSE)
 
 # Filter
@@ -62,5 +61,5 @@ filtered_top <- filtered %>%
   ungroup()
 
 # Save filtered markers
-outfile <- file.path(outdir, paste0(id, "_09_markers_filtered.tsv"))
+outfile <- file.path(outdir, paste0(id, "_markers_filtered.tsv"))
 write.table(filtered_top, file = outfile, sep = "\t", quote = FALSE, row.names = FALSE)

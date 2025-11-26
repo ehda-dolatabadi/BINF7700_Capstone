@@ -34,9 +34,16 @@ conda activate seurat
 
 # Workflow
 echo "Subsetting data..."
-Rscript "$RUN/11_subset_clusters.R"	"$ID"   "$OUT_subset"  "$OUT_cluster/${main_ID}_07_clustered.rds" "$IDENT"
+Rscript "$RUN/11_subset_clusters.R"\
+    "$ID"\
+    "$OUT_subset"\
+    "$OUT_cluster/${main_ID}_clustered.rds"\
+    "$IDENT"
 echo "Subset completed✅"
 
 echo "Re-running normalization and integration..."
-Rscript "$RUN/05_reintegrate_subset.R"  "$ID"   "$OUT_subset"  "$OUT_subset/${ID}_00_subset.rds"
+Rscript "$RUN/05_reintegrate_subset.R"\
+    "$ID"\
+    "$OUT_subset"\
+    "$OUT_subset/${ID}_subset.rds"
 echo "Normalization and integration completed✅"

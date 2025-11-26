@@ -12,7 +12,6 @@ set -euo pipefail
 
 # Parameters
 main_ID="${main_ID:-all}"
-GROUP_BY="${GROUP_BY:-seurat_clusters}"
 
 # Paths
 cd "$SLURM_SUBMIT_DIR"
@@ -52,9 +51,8 @@ echo "Scoring $CELL_NAME markers..."
 Rscript "$RUN/10_score_markers.R" \
   "$ID" \
   "$OUT_score" \
-  "$OUT_cluster/${main_ID}_07_clustered.rds" \
+  "$OUT_cluster/${main_ID}_clustered.rds" \
   "$CELL_NAME" \
-  "$GROUP_BY" \
   "$MARKERS"
 echo "Scoring completed✅"
 
