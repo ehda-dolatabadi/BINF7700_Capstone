@@ -28,9 +28,9 @@ preprocess=false
 integrate=false
 subset=false
 cluster=false
-subset_score=true
-score=true
-subcluster=false
+subset_score=false
+score=false
+subcluster=true
 
 
 
