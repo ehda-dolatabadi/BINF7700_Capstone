@@ -28,9 +28,9 @@ preprocess=false
 integrate=false
 subset=false
 cluster=false
-subset_score=false
-score=false
-subcluster=true
+subset_score=true
+score=true
+subcluster=false
 
 
 
@@ -80,7 +80,7 @@ if [ "$subset" = true ]; then
       --export=ALL,\
 ID="enriched",\
 SUBSET_FILE="$(pwd)/scripts/seurat/abundant_cells.txt",\
-CELL_THRESHOLDS="0.3;2.0" \
+CELL_THRESHOLDS="0;0;1;1;0.5;0;0.7" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/06_subcells.sbatch)
     echo "  Job ID: $JOB3"

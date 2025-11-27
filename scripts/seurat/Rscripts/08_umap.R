@@ -41,7 +41,7 @@ print(DimPlot(obj, reduction = "umap", label = TRUE))
 dev.off()
 
 png(file.path(outdir, paste0(id, "_umap_split.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", split.by = "orig.ident", ncol = 3, label = TRUE))
+print(DimPlot(obj, reduction = "umap", split.by = "orig.ident", ncol = 4, label = TRUE))
 dev.off()
 
 # Save object
