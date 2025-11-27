@@ -34,6 +34,7 @@ obj <- PrepSCTFindMarkers(obj)
 # Find markers
 markers <- FindAllMarkers(
   obj,
+  max.cells.per.ident = 500,
   only.pos = FALSE
 )
 

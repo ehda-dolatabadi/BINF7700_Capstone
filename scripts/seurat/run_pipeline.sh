@@ -24,8 +24,8 @@ SBATCH_OPTS="--parsable"
 
 # ==================== PIPELINE ====================
 # Jobs to submit
-preprocess=true
-integrate=true
+preprocess=false
+integrate=false
 subset=false
 cluster=true
 subset_score=true
