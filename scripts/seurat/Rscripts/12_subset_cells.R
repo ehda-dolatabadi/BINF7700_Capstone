@@ -84,13 +84,13 @@ for (i in seq_along(cell_types)) {
   hist(obj[[score_name]][,1], breaks = 50,
        main = paste(cell_type, "Score Distribution"),
        xlab = paste(cell_type, "Score"))
-  abline(v = c(0, threshold), col = "red", lwd = 2, lty = 2)
+  abline(v = c(0, threshold), col = c("gray", "red"), lwd = 2, lty = 2)
   dev.off()
   
   # Violin plot
   png(file.path(outdir, paste0(id, "_", cell_type, "_violin_score.png")), width = 1600, height = 1200, res=150)
   print(VlnPlot(obj, features = score_name, pt.size = 0, group.by = "orig.ident") +
-    geom_hline(yintercept = c(0, threshold), linetype = "dashed", color = "red") +
+    geom_hline(yintercept = c(0, threshold), linetype = "dashed", color = c("gray", "red")) +
     labs(x = NULL))
   dev.off()
 

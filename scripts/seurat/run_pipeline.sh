@@ -27,9 +27,9 @@ SBATCH_OPTS="--parsable"
 preprocess=false
 integrate=false
 subset=false
-cluster=false
-subset_score=true
-score=true
+cluster=true
+subset_score=false
+score=false
 subcluster=false
 
 
@@ -102,8 +102,8 @@ RES=0.5,\
 UMAP_DIMS=10,\
 UMAP_METRIC="cosine",\
 SIGNIFICANCE=0.05,\
-REGULATION=0.5,\
-ENRICHMENT=0.1,\
+REGULATION=1,\
+ENRICHMENT=0.2,\
 TOP_MARKERS=100 \
       $([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \
 		|| ([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2")) \

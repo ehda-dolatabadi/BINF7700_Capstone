@@ -43,31 +43,31 @@ eval "$(conda shell.bash hook)"
 conda activate seurat
 
 # Workflow
-echo "Running PCA..."
-Rscript "$RUN/06_pca.R" \
-  "$ID" \
-  "$OUT_pca" \
-  "$OUT_integrate/${ID}_integrated.rds" \
-  "$NPCS"
-echo "PCA completed✅"
+#echo "Running PCA..."
+#Rscript "$RUN/06_pca.R" \
+#  "$ID" \
+#  "$OUT_pca" \
+#  "$OUT_integrate/${ID}_integrated.rds" \
+#  "$NPCS"
+#echo "PCA completed✅"
 
-echo "Clustering..."
-Rscript "$RUN/07_cluster.R" \
-  "$ID" \
-  "$OUT_cluster" \
-  "$OUT_pca/${ID}_pca.rds" \
-  "$DIMS" \
-  "$RES"
-echo "Clustering completed✅"
+#echo "Clustering..."
+#Rscript "$RUN/07_cluster.R" \
+#  "$ID" \
+#  "$OUT_cluster" \
+#  "$OUT_pca/${ID}_pca.rds" \
+#  "$DIMS" \
+#  "$RES"
+#echo "Clustering completed✅"
 
-echo "Running UMAP..."
-Rscript "$RUN/08_umap.R" \
-  "$ID" \
-  "$OUT_umap" \
-  "$OUT_cluster/${ID}_clustered.rds" \
-  "$UMAP_DIMS" \
-  "$UMAP_METRIC"
-echo "UMAP completed✅"
+#echo "Running UMAP..."
+#Rscript "$RUN/08_umap.R" \
+#  "$ID" \
+#  "$OUT_umap" \
+#  "$OUT_cluster/${ID}_clustered.rds" \
+#  "$UMAP_DIMS" \
+#  "$UMAP_METRIC"
+#echo "UMAP completed✅"
 
 echo "Finding Markers..."
 Rscript "$RUN/09_find_markers.R" \
