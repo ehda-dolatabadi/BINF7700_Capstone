@@ -28,9 +28,9 @@ preprocess=false
 integrate=false
 subset=false
 cluster=false
-subset_score=true
-score=true
-subcluster=false
+subset_score=false
+score=false
+subcluster=true
 
 
 
@@ -164,8 +164,8 @@ if [ "$subcluster" = true ]; then
     JOB6=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
-ID="cluster15",\
-IDENT="15" \
+ID="cluster16",\
+IDENT="16" \
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB5") \
       $SLURM/05_subcluster.sbatch)
     echo "  Job ID: $JOB6"
@@ -173,7 +173,7 @@ IDENT="15" \
     JOB7=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
-ID="cluster15",\
+ID="cluster16",\
 NPCS=50,\
 DIMS=10,\
 RES=1.5,\

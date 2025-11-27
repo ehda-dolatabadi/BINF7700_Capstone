@@ -37,11 +37,11 @@ obj <- RunUMAP(
 
 # Plot
 png(file.path(outdir, paste0(id, "_umap.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", label = TRUE, pt.size = 0.2))
+print(DimPlot(obj, reduction = "umap", label = TRUE, pt.size = 0.1))
 dev.off()
 
 png(file.path(outdir, paste0(id, "_umap_split.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", split.by = "orig.ident", label = TRUE, pt.size = 0.2))
+print(DimPlot(obj, reduction = "umap", split.by = "orig.ident", ncol = 3, label = TRUE, pt.size = 0.1))
 dev.off()
 
 # Save object
