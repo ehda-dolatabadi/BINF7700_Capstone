@@ -124,6 +124,7 @@ if [ "$subset_score" = true ]; then
       --array=0-$((n_subset-1)) \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
+CELL_TYPE="abundent",\
 MARKER_FILE="$(pwd)/scripts/seurat/abundant_cells.txt" \
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4") \
       $SLURM/04_score_markers.sbatch)
@@ -143,6 +144,7 @@ if [ "$score" = true ]; then
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
+CELL_TYPE="neural",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4" \
 		|| ([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \

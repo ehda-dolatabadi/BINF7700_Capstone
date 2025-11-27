@@ -12,6 +12,7 @@ set -euo pipefail
 
 # Parameters
 main_ID="${main_ID:-all}"
+CELL_TYPE="${CELL_TYPE:-neural}"
 
 # Paths
 cd "$SLURM_SUBMIT_DIR"
@@ -39,7 +40,7 @@ MARKERS="${!CELL_NAME}"
 RUN="$WORK/scripts/seurat/Rscripts"
 OUT_cluster="$OUT/seurat/${main_ID}_07_clustered"
 OUT_score="$OUT/seurat/${main_ID}_10_scored"
-OUT_cell="$OUT_score/$CELL_NAME"
+OUT_cell="$OUT_score/$CELL_TYPE"
 
 mkdir -p "$OUT_score" "$OUT_cell"
 
