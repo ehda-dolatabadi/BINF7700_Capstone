@@ -43,13 +43,13 @@ obj <- AddModuleScore(
 feature_name = paste0(cell_name, "1")
 
 # Plot VlnPlot
-png(file.path(outdir, paste0(id, "_timepoints_violin_score.png")), width = 1600, height = 1200, res = 150)
+png(file.path(outdir, paste0(id, "_all_timepoints_violin_score.png")), width = 1600, height = 1200, res = 150)
 VlnPlot(obj, features = feature_name, group.by = "orig.ident", pt.size = 0) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
   labs(x = NULL)
 dev.off()
 
-png(file.path(outdir, paste0(id, "_clusters_violin_score.png")), width = 1600, height = 1200, res = 150)
+png(file.path(outdir, paste0(id, "_all_clusters_violin_score.png")), width = 1600, height = 1200, res = 150)
 VlnPlot(obj, features = feature_name, group.by = "seurat_clusters", pt.size = 0) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
   labs(x = NULL)
@@ -73,7 +73,7 @@ for (marker in markers_available){
 }
 
 # Visualize distribution
-png(file.path(outdir, paste0(id, "_score_distribution.png")), width = 1600, height = 1200, res = 150)
+png(file.path(outdir, paste0(id, "_all_score_distribution.png")), width = 1600, height = 1200, res = 150)
 hist(obj@meta.data[[feature_name]], breaks = 50, main = "Score Distribution", xlab = "Score")
 abline(v = 0, col = "red", lty = 2, lwd = 2)
 dev.off()

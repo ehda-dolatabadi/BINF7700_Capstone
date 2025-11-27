@@ -26,8 +26,8 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=false
 integrate=false
-subset=false
-cluster=false
+subset=true
+cluster=true
 subset_score=true
 score=true
 subcluster=false
@@ -105,7 +105,7 @@ SIGNIFICANCE=0.05,\
 REGULATION=1,\
 ENRICHMENT=0.2,\
 TOP_MARKERS=30 \
-      $([ "$subset" = true ] && echo "--dependency=afterok:$JOB4" \
+      $([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \
 		|| ([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2")) \
       $SLURM/03_cluster.sbatch)
     echo "  Job ID: $JOB4"
@@ -163,16 +163,16 @@ fi
 # Optional step: Subclustering
 if [ "$subcluster" = true ]; then
     echo "Submitting subclustering..."
-    JOB6=$(sbatch $SBATCH_OPTS \
+    JOB7=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
 ID="cluster16",\
 IDENT="16" \
-      $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB5") \
+      $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4") \
       $SLURM/05_subcluster.sbatch)
-    echo "  Job ID: $JOB6"
+    echo "  Job ID: $JOB7"
 
-    JOB7=$(sbatch $SBATCH_OPTS \
+    JOB8=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
 ID="cluster16",\
@@ -186,9 +186,9 @@ REGULATION=0.5,\
 ENRICHMENT=0.2,\
 TOP_MARKERS=30\
       --job-name=cluster_subcluster \
-      --dependency=afterok:$JOB6 \
+      --dependency=afterok:$JOB7 \
       $SLURM/03_cluster.sbatch)
-    echo "  Job ID: $JOB7"
+    echo "  Job ID: $JOB8"
 fi
 
 echo "Pipeline submitted successfully!"
