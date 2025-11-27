@@ -27,7 +27,7 @@ SBATCH_OPTS="--parsable"
 preprocess=false
 integrate=false
 subset=false
-cluster=true
+cluster=false
 subset_score=true
 score=true
 subcluster=false
@@ -119,7 +119,7 @@ fi
 
 # Optional step: Abundent cells scoring
 if [ "$subset_score" = true ]; then
-    echo "Submitting marker-based scoring..."
+    echo "Submitting marker-based scoring for abundent cells..."
     JOB5=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_subset-1)) \
       --export=ALL,\
@@ -144,8 +144,8 @@ if [ "$score" = true ]; then
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
-      $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB5" \
-		|| ([ "$subset" = true ] && echo "--dependency=afterok:$JOB4" \
+      $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4" \
+		|| ([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \
 		|| ([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2"))) \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB6"
