@@ -22,7 +22,7 @@ plan("multicore", workers = 8)
 # Load clustered object
 obj <- readRDS(input)
 n_cells_before <- ncol(obj)
-n_features_before <- nrow(obj)
+n_features_before <- nrow(obj[["SCT"]])
 
 # Subset to cluster
 obj <- subset(obj, idents = idents)
@@ -38,7 +38,7 @@ write.table(
     n_cells_before,
     n_cells_after = ncol(obj),
     n_features_before,
-    n_features_after = nrow(obj)
+    n_features_after = nrow(obj[["SCT"]])
   ),
   file = file.path(outdir, paste0(id, "_subsetting_summary.tsv")),
   sep = "\t",

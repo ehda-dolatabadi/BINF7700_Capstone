@@ -22,7 +22,6 @@ plan("multicore", workers = 8)
 # Load normalized objects
 obj_list <- lapply(paths, readRDS)
 n_samples <- length(obj_list)
-n_cells_total <- sum(sapply(obj_list, ncol))
 n_features_per_sample <- sapply(obj_list, nrow)
 n_features_min <- min(n_features_per_sample)
 n_features_max <- max(n_features_per_sample)
@@ -60,8 +59,7 @@ write.table(
   data.frame(
     id,
     n_samples,
-    n_cells_total,
-    n_cells_after = ncol(obj),
+    n_cells_total = ncol(obj),
     n_features_min,
     n_features_max,
     n_features_mean,

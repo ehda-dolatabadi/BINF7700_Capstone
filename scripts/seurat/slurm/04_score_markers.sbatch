@@ -39,8 +39,9 @@ MARKERS="${!CELL_NAME}"
 RUN="$WORK/scripts/seurat/Rscripts"
 OUT_cluster="$OUT/seurat/${main_ID}_07_clustered"
 OUT_score="$OUT/seurat/${main_ID}_10_scored"
+OUT_cell="$OUT_score/$CELL_NAME"
 
-mkdir -p "$OUT_score"
+mkdir -p "$OUT_score" "$OUT_cell"
 
 # Environment
 eval "$(conda shell.bash hook)"
@@ -50,7 +51,7 @@ conda activate seurat
 echo "Scoring $CELL_NAME markers..."
 Rscript "$RUN/10_score_markers.R" \
   "$ID" \
-  "$OUT_score" \
+  "$OUT_cell" \
   "$OUT_cluster/${main_ID}_clustered.rds" \
   "$CELL_NAME" \
   "$MARKERS"
