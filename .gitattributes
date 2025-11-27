@@ -1,0 +1,4 @@
+*.html linguist-vendored
+*.html linguist-documentation
+results/** linguist-vendored
+outputs/** linguist-vendored

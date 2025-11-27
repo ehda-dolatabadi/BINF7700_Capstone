@@ -102,9 +102,9 @@ RES=0.5,\
 UMAP_DIMS=10,\
 UMAP_METRIC="cosine",\
 SIGNIFICANCE=0.05,\
-REGULATION=1,\
-ENRICHMENT=0.2,\
-TOP_MARKERS=30 \
+REGULATION=0.5,\
+ENRICHMENT=0.1,\
+TOP_MARKERS=100 \
       $([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \
 		|| ([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2")) \
       $SLURM/03_cluster.sbatch)
