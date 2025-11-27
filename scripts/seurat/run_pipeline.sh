@@ -26,8 +26,8 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=false
 integrate=false
-subset=true
-cluster=true
+subset=false
+cluster=false
 subset_score=true
 score=true
 subcluster=false
@@ -144,7 +144,7 @@ if [ "$score" = true ]; then
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
-CELL_TYPE="neural",\
+CELL_TYPE="schwann",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4" \
 		|| ([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \
