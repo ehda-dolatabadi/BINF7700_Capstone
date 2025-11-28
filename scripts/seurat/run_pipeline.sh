@@ -34,7 +34,6 @@ subcluster=false
 
 
 
-
 # Step 1: Preprocessing
 if [ "$preprocess" = true ]; then
     echo "Submitting preprocessing..."
@@ -55,9 +54,6 @@ fi
 
 
 
-
-
-
 # Step 2: Integration
 if [ "$integrate" = true ]; then
     echo "Submitting integration..."
@@ -68,8 +64,6 @@ ID=$main_ID \
       $SLURM/02_integrate.sbatch)
     echo "  Job ID: $JOB2"
 fi
-
-
 
 
 
@@ -85,8 +79,6 @@ CELL_THRESHOLDS="0;0.04;0.3;0.2" \
       $SLURM/06_subcells.sbatch)
     echo "  Job ID: $JOB3"
 fi
-
-
 
 
 
@@ -113,34 +105,10 @@ fi
 
 
 
-
-
-
-
-# Optional step: Abundent cells scoring
-if [ "$subset_score" = true ]; then
-    echo "Submitting marker-based scoring for abundent cells..."
-    JOB5=$(sbatch $SBATCH_OPTS \
-      --array=0-$((n_subset-1)) \
-      --export=ALL,\
-main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
-CELL_TYPE="abund",\
-MARKER_FILE="$(pwd)/scripts/seurat/abundant_cells.txt" \
-      $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4") \
-      $SLURM/04_score_markers.sbatch)
-    echo "  Job ID: $JOB5"
-fi
-
-
-
-
-
-
-
 # Optional step: Marker-based scoring
 if [ "$score" = true ]; then
     echo "Submitting marker-based scoring..."
-    JOB6=$(sbatch $SBATCH_OPTS \
+    JOB5=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
@@ -149,29 +117,24 @@ MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
 		|| ([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \
 		|| ([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2"))) \
       $SLURM/04_score_markers.sbatch)
-    echo "  Job ID: $JOB6"
+    echo "  Job ID: $JOB5"
 fi
-
-
-
-
-
 
 
 
 # Optional step: Subclustering
 if [ "$subcluster" = true ]; then
     echo "Submitting subclustering..."
-    JOB7=$(sbatch $SBATCH_OPTS \
+    JOB6=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
 ID="cluster16",\
 IDENT="16" \
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4") \
       $SLURM/05_subcluster.sbatch)
-    echo "  Job ID: $JOB7"
+    echo "  Job ID: $JOB6"
 
-    JOB8=$(sbatch $SBATCH_OPTS \
+    JOB7=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
 ID="cluster16",\
@@ -182,12 +145,12 @@ UMAP_DIMS=10,\
 UMAP_METRIC="cosine",\
 SIGNIFICANCE=0.05,\
 REGULATION=0.5,\
-ENRICHMENT=0.2,\
-TOP_MARKERS=30\
+ENRICHMENT=0.1,\
+TOP_MARKERS=100\
       --job-name=cluster_subcluster \
-      --dependency=afterok:$JOB7 \
+      --dependency=afterok:$JOB6 \
       $SLURM/03_cluster.sbatch)
-    echo "  Job ID: $JOB8"
+    echo "  Job ID: $JOB7"
 fi
 
 echo "Pipeline submitted successfully!"
