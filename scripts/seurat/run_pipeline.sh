@@ -27,8 +27,8 @@ SBATCH_OPTS="--parsable"
 preprocess=false
 integrate=false
 subset=false
-cluster=true
-subset_score=false
+cluster=false
+subset_score=true
 score=false
 subcluster=false
 
@@ -124,7 +124,7 @@ if [ "$subset_score" = true ]; then
       --array=0-$((n_subset-1)) \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
-CELL_TYPE="abundent",\
+CELL_TYPE="abund",\
 MARKER_FILE="$(pwd)/scripts/seurat/abundant_cells.txt" \
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4") \
       $SLURM/04_score_markers.sbatch)
