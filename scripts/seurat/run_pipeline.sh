@@ -26,10 +26,10 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=false
 integrate=false
-subset=false
-cluster=false
+subset=true
+cluster=true
 subset_score=false
-score=false
+score=true
 subcluster=false
 
 
@@ -79,9 +79,8 @@ if [ "$subset" = true ]; then
     JOB3=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID="enriched",\
-MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt"
-SUBSET_FILE="$(pwd)/scripts/seurat/abundant_cells.txt",\
-CELL_THRESHOLDS="0.04;0.3;0.2" \
+SUBSET_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
+CELL_THRESHOLDS="0;0.04;0.3;0.2" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/06_subcells.sbatch)
     echo "  Job ID: $JOB3"
@@ -145,7 +144,6 @@ if [ "$score" = true ]; then
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
-CELL_TYPE="schwann",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4" \
 		|| ([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \
