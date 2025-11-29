@@ -74,7 +74,7 @@ if [ "$subset" = true ]; then
       --export=ALL,\
 ID="enriched",\
 SUBSET_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_THRESHOLDS="1;0.3;0.1;1.0;0.4" \
+CELL_THRESHOLDS="1;0.1;1.0;0.4" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/06_subcells.sbatch)
     echo "  Job ID: $JOB3"
