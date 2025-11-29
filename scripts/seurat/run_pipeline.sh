@@ -26,8 +26,8 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=false
 integrate=false
-subset=true
-cluster=true
+subset=false
+cluster=false
 subset_score=false
 score=true
 subcluster=false

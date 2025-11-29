@@ -1,2 +1,2 @@
 id	n_markers_total	n_markers_available	markers_available	markers_missing
-erythrocytes	14	14	ALAS2,RHAG,SLC4A1,HEMGN,GYPC,NCOA4,EPB41,HMBS,AQP1,SLC25A37,HBA1,HBA2,HBB,LOX	
+erythrocytes	11	5	PTPRC,RUVBL1,TFRC,ITGA4,HBB	GYPA,FOLR1,CD36,CD235a,HBD,CA1
