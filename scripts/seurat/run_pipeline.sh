@@ -26,8 +26,8 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=false
 integrate=false
-subset=false
-cluster=false
+subset=true
+cluster=true
 score=true
 subcluster=false
 
@@ -71,7 +71,8 @@ if [ "$subset" = true ]; then
     echo "Submitting subcells removal..."
     JOB3=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
-ID="enriched1",\
+ID="enriched2",\
+main_ID="enriched1",\
 SUBSET_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
 CELL_THRESHOLDS="0.2" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
@@ -86,7 +87,7 @@ if [ "$cluster" = true ]; then
     echo "Submitting clustering..."
     JOB4=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
-ID="$([ "$subset" = true ] && echo "enriched1" || echo "$main_ID")",\
+ID="$([ "$subset" = true ] && echo "enriched2" || echo "$main_ID")",\
 NPCS=50,\
 DIMS=10,\
 RES=0.5,\
@@ -110,7 +111,7 @@ if [ "$score" = true ]; then
     JOB5=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
-main_ID="enriched1",\
+main_ID="$([ "$subset" = true ] && echo "enriched2" || echo "$main_ID")",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4" \
 		|| ([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \
@@ -120,7 +121,7 @@ MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
 fi
 
 
-#"$([ "$subset" = true ] && echo "enriched1" || echo "$main_ID")",\
+
 # Optional step: Subclustering
 if [ "$subcluster" = true ]; then
     echo "Submitting subclustering..."
