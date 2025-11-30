@@ -1,2 +1,2 @@
 id	n_markers_total	n_markers_available	markers_available	markers_missing
-endothelial	16	16	PECAM1,CD34,KDR,CDH5,PROM1,PDPN,TEK,FLT1,VCAM1,PTPRC,VWF,ENG,MCAM,ICAM1,FLT4,SELE	
+endothelial	13	13	CD34,CDH5,ENG,FLT1,ICAM1,KDR,MCAM,PDPN,PECAM1,PROM1,SELE,TEK,VWF	
