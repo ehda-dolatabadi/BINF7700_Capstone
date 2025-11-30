@@ -26,8 +26,8 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=false
 integrate=false
-subset=false
-cluster=false
+subset=true
+cluster=true
 score=true
 subcluster=false
 
@@ -73,7 +73,7 @@ if [ "$subset" = true ]; then
       --export=ALL,\
 ID="enriched1",\
 SUBSET_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_THRESHOLDS="1" \
+CELL_THRESHOLDS="0.2" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/06_subcells.sbatch)
     echo "  Job ID: $JOB3"

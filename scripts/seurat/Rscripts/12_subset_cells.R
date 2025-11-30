@@ -102,7 +102,7 @@ for (i in seq_along(cell_types)) {
 }
 
 # Get cells that pass the filter
-cells_to_keep_others <- FALSE
+cells_to_keep <- TRUE
 
 for (i in 1:length(cell_types)) {
   score_col <- paste0(cell_types[i], "_score1")
