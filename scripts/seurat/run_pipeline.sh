@@ -87,6 +87,7 @@ if [ "$cluster" = true ]; then
     echo "Submitting clustering..."
     JOB4=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
+main_ID="enriched1",\
 ID="$([ "$subset" = true ] && echo "enriched2" || echo "$main_ID")",\
 NPCS=50,\
 DIMS=10,\
