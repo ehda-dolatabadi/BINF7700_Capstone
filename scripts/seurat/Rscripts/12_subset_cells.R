@@ -102,17 +102,13 @@ for (i in seq_along(cell_types)) {
 }
 
 # Get cells that pass the filter
-cells_to_keep_first <- obj[[paste0(cell_types[1], "_score1")]][,1] >= cell_thresholds[1]
-cells_to_keep_others <- TRUE
+cells_to_keep_others <- FALSE
 
-for (i in 2:length(cell_types)) {
+for (i in 1:length(cell_types)) {
   score_col <- paste0(cell_types[i], "_score1")
   threshold <- cell_thresholds[i]
-  cells_to_keep_others <- cells_to_keep_others & (obj[[score_col]][,1] < threshold)
+  cells_to_keep <- cells_to_keep & (obj[[score_col]][,1] < threshold)
 }
-
-# Combine with OR
-cells_to_keep <- cells_to_keep_first | cells_to_keep_others
 
 # Subset to keep only cells that pass all filters
 obj <- obj[, cells_to_keep]

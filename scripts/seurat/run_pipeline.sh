@@ -28,7 +28,6 @@ preprocess=false
 integrate=false
 subset=false
 cluster=false
-subset_score=false
 score=true
 subcluster=false
 
@@ -72,9 +71,9 @@ if [ "$subset" = true ]; then
     echo "Submitting subcells removal..."
     JOB3=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
-ID="enriched",\
+ID="enriched1",\
 SUBSET_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_THRESHOLDS="1;0.1;1.0;0.4" \
+CELL_THRESHOLDS="1" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/06_subcells.sbatch)
     echo "  Job ID: $JOB3"
