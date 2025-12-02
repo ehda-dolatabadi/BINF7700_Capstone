@@ -26,8 +26,8 @@ integrate=false
 cluster_all=false
 score_all=false
 
-enrich1=true
-enrich2=false
+enrich1=false
+enrich2=true
 
 subcluster=false
 
@@ -104,7 +104,7 @@ fi
 
 
 
-# Step 5: Removing epithelial cells and erythrocytes (~60% of dataset)
+# Step 5: Removing epithelial cells (~54% of dataset)
 if [ "$enrich1" = true ]; then
     echo "Submitting subcells removal..."
     JOB5=$(sbatch $SBATCH_OPTS \
@@ -112,8 +112,8 @@ if [ "$enrich1" = true ]; then
 ID="enriched1",\
 main_ID=$main_ID,\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_TYPES="epithelial;erythrocytes",\
-CELL_THRESHOLDS="0.2;0.8" \
+CELL_TYPES="epithelial",\
+CELL_THRESHOLDS="0.2" \
       --job-name=subset1 \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/05_subcells.sbatch)
@@ -154,7 +154,7 @@ fi
 
 
 
-# Step 6: Removing endothelial cells
+# Step 6: Removing other abundant cells cells
 if [ "$enrich2" = true ]; then
     echo "Submitting subcells removal..."
     JOB8=$(sbatch $SBATCH_OPTS \
@@ -162,7 +162,7 @@ if [ "$enrich2" = true ]; then
 ID="enriched2",\
 main_ID="enriched1",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_TYPES="endothelial",\
+CELL_TYPES="endothelial;epithelial;erythrocytes;fibroblasts",\
 CELL_THRESHOLDS="0.2" \
       --job-name=subset2 \
       $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB5") \
