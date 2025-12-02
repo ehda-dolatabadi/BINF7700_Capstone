@@ -10,9 +10,6 @@ export REF="UKY_AmexF1_1_genomic"
 export MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt"
 n_marker=$(grep -cE '^[a-zA-Z_]+=' ${MARKER_FILE})
 
-export SUBSET_FILE="$(pwd)/scripts/seurat/abundant_cells.txt"
-n_subset=$(grep -cE '^[a-zA-Z_]+=' ${SUBSET_FILE})
-
 # Source paths
 source "config/default_paths.sh"
 [ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
@@ -26,9 +23,12 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=false
 integrate=false
-subset=true
-cluster=true
-score=true
+cluster_all=false
+score_all=false
+
+enrich1=true
+enrich2=false
+
 subcluster=false
 
 
@@ -66,29 +66,13 @@ fi
 
 
 
-# Optional step: Removing abundant cells
-if [ "$subset" = true ]; then
-    echo "Submitting subcells removal..."
-    JOB3=$(sbatch $SBATCH_OPTS \
-      --export=ALL,\
-ID="enriched2",\
-main_ID="enriched1",\
-SUBSET_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_THRESHOLDS="0.2" \
-      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
-      $SLURM/06_subcells.sbatch)
-    echo "  Job ID: $JOB3"
-fi
-
-
 
 # Step 3: Clustering
-if [ "$cluster" = true ]; then
+if [ "$cluster_all" = true ]; then
     echo "Submitting clustering..."
-    JOB4=$(sbatch $SBATCH_OPTS \
+    JOB3=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
-main_ID="enriched1",\
-ID="$([ "$subset" = true ] && echo "enriched2" || echo "$main_ID")",\
+ID=$main_ID,\
 NPCS=50,\
 DIMS=10,\
 RES=0.5,\
@@ -98,28 +82,134 @@ SIGNIFICANCE=0.05,\
 REGULATION=1,\
 ENRICHMENT=0.2,\
 TOP_MARKERS=100 \
-      $([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \
-		|| ([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2")) \
+      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/03_cluster.sbatch)
+    echo "  Job ID: $JOB3"
+fi
+
+
+
+# Step 4: Marker-based scoring
+if [ "$score_all" = true ]; then
+    echo "Submitting marker-based scoring..."
+    JOB4=$(sbatch $SBATCH_OPTS \
+      --array=0-$((n_marker-1)) \
+      --export=ALL,\
+ID=$main_ID,\
+MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
+      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
+      $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB4"
 fi
 
 
 
-# Optional step: Marker-based scoring
-if [ "$score" = true ]; then
-    echo "Submitting marker-based scoring..."
+# Step 5: Removing epithelial cells (~60% of dataset)
+if [ "$enrich1" = true ]; then
+    echo "Submitting subcells removal..."
     JOB5=$(sbatch $SBATCH_OPTS \
+      --export=ALL,\
+ID="enriched1",\
+main_ID=$main_ID,\
+MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
+CELL_TYPES="epithelial",\
+CELL_THRESHOLDS="0.2" \
+      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
+      $SLURM/05_subcells.sbatch)
+    echo "  Job ID: $JOB5"
+
+    echo "Submitting clustering..."
+    JOB6=$(sbatch $SBATCH_OPTS \
+      --export=ALL,\
+ID="enriched1",\
+main_ID="enriched1",\
+NPCS=50,\
+DIMS=10,\
+RES=0.5,\
+UMAP_DIMS=10,\
+UMAP_METRIC="cosine",\
+SIGNIFICANCE=0.05,\
+REGULATION=1,\
+ENRICHMENT=0.2,\
+TOP_MARKERS=100 \
+      --dependency=afterok:$JOB5 \
+      $SLURM/03_cluster.sbatch)
+    echo "  Job ID: $JOB6"
+
+    echo "Submitting marker-based scoring..."
+    JOB7=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
-main_ID="$([ "$subset" = true ] && echo "enriched2" || echo "$main_ID")",\
+ID="enriched1",\
+main_ID="enriched1",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
-      $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4" \
-		|| ([ "$subset" = true ] && echo "--dependency=afterok:$JOB3" \
-		|| ([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2"))) \
+      --dependency=afterok:$JOB5 \
       $SLURM/04_score_markers.sbatch)
-    echo "  Job ID: $JOB5"
+    echo "  Job ID: $JOB7"
 fi
+
+
+
+
+
+# Step 6: Removing endothelial cells
+if [ "$enrich2" = true ]; then
+    echo "Submitting subcells removal..."
+    JOB8=$(sbatch $SBATCH_OPTS \
+      --export=ALL,\
+ID="enriched2",\
+main_ID="enriched1",\
+MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
+CELL_TYPES="endothelial",\
+CELL_THRESHOLDS="0.2" \
+      $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB5") \
+      $SLURM/05_subcells.sbatch)
+    echo "  Job ID: $JOB8"
+
+    echo "Submitting clustering..."
+    JOB9=$(sbatch $SBATCH_OPTS \
+      --export=ALL,\
+ID="enriched2",\
+main_ID="enriched2",\
+NPCS=50,\
+DIMS=10,\
+RES=0.5,\
+UMAP_DIMS=10,\
+UMAP_METRIC="cosine",\
+SIGNIFICANCE=0.05,\
+REGULATION=1,\
+ENRICHMENT=0.2,\
+TOP_MARKERS=100 \
+      --dependency=afterok:$JOB8 \
+      $SLURM/03_cluster.sbatch)
+    echo "  Job ID: $JOB9"
+
+    echo "Submitting marker-based scoring..."
+    JOB10=$(sbatch $SBATCH_OPTS \
+      --array=0-$((n_marker-1)) \
+      --export=ALL,\
+ID="enriched1",\
+main_ID="enriched1",\
+MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
+      --dependency=afterok:$JOB8 \
+      $SLURM/04_score_markers.sbatch)
+    echo "  Job ID: $JOB10"
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

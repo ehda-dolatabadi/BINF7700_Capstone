@@ -12,7 +12,8 @@ set -euo pipefail
 # Parameters
 main_ID="${main_ID:-all}"
 ID="${ID:-enriched}"
-CELL_THRESHOLDS="${CELL_THRESHOLDS:-5.0}"
+CELL_TYPES="${CELL_TYPES:-epithelial}"
+CELL_THRESHOLDS="${CELL_THRESHOLDS:-1.0}"
 
 # Paths
 cd "$SLURM_SUBMIT_DIR"
@@ -23,13 +24,13 @@ exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_JOB_ID}.log"
 exec 2>&1
 
 # Source marker file
-SUBSET_FILE="${SUBSET_FILE:-$WORK/scripts/seurat/abundant_cells.txt}"
-source ${SUBSET_FILE}
-cells=($(grep -E '^[a-zA-Z_]+=' ${SUBSET_FILE} | cut -d'=' -f1))
+MARKER_FILE="${MARKER_FILE:-$WORK/scripts/seurat/cell_markers.txt}"
+source ${MARKER_FILE}
 
-# Build semicolon-separated strings
-CELL_TYPES=$(IFS=';'; echo "${cells[*]}")
+# Split into array
+IFS=';' read -ra cells <<< "$CELL_TYPES"
 
+# Build semicolon-separated markers
 CELL_MARKERS=""
 for cell in "${cells[@]}"; do
     CELL_MARKERS="${CELL_MARKERS}${!cell};"

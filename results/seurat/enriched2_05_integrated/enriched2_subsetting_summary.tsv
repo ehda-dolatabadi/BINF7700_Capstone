@@ -1,2 +1,0 @@
-id	n_cells_before	n_features_before	n_endothelial_markers_total	n_endothelial_markers_available	endothelial_threshold	n_cells_endothelial	pct_cells_endothelial	n_cells_after	n_features_after	pct_cells_kept
-enriched2	24985	17921	13	13	0.2	1117	4.47068240944567	23868	17921	95.5293175905543
