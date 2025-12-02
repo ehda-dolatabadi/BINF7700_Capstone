@@ -1,2 +1,2 @@
-id	n_samples	n_cells_total	n_cells_after	n_features_min	n_features_max	n_features_mean	n_features_integrated	n_anchors
-all	8	54806	54806	16563	17608	16993.625	3000	450704
+id	n_samples	n_cells_total	n_features_min	n_features_max	n_features_mean	n_features_integrated	n_anchors
+all	8	54806	16563	17608	16993.625	3000	450432

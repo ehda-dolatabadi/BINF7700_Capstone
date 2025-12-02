@@ -24,10 +24,10 @@ SBATCH_OPTS="--parsable"
 preprocess=false
 integrate=false
 cluster_all=false
-score_all=true
+score_all=false
 
-enrich1=true
-enrich2=false
+enrich1=false
+enrich2=true
 
 subcluster=false
 
@@ -97,7 +97,7 @@ if [ "$score_all" = true ]; then
       --export=ALL,\
 main_ID=$main_ID,\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
-      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
+      $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB3") \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB4"
 fi
@@ -145,7 +145,7 @@ TOP_MARKERS=100 \
 main_ID="enriched1",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       --job-name=score_subset1 \
-      --dependency=afterok:$JOB5 \
+      --dependency=afterok:$JOB6 \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB7"
 fi
@@ -195,7 +195,7 @@ ID="enriched1",\
 main_ID="enriched1",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       --job-name=score_subset2 \
-      --dependency=afterok:$JOB8 \
+      --dependency=afterok:$JOB9 \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB10"
 fi
