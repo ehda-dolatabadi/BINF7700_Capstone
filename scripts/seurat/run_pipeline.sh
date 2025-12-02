@@ -24,7 +24,7 @@ SBATCH_OPTS="--parsable"
 preprocess=false
 integrate=false
 cluster_all=false
-score_all=false
+score_all=true
 
 enrich1=true
 enrich2=false
@@ -95,7 +95,7 @@ if [ "$score_all" = true ]; then
     JOB4=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
-ID=$main_ID,\
+main_ID=$main_ID,\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/04_score_markers.sbatch)
@@ -114,6 +114,7 @@ main_ID=$main_ID,\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
 CELL_TYPES="epithelial",\
 CELL_THRESHOLDS="0.2" \
+      --job-name=subset1 \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/05_subcells.sbatch)
     echo "  Job ID: $JOB5"
@@ -132,6 +133,7 @@ SIGNIFICANCE=0.05,\
 REGULATION=1,\
 ENRICHMENT=0.2,\
 TOP_MARKERS=100 \
+      --job-name=cluster_subset1 \
       --dependency=afterok:$JOB5 \
       $SLURM/03_cluster.sbatch)
     echo "  Job ID: $JOB6"
@@ -140,9 +142,9 @@ TOP_MARKERS=100 \
     JOB7=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
-ID="enriched1",\
 main_ID="enriched1",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
+      --job-name=score_subset1 \
       --dependency=afterok:$JOB5 \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB7"
@@ -162,6 +164,7 @@ main_ID="enriched1",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
 CELL_TYPES="endothelial",\
 CELL_THRESHOLDS="0.2" \
+      --job-name=subset2 \
       $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB5") \
       $SLURM/05_subcells.sbatch)
     echo "  Job ID: $JOB8"
@@ -169,7 +172,6 @@ CELL_THRESHOLDS="0.2" \
     echo "Submitting clustering..."
     JOB9=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
-ID="enriched2",\
 main_ID="enriched2",\
 NPCS=50,\
 DIMS=10,\
@@ -180,6 +182,7 @@ SIGNIFICANCE=0.05,\
 REGULATION=1,\
 ENRICHMENT=0.2,\
 TOP_MARKERS=100 \
+      --job-name=cluster_subset2 \
       --dependency=afterok:$JOB8 \
       $SLURM/03_cluster.sbatch)
     echo "  Job ID: $JOB9"
@@ -191,6 +194,7 @@ TOP_MARKERS=100 \
 ID="enriched1",\
 main_ID="enriched1",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
+      --job-name=score_subset2 \
       --dependency=afterok:$JOB8 \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB10"
