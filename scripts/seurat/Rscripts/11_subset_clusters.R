@@ -17,7 +17,7 @@ idents	<- args[4]
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
-plan("multicore", workers = 8)
+plan("multicore", workers = 56)
 
 # Load clustered object
 obj <- readRDS(input)

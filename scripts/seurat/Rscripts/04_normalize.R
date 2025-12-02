@@ -17,7 +17,7 @@ input   <- args[3]
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
-plan("multicore", workers = 8)
+plan("multicore", workers = 4)
 
 # Load filtered object
 obj <- readRDS(input)

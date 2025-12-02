@@ -19,7 +19,7 @@ npcs    <- as.numeric(args[4])
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
-plan("multicore", workers = 64)
+plan("multicore", workers = 56)
 
 # Load integrated object
 obj <- readRDS(input)

@@ -17,7 +17,7 @@ paths	<- args[3:length(args)]
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
-plan("multicore", workers = 8)
+plan("multicore", workers = 7)
 
 # Load normalized objects
 obj_list <- lapply(paths, readRDS)

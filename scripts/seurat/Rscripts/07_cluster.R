@@ -19,7 +19,7 @@ res     <- as.numeric(args[5])
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
-plan("multicore", workers = 64)
+plan("multicore", workers = 56)
 
 # Load PCA object
 obj <- readRDS(input)

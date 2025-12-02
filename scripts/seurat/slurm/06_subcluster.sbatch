@@ -2,7 +2,7 @@
 #SBATCH --job-name=subcluster
 #SBATCH --partition=courses
 #SBATCH --time=04:00:00
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=56
 #SBATCH --mem=128G
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null

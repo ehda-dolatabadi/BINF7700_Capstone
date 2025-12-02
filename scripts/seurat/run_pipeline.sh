@@ -24,9 +24,9 @@ SBATCH_OPTS="--parsable"
 preprocess=false
 integrate=false
 cluster_all=false
-score_all=true
+score_all=false
 
-enrich1=false
+enrich1=true
 enrich2=false
 
 subcluster=false
@@ -104,7 +104,7 @@ fi
 
 
 
-# Step 5: Removing epithelial cells (~60% of dataset)
+# Step 5: Removing epithelial cells and erythrocytes (~60% of dataset)
 if [ "$enrich1" = true ]; then
     echo "Submitting subcells removal..."
     JOB5=$(sbatch $SBATCH_OPTS \
@@ -112,8 +112,8 @@ if [ "$enrich1" = true ]; then
 ID="enriched1",\
 main_ID=$main_ID,\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_TYPES="epithelial",\
-CELL_THRESHOLDS="0.2" \
+CELL_TYPES="epithelial;erythrocytes",\
+CELL_THRESHOLDS="0.2;0.8" \
       --job-name=subset1 \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/05_subcells.sbatch)
@@ -172,6 +172,7 @@ CELL_THRESHOLDS="0.2" \
     echo "Submitting clustering..."
     JOB9=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
+ID="enriched2"
 main_ID="enriched2",\
 NPCS=50,\
 DIMS=10,\
@@ -191,8 +192,7 @@ TOP_MARKERS=100 \
     JOB10=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
-ID="enriched1",\
-main_ID="enriched1",\
+main_ID="enriched2",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       --job-name=score_subset2 \
       --dependency=afterok:$JOB9 \
@@ -204,35 +204,23 @@ fi
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Optional step: Subclustering
 if [ "$subcluster" = true ]; then
     echo "Submitting subclustering..."
-    JOB6=$(sbatch $SBATCH_OPTS \
+    JOB11=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
-main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
-ID="cluster16",\
-IDENT="16" \
-      $([ "$cluster" = true ] && echo "--dependency=afterok:$JOB4") \
-      $SLURM/05_subcluster.sbatch)
-    echo "  Job ID: $JOB6"
+main_ID=$main_ID,\
+ID="all_cluster15",\
+IDENT="15" \
+      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
+      $SLURM/06_subcluster.sbatch)
+    echo "  Job ID: $JOB11"
 
-    JOB7=$(sbatch $SBATCH_OPTS \
+    echo "Submitting clustering..."
+    JOB12=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
-main_ID="$([ "$subset" = true ] && echo "enriched" || echo "$main_ID")",\
-ID="cluster16",\
+main_ID=$main_ID,\
+ID="all_cluster15",\
 NPCS=50,\
 DIMS=10,\
 RES=1.5,\
@@ -243,9 +231,20 @@ REGULATION=0.5,\
 ENRICHMENT=0.1,\
 TOP_MARKERS=100\
       --job-name=cluster_subcluster \
-      --dependency=afterok:$JOB6 \
+      --dependency=afterok:$JOB11 \
       $SLURM/03_cluster.sbatch)
-    echo "  Job ID: $JOB7"
+    echo "  Job ID: $JOB12"
+
+    echo "Submitting marker-based scoring..."
+    JOB13=$(sbatch $SBATCH_OPTS \
+      --array=0-$((n_marker-1)) \
+      --export=ALL,\
+main_ID="all_cluster15",\
+MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
+      --job-name=score_subcluster \
+      --dependency=afterok:$JOB12 \
+      $SLURM/04_score_markers.sbatch)
+    echo "  Job ID: $JOB13"
 fi
 
 echo "Pipeline submitted successfully!"

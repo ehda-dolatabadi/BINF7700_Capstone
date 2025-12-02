@@ -10,8 +10,8 @@ suppressPackageStartupMessages({
 set.seed(777)
 
 # Set up parallelization
-options(future.globals.maxSize = 16000 * 1024^2)  # 16 GB
-plan("multicore", workers = 16)
+options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
+plan("multicore", workers = 56)
 
 # Close any open graphics devices
 while (!is.null(dev.list())) dev.off()
