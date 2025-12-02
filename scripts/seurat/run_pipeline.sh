@@ -162,8 +162,8 @@ if [ "$enrich2" = true ]; then
 ID="enriched2",\
 main_ID="enriched1",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_TYPES="endothelial;epithelial;erythrocytes;fibroblasts",\
-CELL_THRESHOLDS="0.2" \
+CELL_TYPES="endothelial;erythrocytes;fibroblasts",\
+CELL_THRESHOLDS="0.2;0.7;0.2" \
       --job-name=subset2 \
       $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB5") \
       $SLURM/05_subcells.sbatch)
@@ -172,7 +172,7 @@ CELL_THRESHOLDS="0.2" \
     echo "Submitting clustering..."
     JOB9=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
-ID="enriched2"
+ID="enriched2",\
 main_ID="enriched2",\
 NPCS=50,\
 DIMS=10,\
