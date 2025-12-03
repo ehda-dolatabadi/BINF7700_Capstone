@@ -210,12 +210,12 @@ if [ "$enrich3" = true ]; then
     JOB11=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID="enriched3",\
-main_ID="enriched2",\
+main_ID=$main_ID,\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
 CELL_TYPES="schwann_muscle;schwann_mye;schwann_nmye;schwann_other;schwann_spc;macrophage;neutrophil",\
 CELL_THRESHOLDS="0;0;0;0;0;0;0" \
       --job-name=subset3 \
-      $([ "$enrich2" = true ] && echo "--dependency=afterok:$JOB8") \
+      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/05_subcells.sbatch)
     echo "  Job ID: $JOB11"
 
