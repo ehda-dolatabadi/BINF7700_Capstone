@@ -9,8 +9,8 @@ schwann_nmye="GAP43,NCAM1,NGFR,SOX10"
 # Schwann precursor cells
 schwann_spc="DHH,FABP7,GAP43,MPZ,NGFR,SOX10"
 
-# Other muscle schwann markers
-schwann_muscle="COL20A1,GFRA3,MAG,PMP2,POU3F1,PTPRZ1,UGT8"
+# Other muscle schwann markers (PMP2 is problematic)
+schwann_muscle="COL20A1,GFRA3,MAG,PMP22,POU3F1,PTPRZ1,UGT8"
 
 # Other schwann markers
 schwann_other="ARTN,ASPA,ATP1A2,BCAN,CDH19,EGFL8,ERBB3,FIGN,FOXD3,GFRA1,GFRA2,GPR17,GULP1,INSC,KCNC2,LAMP5,LRRTM1,MIA,OLFML2A,S100B,SEMA3B,SLITRK2,SLITRK6,SOX2,TFAP2A"
