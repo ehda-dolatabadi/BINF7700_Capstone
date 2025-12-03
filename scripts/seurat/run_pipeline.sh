@@ -26,8 +26,8 @@ integrate=false
 cluster_all=false
 score_all=false
 
-enrich1=true
-enrich2=false
+enrich1=false
+enrich2=true
 
 subcluster=false
 
@@ -162,8 +162,8 @@ if [ "$enrich2" = true ]; then
 ID="enriched2",\
 main_ID="enriched1",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_TYPES="endothelial;erythrocytes;fibroblasts",\
-CELL_THRESHOLDS="0.2;0.7;0.2" \
+CELL_TYPES="erythrocytes;fibroblasts",\
+CELL_THRESHOLDS="0.5;0.2" \
       --job-name=subset2 \
       $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB5") \
       $SLURM/05_subcells.sbatch)
