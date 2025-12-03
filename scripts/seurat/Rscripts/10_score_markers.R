@@ -56,21 +56,21 @@ VlnPlot(obj, features = feature_name, group.by = "seurat_clusters", pt.size = 0)
 dev.off()
 
 # Plot individual markers
-#for (marker in markers_available){
-#  png(file.path(outdir, paste0(id, "_", marker, "_timepoints_violin_score.png")), width = 1600, height = 1200, res = 150)
-#  print(VlnPlot(obj, features = marker, group.by = "orig.ident", pt.size = 0) +
-#    geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
-#    labs(x = NULL))
-#  dev.off()
-#}
+for (marker in markers_available){
+  png(file.path(outdir, paste0(id, "_", marker, "_timepoints_violin_score.png")), width = 1600, height = 1200, res = 150)
+  print(VlnPlot(obj, features = marker, group.by = "orig.ident", pt.size = 0) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+    labs(x = NULL))
+  dev.off()
+}
 
-#for (marker in markers_available){
-#  png(file.path(outdir, paste0(id, "_", marker, "_clusters_violin_score.png")), width = 1600, height = 1200, res = 150)
-#  print(VlnPlot(obj, features = marker, group.by = "seurat_clusters", pt.size = 0) +
-#    geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
-#    labs(x = NULL))
-#  dev.off()
-#}
+for (marker in markers_available){
+  png(file.path(outdir, paste0(id, "_", marker, "_clusters_violin_score.png")), width = 1600, height = 1200, res = 150)
+  print(VlnPlot(obj, features = marker, group.by = "seurat_clusters", pt.size = 0) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
+    labs(x = NULL))
+  dev.off()
+}
 
 # Visualize distribution
 png(file.path(outdir, paste0(id, "_all_score_distribution.png")), width = 1600, height = 1200, res = 150)
