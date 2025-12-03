@@ -1,2 +1,2 @@
-id	n_cells_before	n_cells_after	n_features_before	n_features_after
-enriched2	11050	11050	19198	3000
+id	n_cells_before	n_cells_after	n_features_before	n_features_after	integration_performed
+enriched2	1194	1194	19198	12666	FALSE
