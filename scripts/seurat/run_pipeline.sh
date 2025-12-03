@@ -24,11 +24,11 @@ SBATCH_OPTS="--parsable"
 preprocess=false
 integrate=false
 cluster_all=false
-score_all=true
+score_all=false
 
 enrich1=false
 enrich2=false
-enrich3=false
+enrich3=true
 
 subcluster=false
 
@@ -212,9 +212,9 @@ if [ "$enrich3" = true ]; then
 ID="enriched3",\
 main_ID="enriched2",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_TYPES="schwann_mye;schwann_nmye;schwann_spc;neutrophils;macrophages",\
-CELL_THRESHOLDS="0;0;0;" \
-      --job-name=subset2 \
+CELL_TYPES="schwann_muscle;schwann_mye;schwann_nmye;schwann_other;schwann_spc;macrophage;neutrophil",\
+CELL_THRESHOLDS="0;0;0;0;0;0;0" \
+      --job-name=subset3 \
       $([ "$enrich2" = true ] && echo "--dependency=afterok:$JOB8") \
       $SLURM/05_subcells.sbatch)
     echo "  Job ID: $JOB11"
@@ -233,7 +233,7 @@ SIGNIFICANCE=0.05,\
 REGULATION=1,\
 ENRICHMENT=0.2,\
 TOP_MARKERS=100 \
-      --job-name=cluster_subset2 \
+      --job-name=cluster_subset3 \
       --dependency=afterok:$JOB11 \
       $SLURM/03_cluster.sbatch)
     echo "  Job ID: $JOB12"
@@ -244,7 +244,7 @@ TOP_MARKERS=100 \
       --export=ALL,\
 main_ID="enriched3",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
-      --job-name=score_subset2 \
+      --job-name=score_subset3 \
       --dependency=afterok:$JOB12 \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB13"
