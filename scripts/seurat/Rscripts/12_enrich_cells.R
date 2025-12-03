@@ -101,21 +101,6 @@ for (i in seq_along(cell_types)) {
   summary_data[[paste0("pct_cells_", cell_type)]] <- n_cells_above / n_cells_before * 100
 }
 
-# To subset
-# Get cells that pass the filter
-#cells_to_keep <- rep(TRUE, ncol(obj))
-
-#for (i in 1:length(cell_types)) {
-#  score_col <- paste0(cell_types[i], "_score1")
-#  threshold <- cell_thresholds[i]
-#  cells_to_keep <- cells_to_keep & (obj[[score_col]][,1] < threshold)
-#}
-
-# Subset to keep only cells that pass all filters
-#obj <- obj[, cells_to_keep]
-
-
-# To enrich
 # Get cells that pass the filter
 cells_to_remove <- rep(TRUE, ncol(obj))
 

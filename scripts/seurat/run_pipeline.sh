@@ -24,11 +24,11 @@ SBATCH_OPTS="--parsable"
 preprocess=false
 integrate=false
 cluster_all=false
-score_all=false
+score_all=true
 
 enrich1=false
 enrich2=false
-enrich3=true
+enrich3=false
 
 subcluster=false
 
@@ -204,7 +204,7 @@ fi
 
 
 
-# Step 7: Removing endothelial cells
+# Step 7: Removing all other cells
 if [ "$enrich3" = true ]; then
     echo "Submitting subcells removal..."
     JOB11=$(sbatch $SBATCH_OPTS \
@@ -212,8 +212,8 @@ if [ "$enrich3" = true ]; then
 ID="enriched3",\
 main_ID="enriched2",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_TYPES="endothelial",\
-CELL_THRESHOLDS="0.1" \
+CELL_TYPES="schwann_mye;schwann_nmye;schwann_spc;neutrophils;macrophages",\
+CELL_THRESHOLDS="0;0;0;" \
       --job-name=subset2 \
       $([ "$enrich2" = true ] && echo "--dependency=afterok:$JOB8") \
       $SLURM/05_subcells.sbatch)
