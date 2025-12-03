@@ -1,2 +1,2 @@
 id	n_markers_total	n_markers_available	markers_available	markers_missing
-schwann_mye	4	4	EGR2,MPZ,PRX,SOX10	
+schwann_mye	4	3	EGR2,MPZ,PRX	SOX10

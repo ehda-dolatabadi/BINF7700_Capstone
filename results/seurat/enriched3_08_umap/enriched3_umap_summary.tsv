@@ -1,2 +1,2 @@
 id	n_clusters	dims	metric
-enriched3	13	10	cosine
+enriched3	10	10	cosine

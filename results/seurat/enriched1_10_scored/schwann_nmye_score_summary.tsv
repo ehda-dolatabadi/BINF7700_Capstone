@@ -1,2 +1,2 @@
 id	n_markers_total	n_markers_available	markers_available	markers_missing
-schwann_nmye	4	4	GAP43,NCAM1,NGFR,SOX10	
+schwann_nmye	4	3	GAP43,NCAM1,NGFR	SOX10
