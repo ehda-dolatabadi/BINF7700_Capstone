@@ -26,9 +26,9 @@ integrate=false
 cluster_all=false
 score_all=true
 
-enrich1=false
+enrich1=true
 enrich2=false
-enrich3=false
+enrich3=true
 
 subcluster=false
 
@@ -216,7 +216,7 @@ main_ID=$main_ID,\
 MODE="keep",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
 CELL_TYPES="schwann_muscle;schwann_mye;schwann_nmye;schwann_other;schwann_spc;macrophage;neutrophil",\
-CELL_THRESHOLDS="0.3;0;0.08;0.1;0.05;0.5;0.5" \
+CELL_THRESHOLDS="0.3;0.1;0.08;0.1;0.05;0.5;0.5" \
       --job-name=subset3 \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/05_subcells.sbatch)
