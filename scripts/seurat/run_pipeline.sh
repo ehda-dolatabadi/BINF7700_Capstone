@@ -26,8 +26,8 @@ integrate=false
 cluster_all=false
 score_all=false
 
-enrich1=false
-enrich2=true
+enrich1=true
+enrich2=false
 
 subcluster=false
 
@@ -113,7 +113,7 @@ ID="enriched1",\
 main_ID=$main_ID,\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
 CELL_TYPES="epithelial",\
-CELL_THRESHOLDS="0.2" \
+CELL_THRESHOLDS="0.15" \
       --job-name=subset1 \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/05_subcells.sbatch)

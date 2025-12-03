@@ -1,2 +1,2 @@
 id	n_cells_before	n_features_before	n_epithelial_markers_total	n_epithelial_markers_available	epithelial_threshold	n_cells_epithelial	pct_cells_epithelial	n_cells_after	n_features_after	pct_cells_kept
-enriched1	54806	18819	23	15	0.2	29824	54.4173995547933	24982	18819	45.5826004452067
+enriched1	54806	18819	23	15	0.15	31589	57.6378498704521	23217	18819	42.3621501295479
