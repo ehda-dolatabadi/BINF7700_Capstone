@@ -24,11 +24,11 @@ SBATCH_OPTS="--parsable"
 preprocess=false
 integrate=false
 cluster_all=false
-score_all=false
+score_all=true
 
 enrich1=false
 enrich2=false
-enrich3=true
+enrich3=false
 
 subcluster=false
 
@@ -112,9 +112,10 @@ if [ "$enrich1" = true ]; then
       --export=ALL,\
 ID="enriched1",\
 main_ID=$main_ID,\
+MODE="remove",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_TYPES="epithelial",\
-CELL_THRESHOLDS="0.15" \
+CELL_TYPES="endothelial;epithelial;erythrocytes;fibroblasts",\
+CELL_THRESHOLDS="0.2;0.1;0.3;0.3" \
       --job-name=subset1 \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/05_subcells.sbatch)
@@ -162,6 +163,7 @@ if [ "$enrich2" = true ]; then
       --export=ALL,\
 ID="enriched2",\
 main_ID="enriched1",\
+MODE="remove",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
 CELL_TYPES="erythrocytes;fibroblasts",\
 CELL_THRESHOLDS="0.5;0.2" \
@@ -204,16 +206,17 @@ fi
 
 
 
-# Step 7: Removing all other cells
+# Step 7: Enriching for schwann and immune cells only
 if [ "$enrich3" = true ]; then
-    echo "Submitting subcells removal..."
+    echo "Submitting subcells enrichment..."
     JOB11=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID="enriched3",\
 main_ID=$main_ID,\
+MODE="keep",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
 CELL_TYPES="schwann_muscle;schwann_mye;schwann_nmye;schwann_other;schwann_spc;macrophage;neutrophil",\
-CELL_THRESHOLDS="0;0;0;0;0;0;0" \
+CELL_THRESHOLDS="0.3;0;0.08;0.1;0.05;0.5;0.5" \
       --job-name=subset3 \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/05_subcells.sbatch)

@@ -12,6 +12,7 @@ set -euo pipefail
 # Parameters
 main_ID="${main_ID:-all}"
 ID="${ID:-enriched}"
+MODE="${MODE:-remove}"
 CELL_TYPES="${CELL_TYPES:-epithelial}"
 CELL_THRESHOLDS="${CELL_THRESHOLDS:-1.0}"
 
@@ -53,6 +54,7 @@ Rscript "$RUN/12_subset_cells.R" \
   "$ID" \
   "$OUT_subcells" \
   "$OUT_integrate/${main_ID}_integrated.rds" \
+  "$MODE" \
   "$CELL_TYPES" \
   "$CELL_MARKERS" \
   "$CELL_THRESHOLDS"

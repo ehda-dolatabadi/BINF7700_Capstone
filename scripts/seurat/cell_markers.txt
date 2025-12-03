@@ -1,7 +1,7 @@
 # Schwann cells
 
-# Myelinating Schwann cells
-schwann_mye="EGR2,MBP,MPZ,PRX,SOX10"
+# Myelinating Schwann cells (MBP is overexpressed in all clusters)
+schwann_mye="EGR2,MPZ,PRX,SOX10"
 
 # Non myelinating Schwann cells
 schwann_nmye="GAP43,NCAM1,NGFR,SOX10"
@@ -9,7 +9,7 @@ schwann_nmye="GAP43,NCAM1,NGFR,SOX10"
 # Schwann precursor cells
 schwann_spc="DHH,FABP7,GAP43,MPZ,NGFR,SOX10"
 
-# Other muscle schwann markers (PMP2 is problematic)
+# Other muscle schwann markers (PMP2 is overexpressed in all clusters)
 schwann_muscle="COL20A1,GFRA3,MAG,PMP22,POU3F1,PTPRZ1,UGT8"
 
 # Other schwann markers

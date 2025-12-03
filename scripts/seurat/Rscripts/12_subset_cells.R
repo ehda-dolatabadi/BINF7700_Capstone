@@ -18,12 +18,13 @@ while (!is.null(dev.list())) dev.off()
 
 # Args
 args <- commandArgs(trailingOnly = TRUE)
-id               <- args[1]
-outdir           <- args[2]
-input            <- args[3]
-cell_types_str   <- args[4]
-cell_markers_str <- args[5]
-cell_thresholds_str <- args[6]
+id			<- args[1]
+outdir			<- args[2]
+input			<- args[3]
+mode			<- args[4]
+cell_types_str		<- args[5]
+cell_markers_str	<- args[6]
+cell_thresholds_str	<- args[7]
 
 # Parse arguments
 cell_types <- unlist(strsplit(cell_types_str, ";"))
@@ -101,32 +102,31 @@ for (i in seq_along(cell_types)) {
   summary_data[[paste0("pct_cells_", cell_type)]] <- n_cells_above / n_cells_before * 100
 }
 
-# To subset
-# Get cells that pass the filter
-#cells_to_keep <- rep(TRUE, ncol(obj))
-
-#for (i in 1:length(cell_types)) {
-#  score_col <- paste0(cell_types[i], "_score1")
-#  threshold <- cell_thresholds[i]
-#  cells_to_keep <- cells_to_keep & (obj[[score_col]][,1] < threshold)
-#}
-
-# Subset to keep only cells that pass all filters
-#obj <- obj[, cells_to_keep]
-
-
-# To enrich
-# Get cells that pass the filter
-cells_to_remove <- rep(TRUE, ncol(obj))
-
-for (i in 1:length(cell_types)) {
-  score_col <- paste0(cell_types[i], "_score1")
-  threshold <- cell_thresholds[i]
-  cells_to_remove <- cells_to_remove & (obj[[score_col]][,1] < threshold)
+# To remove
+if (mode == "remove") {
+  # Get cells that pass the filter
+  cells_to_keep <- rep(TRUE, ncol(obj))
+  for (i in 1:length(cell_types)) {
+    score_col <- paste0(cell_types[i], "_score1")
+    threshold <- cell_thresholds[i]
+    cells_to_keep <- cells_to_keep & (obj[[score_col]][,1] < threshold)
+  }
+  # Subset to keep only cells that pass all filters
+  obj <- obj[, cells_to_keep]
 }
 
-# Subset to keep only cells that pass all filters
-obj <- obj[, !cells_to_remove]
+# To enrich
+if (mode == "keep") {
+  # Get cells that pass the filter
+  cells_to_remove <- rep(TRUE, ncol(obj))
+  for (i in 1:length(cell_types)) {
+    score_col <- paste0(cell_types[i], "_score1")
+    threshold <- cell_thresholds[i]
+    cells_to_remove <- cells_to_remove & (obj[[score_col]][,1] < threshold)
+  }
+  # Subset to keep only cells that pass all filters
+  obj <- obj[, !cells_to_remove]
+}
 
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_subset.rds")))
