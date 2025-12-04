@@ -32,10 +32,14 @@ obj <- FindClusters(obj, res = res, algorithm = 4)
 saveRDS(obj, file = file.path(outdir, paste0(id, "_clustered.rds")))
 
 # Summary table
+cluster_counts <- table(obj$seurat_clusters)
+cluster_sizes <- paste(names(cluster_counts), cluster_counts, sep = ":", collapse = "; ")
+
 write.table(
   data.frame(
     id,
     n_clusters = length(unique(obj$seurat_clusters)),
+    cells_per_cluster = cluster_sizes,
     dims,
     res
   ),

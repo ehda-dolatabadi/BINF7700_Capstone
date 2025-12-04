@@ -27,10 +27,10 @@ cluster_all=false
 score_all=false
 
 enrich1=true
-enrich2=true
+enrich2=false
 enrich3=true
 
-subcluster=false
+subcluster=true
 
 
 
