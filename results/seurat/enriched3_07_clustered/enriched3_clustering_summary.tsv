@@ -1,2 +1,2 @@
-id	n_clusters	dims	res
-enriched3	10	10	0.5
+id	n_clusters	cells_per_cluster	dims	res
+enriched3	10	1:1179; 2:1119; 3:972; 4:787; 5:685; 6:376; 7:294; 8:245; 9:109; 10:109	10	0.5
