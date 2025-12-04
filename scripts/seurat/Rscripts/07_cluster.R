@@ -4,6 +4,7 @@
 
 suppressPackageStartupMessages({
   library(Seurat)
+  library(ggplot2)
   library(future)
 })
 
