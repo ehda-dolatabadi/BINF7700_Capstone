@@ -54,7 +54,7 @@ for (i in qc_metrics[1:5]) {
     labs(x = NULL)
   
   ggsave(file.path(outdir, i, paste0(i, "_vln_", id, ".png")), p,
-         width = 15, height = 9, dpi = 300, bg = "white")
+         width = 10, height = 6, dpi = 300, bg = "white")
   print(p)
   
   
