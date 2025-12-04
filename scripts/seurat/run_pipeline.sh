@@ -21,14 +21,14 @@ SBATCH_OPTS="--parsable"
 
 # ==================== PIPELINE ====================
 # Jobs to submit
-preprocess=true
+preprocess=false
 integrate=false
 cluster_all=false
 score_all=false
 
-enrich1=false
+enrich1=true
 enrich2=false
-enrich3=false
+enrich3=true
 
 subcluster=false
 
@@ -114,7 +114,7 @@ ID="enriched1",\
 main_ID=$main_ID,\
 MODE="remove",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_TYPES="epithelial;erythrocytes;fibroblasts",\
+CELL_TYPES="Epithelial;Erythrocytes;Fibroblasts",\
 CELL_THRESHOLDS="0.2;0.5;0.5" \
       --job-name=subset1 \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
@@ -215,7 +215,7 @@ ID="enriched3",\
 main_ID=$main_ID,\
 MODE="keep",\
 MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
-CELL_TYPES="schwann_muscle;schwann_mye;schwann_nmye;schwann_other;schwann_spc;macrophage;neutrophil",\
+CELL_TYPES="Schwann_muscle;Schwann_mye;Schwann_nmye;Schwann_other;Schwann_spc;Macrophage;Neutrophil",\
 CELL_THRESHOLDS="0.4;0.2;0.2;0.2;0.2;1;1" \
       --job-name=subset3 \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \

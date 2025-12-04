@@ -87,9 +87,9 @@ for (i in seq_along(cell_types)) {
        ylab = "Frequency (Number of Cells)",
        col = "lightblue",
        border = "black",
-       cex.main = 1.5,
-       cex.lab = 1.3,
-       cex.axis = 1.1)
+       cex.main = 2.0,
+       cex.lab = 1.8,
+       cex.axis = 1.5)
   abline(v = c(0, threshold), col = c("gray", "red"), lwd = 2, lty = 2)
   legend("topright", legend = c("Zero reference", paste0("Threshold = ", threshold)),
          lty = 2, col = c("gray", "red"), lwd = 2, cex = 1.1)
@@ -105,12 +105,12 @@ for (i in seq_along(cell_types)) {
       y = "Module Score"
     ) +
     theme(
-      plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-      axis.title = element_text(size = 14, face = "bold"),
-      axis.text = element_text(size = 12),
+      plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+      axis.title = element_text(size = 18, face = "bold"),
+      axis.text = element_text(size = 14),
       axis.text.x = element_text(angle = 45, hjust = 1),
-      legend.title = element_text(size = 12, face = "bold"),
-      legend.text = element_text(size = 11)
+      legend.title = element_text(size = 16, face = "bold"),
+      legend.text = element_text(size = 14)
     ))
   dev.off()
 
