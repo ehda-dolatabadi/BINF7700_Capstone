@@ -44,15 +44,38 @@ feature_name = paste0(cell_name, "1")
 
 # Plot VlnPlot
 png(file.path(outdir, paste0(id, "_all_timepoints_violin_score.png")), width = 1600, height = 1200, res = 150)
-VlnPlot(obj, features = feature_name, group.by = "orig.ident", pt.size = 0) +
+print(VlnPlot(obj, features = feature_name, group.by = "orig.ident", pt.size = 0) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
-  labs(x = NULL)
+  labs(
+    title = paste0(cell_name, " by Timepoint"),
+    x = "Timepoint",
+    y = "Module Score"
+  ) +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    axis.title = element_text(size = 14, face = "bold"),
+    axis.text = element_text(size = 12),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.title = element_text(size = 12, face = "bold"),
+    legend.text = element_text(size = 11)
+  ))
 dev.off()
 
 png(file.path(outdir, paste0(id, "_all_clusters_violin_score.png")), width = 1600, height = 1200, res = 150)
-VlnPlot(obj, features = feature_name, group.by = "seurat_clusters", pt.size = 0) +
+print(VlnPlot(obj, features = feature_name, group.by = "seurat_clusters", pt.size = 0) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
-  labs(x = NULL)
+  labs(
+    title = paste0(cell_name, " by Cluster"),
+    x = "Cluster",
+    y = "Module Score"
+  ) +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    axis.title = element_text(size = 14, face = "bold"),
+    axis.text = element_text(size = 12),
+    legend.title = element_text(size = 12, face = "bold"),
+    legend.text = element_text(size = 11)
+  ))
 dev.off()
 
 # Plot individual markers
@@ -60,7 +83,19 @@ for (marker in markers_available){
   png(file.path(outdir, paste0(id, "_", marker, "_timepoints_violin_score.png")), width = 1600, height = 1200, res = 150)
   print(VlnPlot(obj, features = marker, group.by = "orig.ident", pt.size = 0) +
     geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
-    labs(x = NULL))
+    labs(
+      title = paste0(marker, " Expression by Timepoint"),
+      x = "Timepoint",
+      y = "Expression Level"
+    ) +
+    theme(
+      plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+      axis.title = element_text(size = 14, face = "bold"),
+      axis.text = element_text(size = 12),
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      legend.title = element_text(size = 12, face = "bold"),
+      legend.text = element_text(size = 11)
+    ))
   dev.off()
 }
 
@@ -68,14 +103,34 @@ for (marker in markers_available){
   png(file.path(outdir, paste0(id, "_", marker, "_clusters_violin_score.png")), width = 1600, height = 1200, res = 150)
   print(VlnPlot(obj, features = marker, group.by = "seurat_clusters", pt.size = 0) +
     geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
-    labs(x = NULL))
+    labs(
+      title = paste0(marker, " Expression by Cluster"),
+      x = "Cluster",
+      y = "Expression Level"
+    ) +
+    theme(
+      plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+      axis.title = element_text(size = 14, face = "bold"),
+      axis.text = element_text(size = 12),
+      legend.title = element_text(size = 12, face = "bold"),
+      legend.text = element_text(size = 11)
+    ))
   dev.off()
 }
 
 # Visualize distribution
 png(file.path(outdir, paste0(id, "_all_score_distribution.png")), width = 1600, height = 1200, res = 150)
-hist(obj@meta.data[[feature_name]], breaks = 50, main = "Score Distribution", xlab = "Score")
+hist(obj@meta.data[[feature_name]], breaks = 50,
+     main = paste0(cell_name, " Distribution"),
+     xlab = "Module Score",
+     ylab = "Frequency (Number of Cells)",
+     col = "lightblue",
+     border = "black",
+     cex.main = 1.5,
+     cex.lab = 1.3,
+     cex.axis = 1.1)
 abline(v = 0, col = "gray", lty = 2, lwd = 2)
+legend("topright", legend = "Zero reference", lty = 2, col = "gray", lwd = 2, cex = 1.1)
 dev.off()
 
 # Save object

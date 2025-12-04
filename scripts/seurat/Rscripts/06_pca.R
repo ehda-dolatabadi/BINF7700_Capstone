@@ -38,7 +38,19 @@ pct_var_pc1 <- (pca_stdev[1]^2 / total_var) * 100
 # Elbow plot
 png(file.path(outdir, paste0(id, "_pca_elbow.png")), width=1600, height=1200, res=150)
 print(ElbowPlot(obj, ndims = npcs) +
-	geom_vline(xintercept = 10, linetype = "dashed", color = "red"))
+	geom_vline(xintercept = 10, linetype = "dashed", color = "red") +
+	labs(
+		title = "PCA Elbow Plot",
+		x = "Principal Component",
+		y = "Standard Deviation"
+	) +
+	theme(
+		plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+		axis.title = element_text(size = 14, face = "bold"),
+		axis.text = element_text(size = 12),
+		legend.title = element_text(size = 12, face = "bold"),
+		legend.text = element_text(size = 11)
+	))
 dev.off()
 
 # Save object
