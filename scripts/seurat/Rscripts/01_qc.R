@@ -50,14 +50,13 @@ for (i in c("percent.rrna","percent.trna")) {
     labs(
       x = "Sample",
       y = "Percentage (%)",
-      title = paste(gsub("\\.", " ", gsub("percent\\.", "", i)), "Distribution")
+      title = paste(gsub("\\.", " ", gsub("percent\\.", "", i)), "Distribution -", id)
     ) +
     theme(
       plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
       axis.title = element_text(size = 12),
       axis.text = element_text(size = 10),
-      legend.title = element_text(size = 12),
-      legend.text = element_text(size = 10)
+      legend.position = "none"
     )
 
   ggsave(file.path(outdir, i, paste0(i, "_vln_", id, ".png")), p,
@@ -90,14 +89,13 @@ for (i in qc_metrics[1:5]) {
     labs(
       x = "Sample",
       y = y_label,
-      title = plot_title
+      title = paste(plot_title, "-", id)
     ) +
     theme(
       plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
       axis.title = element_text(size = 12),
       axis.text = element_text(size = 10),
-      legend.title = element_text(size = 12),
-      legend.text = element_text(size = 10)
+      legend.position = "none"
     )
 
   # Add threshold lines
@@ -123,7 +121,7 @@ for (i in qc_metrics[1:5]) {
     labs(
       x = y_label,
       y = "Number of Cells (count)",
-      title = paste(plot_title, "- Histogram")
+      title = paste(plot_title, "- Histogram -", id)
     ) +
     theme_classic() +
     theme(
@@ -156,7 +154,7 @@ for (i in qc_metrics[1:5]) {
       labs(
         x = "UMI Count (counts)",
         y = "Number of Cells (count)",
-        title = "UMI Count Distribution - High Counts (>10,000)"
+        title = paste("UMI Count Distribution - High Counts (>10,000) -", id)
       ) +
       theme_classic() +
       theme(
@@ -178,7 +176,7 @@ for (i in qc_metrics[1:5]) {
       labs(
         x = "UMI Count (counts)",
         y = "Number of Cells (count)",
-        title = "UMI Count Distribution - Low Counts (<2,500)"
+        title = paste("UMI Count Distribution - Low Counts (<2,500) -", id)
       ) +
       theme_classic() +
       theme(
@@ -202,7 +200,7 @@ for (i in qc_metrics[1:5]) {
     labs(
       x = paste(y_label, "(log10 scale)"),
       y = "Density",
-      title = paste(plot_title, "- Kernel Density Estimate")
+      title = paste(plot_title, "- Kernel Density Estimate -", id)
     ) +
     theme_classic() +
     theme(
@@ -236,7 +234,7 @@ for (i in qc_metrics[1:5]) {
       labs(
         x = "UMI Count (counts, log10 scale)",
         y = "Density",
-        title = "UMI Count KDE - High Counts (>10,000)"
+        title = paste("UMI Count KDE - High Counts (>10,000) -", id)
       ) +
       theme_classic() +
       theme(
@@ -259,7 +257,7 @@ for (i in qc_metrics[1:5]) {
       labs(
         x = "UMI Count (counts, log10 scale)",
         y = "Density",
-        title = "UMI Count KDE - Low Counts (<2,500)"
+        title = paste("UMI Count KDE - Low Counts (<2,500) -", id)
       ) +
       theme_classic() +
       theme(
@@ -280,11 +278,14 @@ for (i in qc_metrics[1:5]) {
   if (i != "nCount_RNA") {
     y_label_scatter <- y_label
 
+    # Calculate correlation
+    cor_value <- cor(obj@meta.data$nCount_RNA, obj@meta.data[[i]], use = "complete.obs")
+
     p <- FeatureScatter(obj, feature1 = "nCount_RNA", feature2 = i, pt.size = 0.5) +
       labs(
         x = "UMI Count (counts)",
         y = y_label_scatter,
-        title = paste(y_label_scatter, "vs UMI Count"),
+        title = paste(y_label_scatter, "vs UMI Count - r =", round(cor_value, 3), "-", id),
         color = "Cell Density"
       ) +
       theme_classic() +
@@ -292,8 +293,7 @@ for (i in qc_metrics[1:5]) {
         plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
         axis.title = element_text(size = 12),
         axis.text = element_text(size = 10),
-        legend.title = element_text(size = 11),
-        legend.text = element_text(size = 9)
+        legend.position = "none"
       )
 
     # Add threshold lines
@@ -332,6 +332,9 @@ for (i in qc_metrics[1:5]) {
       "percent.ribo" = "Feature vs UMI Count colored by Ribosomal Content"
     )
 
+    # Calculate correlation between nCount_RNA and nFeature_RNA
+    cor_value <- cor(obj@meta.data$nCount_RNA, obj@meta.data$nFeature_RNA, use = "complete.obs")
+
     p <- df %>% arrange(!!sym(i)) %>%
       ggplot(aes_string("nCount_RNA", "nFeature_RNA", colour = i)) +
       geom_point(size = 1, alpha = 0.6) +
@@ -345,7 +348,7 @@ for (i in qc_metrics[1:5]) {
       labs(
         x = "UMI Count (counts, log10 scale)",
         y = "Feature Count (genes, log10 scale)",
-        title = plot_title_colored
+        title = paste(plot_title_colored, "- r =", round(cor_value, 3), "-", id)
       ) +
       theme_classic() +
       theme(
