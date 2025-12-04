@@ -21,16 +21,16 @@ SBATCH_OPTS="--parsable"
 
 # ==================== PIPELINE ====================
 # Jobs to submit
-preprocess=false
+preprocess=true
 integrate=false
-cluster_all=true
-score_all=true
+cluster_all=false
+score_all=false
 
-enrich1=true
+enrich1=false
 enrich2=false
-enrich3=true
+enrich3=false
 
-subcluster=true
+subcluster=false
 
 
 

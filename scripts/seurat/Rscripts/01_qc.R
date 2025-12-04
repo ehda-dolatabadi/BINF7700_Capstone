@@ -46,9 +46,9 @@ thresholds <- list(
 
 # Library prep control
 for (i in c("percent.rrna","percent.trna")) {
-  p <- VlnPlot(obj, features = i, layer = "counts") +
+  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.3) +
     labs(
-      x = "Sample",
+      x = NULL,
       y = "Percentage (%)",
       title = paste(gsub("\\.", " ", gsub("percent\\.", "", i)), "Distribution -", id)
     ) +
@@ -60,7 +60,7 @@ for (i in c("percent.rrna","percent.trna")) {
     )
 
   ggsave(file.path(outdir, i, paste0(i, "_vln_", id, ".png")), p,
-         width = 8, height = 6, dpi = 150, bg = "white")
+         width = 10.67, height = 8, dpi = 150, bg = "white")
   print(p)
 }
 
@@ -85,9 +85,9 @@ for (i in qc_metrics[1:5]) {
   )
 
   # violin plots
-  p <- VlnPlot(obj, features = i, layer = "counts") +
+  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.3) +
     labs(
-      x = "Sample",
+      x = NULL,
       y = y_label,
       title = paste(plot_title, "-", id)
     ) +
@@ -111,7 +111,7 @@ for (i in qc_metrics[1:5]) {
   }
 
   ggsave(file.path(outdir, i, paste0(i, "_vln_", id, ".png")), p,
-         width = 8, height = 6, dpi = 150, bg = "white")
+         width = 10.67, height = 8, dpi = 150, bg = "white")
   print(p)
   
   
@@ -121,7 +121,7 @@ for (i in qc_metrics[1:5]) {
     labs(
       x = y_label,
       y = "Number of Cells (count)",
-      title = paste(plot_title, "- Histogram -", id)
+      title = paste(plot_title, "Histogram -", id)
     ) +
     theme_classic() +
     theme(
@@ -143,7 +143,7 @@ for (i in qc_metrics[1:5]) {
   }
 
   ggsave(file.path(outdir, i, paste0(i, "_dist_", id, ".png")), p,
-         width = 8, height = 6, dpi = 150, bg = "white")
+         width = 10.67, height = 8, dpi = 150, bg = "white")
   print(p)
   
   
@@ -166,7 +166,7 @@ for (i in qc_metrics[1:5]) {
                  color = "red", linetype = "dashed", size = 0.8)
 
     ggsave(file.path(outdir, i, paste0(i, "_dist_high_", id, ".png")), p,
-           width = 8, height = 6, dpi = 150, bg = "white")
+           width = 10.67, height = 8, dpi = 150, bg = "white")
     print(p)
 
 
@@ -188,7 +188,7 @@ for (i in qc_metrics[1:5]) {
                  color = "red", linetype = "dashed", size = 0.8)
 
     ggsave(file.path(outdir, i, paste0(i, "_dist_low_", id, ".png")), p,
-           width = 8, height = 6, dpi = 150, bg = "white")
+           width = 10.67, height = 8, dpi = 150, bg = "white")
     print(p)
   }
   
@@ -200,7 +200,7 @@ for (i in qc_metrics[1:5]) {
     labs(
       x = paste(y_label, "(log10 scale)"),
       y = "Density",
-      title = paste(plot_title, "- Kernel Density Estimate -", id)
+      title = paste(plot_title, "Kernel Density Estimate -", id)
     ) +
     theme_classic() +
     theme(
@@ -222,7 +222,7 @@ for (i in qc_metrics[1:5]) {
   }
 
   ggsave(file.path(outdir, i, paste0(i, "_KDE_", id, ".png")), p,
-         width = 8, height = 6, dpi = 150, bg = "white")
+         width = 10.67, height = 8, dpi = 150, bg = "white")
   print(p)
   
 
@@ -246,7 +246,7 @@ for (i in qc_metrics[1:5]) {
                  color = "red", linetype = "dashed", size = 0.8)
 
     ggsave(file.path(outdir, i, paste0(i, "_KDE_high_", id, ".png")), p,
-           width = 8, height = 6, dpi = 150, bg = "white")
+           width = 10.67, height = 8, dpi = 150, bg = "white")
     print(p)
 
 
@@ -269,7 +269,7 @@ for (i in qc_metrics[1:5]) {
                  color = "red", linetype = "dashed", size = 0.8)
 
     ggsave(file.path(outdir, i, paste0(i, "_KDE_low_", id, ".png")), p,
-           width = 8, height = 6, dpi = 150, bg = "white")
+           width = 10.67, height = 8, dpi = 150, bg = "white")
     print(p)
   }
   
@@ -285,7 +285,7 @@ for (i in qc_metrics[1:5]) {
       labs(
         x = "UMI Count (counts)",
         y = y_label_scatter,
-        title = paste(y_label_scatter, "vs UMI Count - r =", round(cor_value, 3), "-", id),
+        title = paste(y_label_scatter, "vs UMI Count \nr =", round(cor_value, 3), "-", id),
         color = "Cell Density"
       ) +
       theme_classic() +
@@ -315,7 +315,7 @@ for (i in qc_metrics[1:5]) {
                  color = "red", linetype = "dashed", size = 0.8)
 
     ggsave(file.path(outdir, i, paste0(i, "_vs_nCount_RNA_", id, ".png")), p,
-           width = 8, height = 6, dpi = 150, bg = "white")
+           width = 10.67, height = 8, dpi = 150, bg = "white")
     print(p)
   }
   
@@ -348,7 +348,7 @@ for (i in qc_metrics[1:5]) {
       labs(
         x = "UMI Count (counts, log10 scale)",
         y = "Feature Count (genes, log10 scale)",
-        title = paste(plot_title_colored, "- r =", round(cor_value, 3), "-", id)
+        title = paste(plot_title_colored, "\nr =", round(cor_value, 3), "-", id)
       ) +
       theme_classic() +
       theme(
@@ -370,7 +370,7 @@ for (i in qc_metrics[1:5]) {
                  color = "red", linetype = "dashed", size = 0.8)
 
     ggsave(file.path(outdir, i, paste0(i, "_feature_vs_count_", id, ".png")), p,
-           width = 8, height = 6, dpi = 150, bg = "white")
+           width = 10.67, height = 8, dpi = 150, bg = "white")
     print(p)
   }
 }
