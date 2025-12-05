@@ -47,7 +47,7 @@ png(file.path(outdir, paste0(id, "_all_timepoints_violin_score.png")), width = 1
 print(VlnPlot(obj, features = feature_name, group.by = "orig.ident", pt.size = 0) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
   labs(
-    title = paste0(cell_name, " by Timepoint"),
+    title = cell_name,
     x = "Timepoint",
     y = "Module Score"
   ) +
@@ -65,7 +65,7 @@ png(file.path(outdir, paste0(id, "_all_clusters_violin_score.png")), width = 160
 print(VlnPlot(obj, features = feature_name, group.by = "seurat_clusters", pt.size = 0) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
   labs(
-    title = paste0(cell_name, " by Cluster"),
+    title = cell_name,
     x = "Cluster",
     y = "Module Score"
   ) +
@@ -84,7 +84,7 @@ for (marker in markers_available){
   print(VlnPlot(obj, features = marker, group.by = "orig.ident", pt.size = 0) +
     geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
     labs(
-      title = paste0(marker, " Expression by Timepoint"),
+      title = marker,
       x = "Timepoint",
       y = "Expression Level"
     ) +
@@ -104,7 +104,7 @@ for (marker in markers_available){
   print(VlnPlot(obj, features = marker, group.by = "seurat_clusters", pt.size = 0) +
     geom_hline(yintercept = 0, linetype = "dashed", color = "gray") +
     labs(
-      title = paste0(marker, " Expression by Cluster"),
+      title = marker,
       x = "Cluster",
       y = "Expression Level"
     ) +
