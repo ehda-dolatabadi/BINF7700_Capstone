@@ -23,14 +23,14 @@ SBATCH_OPTS="--parsable"
 # Jobs to submit
 preprocess=false
 integrate=false
-cluster_all=false
+cluster_all=true
 score_all=false
 
 enrich1=true
 enrich2=false
 enrich3=true
 
-subcluster=false
+subcluster=true
 
 
 

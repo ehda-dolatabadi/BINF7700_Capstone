@@ -38,7 +38,7 @@ obj <- RunUMAP(
 
 # Plot
 png(file.path(outdir, paste0(id, "_umap.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", label = TRUE) +
+print(DimPlot(obj, reduction = "umap", label = TRUE, label.size = 7) +
 	labs(
 		title = "UMAP Clustering",
 		x = "UMAP 1",

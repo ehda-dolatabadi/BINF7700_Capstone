@@ -46,7 +46,7 @@ thresholds <- list(
 
 # Library prep control
 for (i in c("percent.rrna","percent.trna")) {
-  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.3) +
+  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.1) +
     labs(
       x = NULL,
       y = "Percentage (%)",
@@ -85,7 +85,7 @@ for (i in qc_metrics[1:5]) {
   )
 
   # violin plots
-  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.3) +
+  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.1) +
     labs(
       x = NULL,
       y = y_label,
