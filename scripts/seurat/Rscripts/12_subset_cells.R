@@ -100,7 +100,7 @@ for (i in seq_along(cell_types)) {
   print(VlnPlot(obj, features = score_name, pt.size = 0, group.by = "orig.ident") +
     geom_hline(yintercept = c(0, threshold), linetype = "dashed", color = c("gray", "red")) +
     labs(
-      title = paste0(cell_type, " Score by Timepoint"),
+      title = cell_type,
       x = "Timepoint",
       y = "Module Score"
     ) +
