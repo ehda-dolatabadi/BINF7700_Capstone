@@ -46,16 +46,16 @@ thresholds <- list(
 
 # Library prep control
 for (i in c("percent.rrna","percent.trna")) {
-  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.1) +
+  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.05) +
     labs(
       x = NULL,
       y = "Percentage (%)",
       title = paste(gsub("\\.", " ", gsub("percent\\.", "", i)), "Distribution -", id)
     ) +
     theme(
-      plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-      axis.title = element_text(size = 12),
-      axis.text = element_text(size = 10),
+      plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+      axis.title = element_text(size = 18),
+      axis.text = element_text(size = 14),
       legend.position = "none"
     )
 
@@ -85,16 +85,16 @@ for (i in qc_metrics[1:5]) {
   )
 
   # violin plots
-  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.1) +
+  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.05) +
     labs(
       x = NULL,
       y = y_label,
       title = paste(plot_title, "-", id)
     ) +
     theme(
-      plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-      axis.title = element_text(size = 12),
-      axis.text = element_text(size = 10),
+      plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+      axis.title = element_text(size = 18),
+      axis.text = element_text(size = 14),
       legend.position = "none"
     )
 
@@ -125,9 +125,9 @@ for (i in qc_metrics[1:5]) {
     ) +
     theme_classic() +
     theme(
-      plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-      axis.title = element_text(size = 12),
-      axis.text = element_text(size = 10)
+      plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+      axis.title = element_text(size = 18),
+      axis.text = element_text(size = 14)
     )
 
   # Add threshold lines
@@ -158,9 +158,9 @@ for (i in qc_metrics[1:5]) {
       ) +
       theme_classic() +
       theme(
-        plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10)
+        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 18),
+        axis.text = element_text(size = 14)
       ) +
       geom_vline(xintercept = thresholds[["nCount_RNA"]]["max"],
                  color = "red", linetype = "dashed", size = 0.8)
@@ -180,9 +180,9 @@ for (i in qc_metrics[1:5]) {
       ) +
       theme_classic() +
       theme(
-        plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10)
+        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 18),
+        axis.text = element_text(size = 14)
       ) +
       geom_vline(xintercept = thresholds[["nCount_RNA"]]["min"],
                  color = "red", linetype = "dashed", size = 0.8)
@@ -204,9 +204,9 @@ for (i in qc_metrics[1:5]) {
     ) +
     theme_classic() +
     theme(
-      plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-      axis.title = element_text(size = 12),
-      axis.text = element_text(size = 10)
+      plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+      axis.title = element_text(size = 18),
+      axis.text = element_text(size = 14)
     )
 
   # Add threshold lines
@@ -238,9 +238,9 @@ for (i in qc_metrics[1:5]) {
       ) +
       theme_classic() +
       theme(
-        plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10)
+        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 18),
+        axis.text = element_text(size = 14)
       ) +
       geom_vline(xintercept = thresholds[["nCount_RNA"]]["max"],
                  color = "red", linetype = "dashed", size = 0.8)
@@ -261,9 +261,9 @@ for (i in qc_metrics[1:5]) {
       ) +
       theme_classic() +
       theme(
-        plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10)
+        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 18),
+        axis.text = element_text(size = 14)
       ) +
       geom_vline(xintercept = thresholds[["nCount_RNA"]]["min"],
                  color = "red", linetype = "dashed", size = 0.8)
@@ -290,9 +290,9 @@ for (i in qc_metrics[1:5]) {
       ) +
       theme_classic() +
       theme(
-        plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10),
+        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 18),
+        axis.text = element_text(size = 14),
         legend.position = "none"
       )
 
@@ -352,11 +352,11 @@ for (i in qc_metrics[1:5]) {
       ) +
       theme_classic() +
       theme(
-        plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 10),
-        legend.title = element_text(size = 11),
-        legend.text = element_text(size = 9)
+        plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+        axis.title = element_text(size = 18),
+        axis.text = element_text(size = 14),
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14)
       ) +
       # Add UMI count thresholds (vertical lines)
       geom_vline(xintercept = thresholds[["nCount_RNA"]]["min"],
