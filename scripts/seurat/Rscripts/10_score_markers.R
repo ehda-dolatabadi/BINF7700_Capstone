@@ -71,7 +71,7 @@ print(VlnPlot(obj, features = feature_name, group.by = "seurat_clusters", pt.siz
   ) +
   theme(
     plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
-    axis.title = element_text(size = 28, face = "bold"),
+    axis.title = element_text(size = 18, face = "bold"),
     axis.text = element_text(size = 14),
     legend.title = element_text(size = 16, face = "bold"),
     legend.text = element_text(size = 14)
@@ -89,7 +89,7 @@ for (marker in markers_available){
       y = "Expression Level"
     ) +
     theme(
-      plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+      plot.title = element_text(size = 30, face = "bold", hjust = 0.5),
       axis.title = element_text(size = 18, face = "bold"),
       axis.text = element_text(size = 14),
       axis.text.x = element_text(angle = 45, hjust = 1),
@@ -109,7 +109,7 @@ for (marker in markers_available){
       y = "Expression Level"
     ) +
     theme(
-      plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+      plot.title = element_text(size = 30, face = "bold", hjust = 0.5),
       axis.title = element_text(size = 18, face = "bold"),
       axis.text = element_text(size = 14),
       legend.title = element_text(size = 16, face = "bold"),
