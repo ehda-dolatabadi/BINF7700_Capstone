@@ -1,7 +1,11 @@
 #!/usr/bin/env Rscript
-# Purpose: Run PCA on an integrated Seurat object
-# Usage: Rscript 5_pca.R <id> <output> <input>
+# Script: 06_pca.R
+# Purpose: Perform principal component analysis for dimensionality reduction
+# Description: Runs PCA on integrated data and generates an elbow plot to help
+#              determine the optimal number of PCs for downstream analysis
+# Usage: Rscript 06_pca.R <id> <output> <input> <npcs>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
@@ -10,7 +14,7 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]

@@ -7,9 +7,13 @@
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
+# Script: 03_cluster.sbatch
+# Purpose: Perform dimensionality reduction, clustering, and marker identification
+# Description: Runs PCA, graph-based clustering, UMAP visualization, and finds cluster markers
+
 set -euo pipefail
 
-# Parameters
+# Parameter defaults
 ID="${ID:-all}"
 NPCS="${NPCS:-50}"
 DIMS="${DIMS:-10}"
@@ -21,14 +25,16 @@ REGULATION="${REGULATION:-1}"
 ENRICHMENT="${ENRICHMENT:-0.2}"
 TOP_MARKERS="${TOP_MARKERS:-30}"
 
-# Paths
+# Load configuration and setup paths
 cd "$SLURM_SUBMIT_DIR"
 source "config/default_paths.sh"
 [ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
 
+# Redirect output to log file
 exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_JOB_ID}.log"
 exec 2>&1
 
+# Define script and output directories
 RUN="$WORK/scripts/seurat/Rscripts"
 OUT_integrate="$OUT/seurat/${ID}_05_integrated"
 OUT_pca="$OUT/seurat/${ID}_06_pca"
@@ -36,13 +42,15 @@ OUT_cluster="$OUT/seurat/${ID}_07_clustered"
 OUT_umap="$OUT/seurat/${ID}_08_umap"
 OUT_markers="$OUT/seurat/${ID}_09_markers"
 
+# Create output directories
 mkdir -p "$OUT_pca" "$OUT_cluster" "$OUT_umap" "$OUT_markers"
 
-# Environment
+# Activate conda environment
 eval "$(conda shell.bash hook)"
 conda activate seurat
 
-# Workflow
+# Clustering workflow
+# Step 1: Perform principal component analysis for dimensionality reduction
 echo "Running PCA..."
 Rscript "$RUN/06_pca.R" \
   "$ID" \
@@ -51,6 +59,7 @@ Rscript "$RUN/06_pca.R" \
   "$NPCS"
 echo "PCA completed✅"
 
+# Step 2: Identify cell clusters using graph-based clustering (Leiden algorithm)
 echo "Clustering..."
 Rscript "$RUN/07_cluster.R" \
   "$ID" \
@@ -60,6 +69,7 @@ Rscript "$RUN/07_cluster.R" \
   "$RES"
 echo "Clustering completed✅"
 
+# Step 3: Generate UMAP visualization for cluster interpretation
 echo "Running UMAP..."
 Rscript "$RUN/08_umap.R" \
   "$ID" \
@@ -69,6 +79,7 @@ Rscript "$RUN/08_umap.R" \
   "$UMAP_METRIC"
 echo "UMAP completed✅"
 
+# Step 4: Find differentially expressed marker genes for each cluster
 echo "Finding Markers..."
 Rscript "$RUN/09_find_markers.R" \
   "$ID" \
@@ -80,5 +91,5 @@ Rscript "$RUN/09_find_markers.R" \
   "$TOP_MARKERS"
 echo "Markers finding completed✅"
 
-# Sync
+# Sync results to work directory (exclude large RDS files)
 rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

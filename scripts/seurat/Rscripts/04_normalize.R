@@ -1,7 +1,11 @@
 #!/usr/bin/env Rscript
-# Purpose: SCTransform normalization on a filtered Seurat object
-# Usage: Rscript 3_normalize.R <id> <output> <input>
+# Script: 04_normalize.R
+# Purpose: Normalize filtered data using SCTransform
+# Description: Applies SCTransform normalization to stabilize variance and identify
+#              highly variable features for downstream analysis
+# Usage: Rscript 04_normalize.R <id> <output> <input>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(future)
@@ -9,20 +13,20 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
 
-# Set up parallelization
+# Configure parallel processing
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 4)
 
-# Load filtered object
+# Load filtered Seurat object
 obj <- readRDS(input)
 
-# SCTransform
+# Apply SCTransform normalization
 obj <- SCTransform(
   object = obj,
   assay = "RNA",
@@ -32,7 +36,7 @@ obj <- SCTransform(
 )
 n_variable_features <- length(VariableFeatures(obj))
 
-# Set default assay to SCT for downstream steps
+# Set SCT as default assay for downstream analysis
 DefaultAssay(obj) <- "SCT"
 
 # Save object

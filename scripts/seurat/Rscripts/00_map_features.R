@@ -1,5 +1,11 @@
 #!/usr/bin/env Rscript
+# Script: 00_map_features.R
+# Purpose: Map gene IDs to gene symbols and create Seurat object from 10x data
+# Description: Reads 10x CellRanger output, maps gene IDs to symbols using a reference TSV,
+#              aggregates duplicate gene symbols, and creates a Seurat object
+# Usage: Rscript 00_map_features.R <id> <outdir> <input> <tsv> <min_cells> <min_features>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
@@ -8,7 +14,7 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id           <- args[1]
 outdir       <- args[2]
@@ -17,7 +23,7 @@ tsv          <- args[4]
 min_cells    <- as.numeric(args[5])
 min_features <- as.numeric(args[6])
 
-# Load and create Seurat object
+# Load 10x data and create initial Seurat object
 counts <- Read10X(input)
 obj <- CreateSeuratObject(
   counts = counts,
@@ -26,7 +32,7 @@ obj <- CreateSeuratObject(
   project = id
 )
 
-# Load mapping file
+# Load gene ID to symbol mapping file and filter for genes in dataset
 n_cells <- ncol(obj)
 n_features_before <- nrow(obj)
 
@@ -38,21 +44,19 @@ loc_map <- read.table(tsv,
 
 n_genes_mapped <- nrow(loc_map)
 
-# Get counts
+# Extract count matrix and prepare for remapping
 counts <- GetAssayData(obj, slot = "counts", assay = "RNA")
 
-# Map rownames
+# Map gene IDs to gene symbols
 new_names <- rownames(obj)
-
-# Apply mapping
 has_mapping <- rownames(obj) %in% loc_map$gene_id
 new_names[has_mapping] <- loc_map$symbol[match(rownames(obj)[has_mapping], loc_map$gene_id)]
 n_duplicates <- n_features_before - length(unique(new_names))
 
-# Aggregate by summing duplicates
+# Aggregate duplicate gene symbols by summing their counts
 counts_agg <- rowsum(as.matrix(counts), group = new_names)
 
-# Create new object
+# Create new Seurat object with mapped gene symbols
 obj <- CreateSeuratObject(
   counts = counts_agg,
   meta.data = obj@meta.data,
@@ -60,10 +64,10 @@ obj <- CreateSeuratObject(
 )
 n_features_after <- nrow(obj)
 
-# Save object
+# Save mapped Seurat object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_mapped.rds")))
 
-# Summary table
+# Write summary statistics to file
 write.table(
   data.frame(
     id,

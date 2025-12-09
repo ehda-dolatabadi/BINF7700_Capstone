@@ -1,5 +1,11 @@
 #!/usr/bin/env Rscript
+# Script: 12_subset_cells.R
+# Purpose: Filter cells based on cell type marker expression scores
+# Description: Calculates module scores for cell type markers and filters cells based
+#              on thresholds (keep mode retains high-scoring cells, remove mode excludes them)
+# Usage: Rscript 12_subset_cells.R <id> <outdir> <input> <mode> <cell_types> <cell_markers> <cell_thresholds>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
@@ -9,14 +15,14 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Set up parallelization
+# Configure parallel processing
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 56)
 
 # Close any open graphics devices
 while (!is.null(dev.list())) dev.off()
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id			<- args[1]
 outdir			<- args[2]

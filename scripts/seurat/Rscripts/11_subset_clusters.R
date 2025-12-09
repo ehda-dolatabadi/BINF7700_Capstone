@@ -1,5 +1,11 @@
 #!/usr/bin/env Rscript
+# Script: 11_subset_clusters.R
+# Purpose: Extract cells from specific cluster identities
+# Description: Subsets the Seurat object to retain only cells from specified clusters
+#              for focused downstream analysis
+# Usage: Rscript 11_subset_clusters.R <id> <outdir> <input> <idents>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(dplyr)
@@ -8,7 +14,7 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]

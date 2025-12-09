@@ -1,5 +1,11 @@
 #!/usr/bin/env Rscript
+# Script: 10_score_markers.R
+# Purpose: Calculate module scores for cell type markers and visualize
+# Description: Computes module scores based on predefined marker genes to identify
+#              cell populations, generates violin plots and expression plots
+# Usage: Rscript 10_score_markers.R <id> <outdir> <input> <cell_name> <markers>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
@@ -10,7 +16,7 @@ set.seed(777)
 # Close any open graphics devices
 while (!is.null(dev.list())) dev.off()
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id <- args[1]
 outdir <- args[2]

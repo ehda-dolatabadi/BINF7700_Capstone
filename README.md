@@ -35,8 +35,16 @@ This repository contains a reproducible computational workflow for analyzing sin
 git clone https://github.com/ehda-dolatabadi/axolotl-regeneration-scrna.git
 cd axolotl-regeneration-scrna
 
+# Configure paths (optional - create local overrides)
+cp config/default_paths.sh config/local_paths.sh
+# Edit config/local_paths.sh with your specific paths
+
 # Run Cell Ranger alignment (Step 1)
 bash scripts/cellranger/run_pipeline.sh
+
+# Set up R environment for Seurat analysis
+conda env create -f config/seurat_env.yml
+conda activate seurat
 
 # Run Seurat analysis (Step 2)
 bash scripts/seurat/run_pipeline.sh
@@ -65,40 +73,75 @@ bash scripts/seurat/run_pipeline.sh
 
 **Software Requirements:**
 - Cell Ranger (tested with v9.0.1)
-- R (tested with v4.5.1) with packages:
-  - Seurat (tested with v5.3.0)
-  - ggplot2
-  - dplyr
-  - future (for parallelization)
-  - SingleCellExperiment
-  - scDblFinder (for doublet detection)
+- R (tested with v4.5.2)
+- Conda (for R environment management)
+- SLURM job scheduler
+
+**R Packages** (installed via conda environment for Seurat/Monocle3/CellChat):
+- Seurat (tested with v5.3.1)
+- ggplot2 (v4.0.1)
+- dplyr (v1.1.4)
+- future (v1.68.0, for parallelization)
+- SingleCellExperiment
+- scDblFinder (for doublet detection)
 - Monocle3 (for trajectory analysis - coming soon)
 - CellChat (for communication analysis - coming soon)
-- SLURM job scheduler
+
+See `config/seurat_env.yml` for complete environment specification and `config/seurat_R_sessionInfo.txt` for detailed package versions.
 
 ---
 
 ## Usage
 
+### Configuration
+
+The pipeline uses configuration files in the `config/` directory:
+
+- **`default_paths.sh`**: Default path configurations (tracked in git)
+- **`local_paths.sh`**: Optional local overrides (not tracked, user-specific)
+
+To customize paths for your environment:
+```bash
+cp config/default_paths.sh config/local_paths.sh
+# Edit config/local_paths.sh with your specific paths
+```
+
 ### Full Pipeline Execution
 
-**Step 1: Cell Ranger Alignment (Automated)**
+**Step 1: Cell Ranger Alignment**
 ```bash
 bash scripts/cellranger/run_pipeline.sh
 ```
 
-**Step 2: Run Seurat Analysis**
+This step processes raw FASTQ files and generates count matrices. Cell Ranger runs independently and does not require the R environment.
+
+**Step 2: Seurat Analysis**
+
+First, set up and activate the R environment:
+```bash
+conda env create -f config/seurat_env.yml
+conda activate seurat
+```
+
+Verify installation:
+```bash
+Rscript -e "library(Seurat); packageVersion('Seurat')"
+```
+
+Run the analysis:
 ```bash
 bash scripts/seurat/run_pipeline.sh
 ```
 
 **Step 3: Trajectory Inference with Monocle3** *(Coming soon)*
 ```bash
+conda activate seurat  # Use the same R environment
 bash scripts/monocle3/run_monocle3.sh
 ```
 
 **Step 4: Cell-Cell Communication with CellChat** *(Coming soon)*
 ```bash
+conda activate seurat  # Use the same R environment
 bash scripts/cellchat/run_cellchat.sh
 ```
 
@@ -108,21 +151,25 @@ bash scripts/cellchat/run_cellchat.sh
 - **Input**: Raw FASTQ files from 10X Genomics sequencing
 - **Output**: Gene-barcode count matrices (`filtered_feature_bc_matrix/`)
 - **Time**: ~15-20 hours per sample
+- **Requirements**: Cell Ranger only (no R environment needed)
 
 #### Stage 2: Seurat (scRNA-seq Analysis)
 - **Input**: Count matrices from Cell Ranger
 - **Output**: Clustered cells with annotations, marker genes, QC reports
 - **Time**: ~2-3 hours for full dataset
+- **Requirements**: R environment (seurat conda environment)
 
 #### Stage 3: Monocle3 (Trajectory Inference) *(Coming soon)*
 - **Input**: Annotated Seurat objects
 - **Output**: Pseudotime trajectories, developmental paths, gene dynamics
 - **Time**: TBD
+- **Requirements**: R environment (seurat conda environment)
 
 #### Stage 4: CellChat (Cell-Cell Communication) *(Coming soon)*
 - **Input**: Annotated Seurat objects
 - **Output**: Ligand-receptor networks, signaling pathways, communication patterns
 - **Time**: TBD
+- **Requirements**: R environment (seurat conda environment)
 
 ---
 
@@ -130,21 +177,24 @@ bash scripts/cellchat/run_cellchat.sh
 
 ```
 .
-├── config/                   # Configuration files
-│   ├── default_paths.sh      # Default path configurations
-│   └── local_paths.sh        # Optional local overrides
+├── config/                        # Configuration files
+│   ├── default_paths.sh           # Default path configurations
+│   ├── local_paths.sh             # Optional local overrides (not tracked)
+│   ├── seurat_env.yml             # Conda environment specification
+│   └── seurat_R_sessionInfo.txt   # R session info and package versions
 │
 ├── scripts/
-│   ├── cellranger/           # Cell Ranger alignment pipeline
-│   │   ├── slurm/            # SLURM batch scripts
+│   ├── cellranger/                # Cell Ranger alignment pipeline
+│   │   ├── slurm/                 # SLURM batch scripts
 │   │   │   ├── 01_mkref.sbatch
 │   │   │   ├── 02_cellranger.sbatch
 │   │   │   └── 03_aggr.sbatch
+│   │   ├── gtf_remove_whitespace.sh  # GTF preprocessing (AmexG only)
 │   │   ├── run_pipeline.sh
-│   │   └── README.md         # Cell Ranger documentation
+│   │   └── README.md              # Cell Ranger documentation
 │   │
-│   ├── seurat/               # Seurat scRNA-seq analysis pipeline
-│   │   ├── Rscripts/         # R analysis scripts
+│   ├── seurat/                    # Seurat scRNA-seq analysis pipeline
+│   │   ├── Rscripts/              # R analysis scripts
 │   │   │   ├── 00_map_features.R       # Gene ID mapping
 │   │   │   ├── 01_qc.R                 # Quality control
 │   │   │   ├── 02_remove_doublets.R    # Doublet detection and removal
@@ -170,29 +220,29 @@ bash scripts/cellchat/run_cellchat.sh
 │   │   ├── run_pipeline.sh        # Pipeline orchestration
 │   │   └── README.md              # Seurat documentation
 │   │
-│   ├── monocle3/             # Trajectory inference (Coming soon)
-│   │   └── README.md         # Monocle3 documentation
+│   ├── monocle3/                  # Trajectory inference (Coming soon)
+│   │   └── README.md              # Monocle3 documentation
 │   │
-│   └── cellchat/             # Cell-cell communication (Coming soon)
-│       └── README.md         # CellChat documentation
+│   └── cellchat/                  # Cell-cell communication (Coming soon)
+│       └── README.md              # CellChat documentation
 │
-├── data/                     # Input data (not tracked)
-│   ├── Li_dataset/           # Raw sequencing data
-│   └── ref_files/            # Reference genomes and annotations
+├── data/                          # Input data (not tracked)
+│   ├── Li_dataset/                # Raw sequencing data
+│   └── ref_files/                 # Reference genomes and annotations
 │
-├── outputs/                  # Working outputs (not tracked)
-│   ├── cellranger/           # Cell Ranger outputs (large .rds files)
-│   └── seurat/               # Seurat outputs (large .rds files)
+├── outputs/                       # Working outputs (not tracked)
+│   ├── cellranger/                # Cell Ranger outputs (count matrices)
+│   └── seurat/                    # Seurat outputs (Seurat objects)
 │
-├── results/                  # Synced analysis results (not tracked)
-│   ├── cellranger/           # Alignment results (QC reports, summaries)
-│   ├── seurat/               # Analysis results (plots, tables, summaries)
-│   ├── monocle3/             # Trajectory analysis results
-│   └── cellchat/             # Cell communication results
+├── results/                       # Synced analysis results (not tracked)
+│   ├── cellranger/                # Alignment results (QC reports, summaries)
+│   ├── seurat/                    # Analysis results (plots, tables, summaries)
+│   ├── monocle3/                  # Trajectory analysis results
+│   └── cellchat/                  # Cell communication results
 │
-├── logs/                     # SLURM job logs (not tracked)
+├── logs/                          # SLURM job logs (not tracked)
 │
-└── README.md                 # This file
+└── README.md                      # This file
 ```
 
 ---
@@ -215,6 +265,8 @@ This project uses two axolotl reference genomes:
 **AmexG_v6.0-DD (Axolotl-omics)**
 - Genome: https://www.axolotl-omics.org/dl/AmexG_v6.0-DD.fa.gz
 - Annotation: https://www.axolotl-omics.org/dl/AmexT_v47-AmexG_v6.0-DD.gtf.gz
+
+**Note**: The AmexG GTF file requires preprocessing with `scripts/cellranger/gtf_remove_whitespace.sh` before use with Cell Ranger (see Cell Ranger README for details).
 
 ---
 
@@ -283,6 +335,6 @@ Email: [dolatabadi.e@northeastern.edu](mailto:dolatabadi.e@northeastern.edu)
 
 ---
 
-**Last Updated**: November 23, 2025
+**Last Updated**: December 9, 2025
 **Status**: Active Development
 **Version**: 1.0.0

@@ -1,7 +1,11 @@
 #!/usr/bin/env Rscript
-# Purpose: Run UMAP on clustered Seurat object
-# Usage: Rscript 7_umap.R <id> <output> <input>
+# Script: 08_umap.R
+# Purpose: Generate UMAP visualization of clustered cells
+# Description: Performs UMAP dimensionality reduction for 2D visualization of cell
+#              clusters and generates plots split by cluster and timepoint
+# Usage: Rscript 08_umap.R <id> <output> <input> <dims> <metric>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
@@ -10,7 +14,7 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]

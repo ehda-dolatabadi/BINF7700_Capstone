@@ -1,7 +1,11 @@
 #!/usr/bin/env Rscript
-# Purpose: Find marker genes for each Seurat cluster
-# Usage: Rscript 8_find_markers.R <id> <output> <input> <cores>
+# Script: 09_find_markers.R
+# Purpose: Identify differentially expressed marker genes for each cluster
+# Description: Finds cluster-specific markers using Wilcoxon test, filters by significance
+#              and expression thresholds, and exports top markers per cluster
+# Usage: Rscript 09_find_markers.R <id> <output> <input> <significance> <regulation> <enrichment> <top>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(dplyr)
@@ -10,7 +14,7 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id           <- args[1]
 outdir       <- args[2]

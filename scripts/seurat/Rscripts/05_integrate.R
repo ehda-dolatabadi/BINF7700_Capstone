@@ -1,7 +1,11 @@
 #!/usr/bin/env Rscript
-# Purpose: Integrate multiple SCT-normalized Seurat objects
-# Usage: Rscript 4_integrate.R <id> <outdir> <sample1.rds> <sample2.rds> ...
+# Script: 05_integrate.R
+# Purpose: Integrate multiple normalized samples using Seurat's integration method
+# Description: Performs batch correction across samples by finding integration anchors
+#              and integrating data to enable cross-sample comparisons
+# Usage: Rscript 05_integrate.R <id> <outdir> <sample1.rds> <sample2.rds> ...
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(future)
@@ -9,17 +13,17 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id	<- args[1]
 outdir	<- args[2]
 paths	<- args[3:length(args)]
 
-# Set up parallelization
+# Configure parallel processing
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 7)
 
-# Load normalized objects
+# Load all normalized Seurat objects
 obj_list <- lapply(paths, readRDS)
 n_samples <- length(obj_list)
 n_features_per_sample <- sapply(obj_list, nrow)
@@ -27,11 +31,11 @@ n_features_min <- min(n_features_per_sample)
 n_features_max <- max(n_features_per_sample)
 n_features_mean <- mean(n_features_per_sample)
 
-# Integration features
+# Select integration features and prepare objects
 features <- SelectIntegrationFeatures(object.list = obj_list, nfeatures = 3000)
 obj_list <- PrepSCTIntegration(object.list = obj_list, anchor.features = features)
 
-# Find anchors and integrate (batch correction)
+# Find integration anchors across samples
 anchors <- FindIntegrationAnchors(
   object.list = obj_list,
   normalization.method = "SCT",
@@ -39,6 +43,7 @@ anchors <- FindIntegrationAnchors(
 )
 n_anchors <- nrow(anchors@anchors)
 
+# Integrate data using anchors for batch correction
 obj <- IntegrateData(
   anchorset = anchors,
   normalization.method = "SCT"

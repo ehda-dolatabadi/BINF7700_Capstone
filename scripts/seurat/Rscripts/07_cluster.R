@@ -1,7 +1,11 @@
 #!/usr/bin/env Rscript
-# Purpose: Run graph-based clustering on PCA Seurat object
-# Usage: Rscript 6_cluster.R <id> <output> <input>
+# Script: 07_cluster.R
+# Purpose: Perform graph-based clustering using the Leiden algorithm
+# Description: Builds nearest neighbor graph and identifies cell clusters using
+#              Leiden community detection algorithm
+# Usage: Rscript 07_cluster.R <id> <output> <input> <dims> <res>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
@@ -10,7 +14,7 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]

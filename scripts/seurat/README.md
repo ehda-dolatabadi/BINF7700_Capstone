@@ -12,6 +12,7 @@ A comprehensive pipeline for processing and analyzing single-cell RNA-seq data f
 - [Usage](#usage)
 - [Scripts Description](#scripts-description)
 - [Output Files](#output-files)
+- [Cell Markers File](#cell-markers-file)
 - [Citation](#references)
 
 ---
@@ -73,8 +74,9 @@ scripts/seurat/
 
 ### Software Requirements
 
-- R (tested with v4.5.1)
+- R (tested with v4.5.2)
 - SLURM workload manager
+- Conda (for environment management)
 
 ### R Packages
 
@@ -94,9 +96,26 @@ scripts/seurat/
 
 ## Installation
 
-### 1. Configure paths
+### 1. Set up R environment
 
-The pipeline uses configuration files in the `config/` directory. Paths are set in `config/default_paths.sh` and can be overridden in `config/local_paths.sh`.
+The pipeline requires specific R packages. Use the provided conda environment file to create a reproducible environment.
+
+**Create environment from yml file**:
+```bash
+conda env create -f config/seurat_env.yml
+conda activate seurat
+```
+
+**Verify installation**:
+```bash
+Rscript -e "library(Seurat); packageVersion('Seurat')"
+```
+
+The `config/seurat_R_sessionInfo.txt` file contains detailed information about the R session and package versions used in testing.
+
+### 2. Configure paths
+
+The pipeline uses configuration files in the `config/` directory. Default paths are defined in `config/default_paths.sh` and can be overridden in `config/local_paths.sh`.
 
 **Default paths** (`config/default_paths.sh`):
 ```bash
@@ -107,16 +126,17 @@ LOG="$WORK/logs"                # Logs directory
 REF_FILES="$DATA/ref_files"     # Reference genome files
 ```
 
-**Optional overrides** (`config/local_paths.sh`):
-- Create this file to override any paths from default_paths.sh
+**Optional local overrides** (`config/local_paths.sh`):
+- Create this file to override any paths from `default_paths.sh`
 - Useful for custom data locations or cluster-specific paths
+- This file is excluded from version control for user-specific configurations
 
 **Main analysis ID**: Set in `run_pipeline.sh`:
 ```bash
-export main_ID=""               # Main analysis ID (leave empty for "main")
+export main_ID="all"            # Main analysis ID (default: "all")
 ```
 
-### 2. Prepare input data
+### 3. Prepare input data
 
 Ensure your data is organized as:
 ```
@@ -133,6 +153,10 @@ And ensure you have a gene mapping file:
 $REF_FILES/
 └── loc_map.tsv                 # Gene ID to symbol mapping (gene_id, symbol)
 ```
+
+### 4. Configure cell type markers
+
+Edit `scripts/seurat/cell_markers.txt` to define cell type markers (see [Cell Markers File](#cell-markers-file) section).
 
 ---
 
@@ -165,6 +189,9 @@ graph TD
 ### Full Pipeline
 
 ```bash
+# Activate conda environment
+conda activate seurat
+
 # Navigate to the working directory
 cd $WORK
 
@@ -229,6 +256,8 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 **Output**: QC plots (violin, histogram, density, scatter plots) as PNG and PDF
 
+**Note**: QC plots do not show threshold lines - they are purely exploratory to help determine appropriate filtering thresholds.
+
 ---
 
 #### 02_remove_doublets.R
@@ -258,7 +287,9 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 **Usage**: `Rscript 03_filter.R <id> <outdir> <input_rds> <min_counts> <max_counts> <min_features> <max_features> <max_mt> <max_ribo>`
 
-**Output**: `<id>_filtered.rds`, `<id>_filtering_summary.tsv`, QC plots
+**Output**: `<id>_filtered.rds`, `<id>_filtering_summary.tsv`, QC plots with red dashed threshold lines
+
+**Note**: Unlike QC plots, filtering plots show red dashed lines indicating the thresholds being applied.
 
 ---
 
@@ -285,7 +316,7 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 **Usage**: `Rscript 05_integrate.R <id> <outdir> <sample1.rds> <sample2.rds> ...`
 
-**Output**: `<id>_05_integrated.rds`, `<id>_05_integration_summary.tsv`
+**Output**: `<id>_integrated.rds`, `<id>_integration_summary.tsv`
 
 ---
 
@@ -343,67 +374,93 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 **Usage**: `Rscript 09_find_markers.R <id> <outdir> <input_rds> <significance> <regulation> <enrichment> <top>`
 
 **Output**:
-- `<id>_09_markers.tsv`: All markers
-- `<id>_09_markers_filtered.tsv`: Filtered top markers
+- `<id>_markers.tsv`: All markers
+- `<id>_markers_filtered.tsv`: Filtered top markers
 
 ---
 
 #### 10_score_markers.R
-**Purpose**: Score cells based on cell type markers.
+**Purpose**: Score cells based on cell type markers and visualize expression patterns.
 
-**Parameters**:
-- Cell type name and markers are passed as arguments
-- `group_by`: Metadata column for grouping in plots (default: "seurat_clusters")
+**Method**: Calculates module scores using AddModuleScore and generates comprehensive visualizations grouped by both timepoints and clusters.
 
-**Usage**: `Rscript 10_score_markers.R <id> <outdir> <input_rds> <cell_name> <group_by> <markers>`
+**Usage**: `Rscript 10_score_markers.R <id> <outdir> <input_rds> <cell_name> <markers>`
+
+**Arguments**:
+- `id`: Sample or analysis identifier
+- `outdir`: Output directory
+- `input_rds`: Path to Seurat object
+- `cell_name`: Cell type name (used for labeling)
+- `markers`: Comma-separated list of marker genes (e.g., MBP,MPZ,PMP22)
 
 **Output**:
-- `<id>_10_scored.rds`: Object with added score
-- `<id>_10_feature_score.png`: Feature plot
-- `<id>_10_violin_score.png`: Violin plot by group
-- `<id>_10_individual_markers_violin.png`: Individual marker expression
-- `<id>_10_score_distribution.png`: Score distribution histogram
-- `<id>_10_score_summary.tsv`
+- `<id>_scored.rds`: Object with added module score
+- `<id>_all_timepoints_violin_score.png`: Violin plot grouped by timepoint
+- `<id>_all_clusters_violin_score.png`: Violin plot grouped by cluster
+- `<id>_<marker>_timepoints_violin_score.png`: Individual marker expression by timepoint
+- `<id>_<marker>_clusters_violin_score.png`: Individual marker expression by cluster
+- `<id>_all_score_distribution.png`: Score distribution histogram
+- `<id>_score_summary.tsv`: Summary of available and missing markers
 
 ---
 
 #### 11_subset_clusters.R
-**Purpose**: Subset data to specific clusters.
+**Purpose**: Subset data to specific clusters for focused re-analysis.
 
 **Usage**: `Rscript 11_subset_clusters.R <id> <outdir> <input_rds> <cluster_ident>`
 
-**Output**: `<id>_00_subset.rds`, `<id>_00_subsetting_summary.tsv`
+**Arguments**:
+- `cluster_ident`: Cluster identity or identities to retain (e.g., 15 or 1,2,3)
+
+**Output**: `<id>_subset.rds`, `<id>_subsetting_summary.tsv`
 
 ---
 
 #### 12_subset_cells.R
-**Purpose**: Filter out unwanted cell types based on module scores.
+**Purpose**: Filter cells based on cell type marker expression scores with two modes.
 
-**Parameters**:
-- Cell types, markers, and thresholds are passed as arguments
-- Cells with scores below thresholds are kept
+**Modes**:
+- **"remove" mode**: Keeps cells where ALL scores are below threshold (filters OUT high-scoring cells from unwanted populations)
+- **"keep" mode**: Keeps cells where AT LEAST ONE score is above threshold (enriches FOR cells expressing target markers)
 
-**Usage**: `Rscript 12_subset_cells.R <id> <outdir> <input_rds> <cell_types> <cell_markers> <cell_thresholds>`
+**Usage**: `Rscript 12_subset_cells.R <id> <outdir> <input_rds> <mode> <cell_types> <cell_markers> <cell_thresholds>`
 
 **Arguments Format**:
-- `cell_types`: Semicolon-separated (e.g., "Epithelial;Erythrocyte")
-- `cell_markers`: Semicolon-separated lists, comma-separated within (e.g., "KRT8,KRT18;HBA1,HBB")
-- `cell_thresholds`: Semicolon-separated values (e.g., "0.5;3.0")
+- `mode`: Either remove or keep
+- `cell_types`: Semicolon-separated (e.g., Epithelial;Erythrocytes)
+- `cell_markers`: Semicolon-separated lists, comma-separated within (e.g., KRT8,KRT18;HBA1,HBB)
+- `cell_thresholds`: Semicolon-separated values (e.g., 0.5;3.0)
+
+**Example - Remove mode**:
+```bash
+# Remove epithelial, erythrocytes, and fibroblasts
+Rscript 12_subset_cells.R enriched1 $OUT/seurat/enriched1 integrated.rds \
+  remove Epithelial;Erythrocytes;Fibroblasts KRT8,KRT18;HBA1,HBB;COL1A1,COL1A2 0.2;0.5;0.5
+```
+
+**Example - Keep mode**:
+```bash
+# Keep only Schwann cells and immune cells
+Rscript 12_subset_cells.R enriched2 $OUT/seurat/enriched2 integrated.rds \
+  keep Schwann;Macrophage MBP,MPZ,PMP22;CD68,CD163 0.4;1.0
+```
 
 **Output**:
-- `<id>_00_subset.rds`: Filtered object
-- `<id>_00_<celltype>_score_distribution.png`: Score distribution per cell type
-- `<id>_00_violin_score.png`: Violin plot of all scores
-- `<id>_00_subsetting_summary.tsv`
+- `<id>_subset.rds`: Filtered object
+- `<id>_<celltype>_score_distribution.png`: Score distribution histogram per cell type
+- `<id>_<celltype>_violin_score.png`: Violin plot by timepoint per cell type
+- `<id>_subsetting_summary.tsv`: Summary statistics including cells kept/removed per cell type
 
 ---
 
 #### 05_reintegrate_subset.R
-**Purpose**: Re-normalize and re-integrate subset data.
+**Purpose**: Re-normalize and re-integrate a subset of cells.
+
+**Method**: Splits subset by sample, re-runs SCTransform on each, and performs integration. If any sample has <30 cells, integration is skipped and SCTransform is run on the entire subset without integration.
 
 **Usage**: `Rscript 05_reintegrate_subset.R <id> <outdir> <input_rds>`
 
-**Output**: `<id>_05_integrated.rds`, `<id>_05_integration_summary.tsv`
+**Output**: `<id>_integrated.rds`, `<id>_integration_summary.tsv`
 
 ---
 
@@ -411,68 +468,70 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 ### File Naming Convention
 
-Files follow the pattern: `<analysis_id>_<step_number>_<description>.<extension>`
+Files follow the pattern: `<analysis_id>_<step_number>_<description>.<extension>` for integrated analysis steps, or `<analysis_id>_<description>.<extension>` for per-sample or subset operations.
 
 Examples:
 - `control_mapped.rds` (step 00, per-sample)
-- `main_05_integrated.rds` (step 05, integrated samples)
-- `main_07_clustered.rds` (step 07, clustered data)
+- `all_05_integrated.rds` (step 05, integrated samples with main_ID=all)
+- `all_07_clustered.rds` (step 07, clustered data)
+- `enriched1_subset.rds` (subset operation)
 
 ### Output Directory Structure
 
 ```
-results/seurat/
-├── <id>_00_mapped/
+$OUT/seurat/
+├── all_00_mapped/
 │   └── <sample>_mapped.rds
-├── <id>_01_qc/
+├── all_01_qc/
 │   └── <sample>/
 │       └── QC plots and PDFs
-├── <id>_02_DB_removed/
+├── all_02_DB_removed/
 │   └── <sample>/
 │       ├── <sample>_DB_removed.rds
 │       └── QC plots
-├── <id>_03_filtered/
+├── all_03_filtered/
 │   └── <sample>/
 │       ├── <sample>_filtered.rds
-│       └── QC plots
-├── <id>_04_normalized/
+│       └── QC plots with threshold lines
+├── all_04_normalized/
 │   └── <sample>_normalized.rds
-├── <id>_05_integrated/
-│   ├── <id>_05_integrated.rds
-│   └── <id>_05_integration_summary.tsv
-├── <id>_06_pca/
-│   ├── <id>_06_pca.rds
-│   ├── <id>_06_pca_elbow.png
-│   └── <id>_06_pca_summary.tsv
-├── <id>_07_clustered/
-│   ├── <id>_07_clustered.rds
-│   └── <id>_07_clustering_summary.tsv
-├── <id>_08_umap/
-│   ├── <id>_08_umap.rds
-│   ├── <id>_08_umap.png
-│   └── <id>_08_umap_summary.tsv
-├── <id>_09_markers/
-│   ├── <id>_09_markers.tsv
-│   └── <id>_09_markers_filtered.tsv
-├── <id>_10_scored/
-│   ├── <celltype>_10_scored.rds
-│   ├── <celltype>_10_feature_score.png
-│   ├── <celltype>_10_violin_score.png
-│   ├── <celltype>_10_individual_markers_violin.png
-│   ├── <celltype>_10_score_distribution.png
-│   └── <celltype>_10_score_summary.tsv
-├── <id>_11_subset/
-│   ├── <id>_00_subset.rds
-│   ├── <id>_00_subsetting_summary.tsv
-│   ├── <id>_05_integrated.rds
-│   └── <id>_05_integration_summary.tsv
-└── <id>_12_subcells/
-    ├── <id>_00_subset.rds
-    ├── <id>_00_<celltype>_score_distribution.png
-    ├── <id>_00_violin_score.png
-    ├── <id>_00_subsetting_summary.tsv
-    ├── <id>_05_integrated.rds
-    └── <id>_05_integration_summary.tsv
+├── all_05_integrated/
+│   ├── all_05_integrated.rds
+│   └── all_05_integration_summary.tsv
+├── all_06_pca/
+│   ├── all_06_pca.rds
+│   ├── all_06_pca_elbow.png
+│   └── all_06_pca_summary.tsv
+├── all_07_clustered/
+│   ├── all_07_clustered.rds
+│   └── all_07_clustering_summary.tsv
+├── all_08_umap/
+│   ├── all_08_umap.rds
+│   ├── all_08_umap.png
+│   └── all_08_umap_summary.tsv
+├── all_09_markers/
+│   ├── all_markers.tsv
+│   └── all_markers_filtered.tsv
+├── all_10_scored/
+│   ├── <celltype>_scored.rds
+│   ├── <celltype>_all_timepoints_violin_score.png
+│   ├── <celltype>_all_clusters_violin_score.png
+│   ├── <celltype>_<marker>_timepoints_violin_score.png
+│   ├── <celltype>_<marker>_clusters_violin_score.png
+│   ├── <celltype>_all_score_distribution.png
+│   └── <celltype>_score_summary.tsv
+├── all_cluster15_subset/
+│   ├── all_cluster15_subset.rds
+│   ├── all_cluster15_subsetting_summary.tsv
+│   ├── all_cluster15_05_integrated.rds
+│   └── all_cluster15_05_integration_summary.tsv
+└── enriched1/
+    ├── enriched1_subset.rds
+    ├── enriched1_<celltype>_score_distribution.png
+    ├── enriched1_<celltype>_violin_score.png
+    ├── enriched1_subsetting_summary.tsv
+    ├── enriched1_05_integrated.rds
+    └── enriched1_05_integration_summary.tsv
 ```
 
 ### Key Output Files
@@ -487,7 +546,37 @@ results/seurat/
 | `*_clustered.rds` | Clustered object with cell identities |
 | `*_markers.tsv` | Differentially expressed genes per cluster |
 | `*_scored.rds` | Object with cell type scores added |
+| `*_subset.rds` | Subset object (by cluster or cell type) |
 | `*_summary.tsv` | Summary statistics for each step |
+
+---
+
+## Cell Markers File
+
+The `cell_markers.txt` file defines cell type markers used for scoring in step 10 and subsetting in step 12.
+
+**Format**: Each line defines one cell type with the format:
+```
+CELL_TYPE_NAME=GENE1,GENE2,GENE3,...
+```
+
+**Example** (`scripts/seurat/cell_markers.txt`):
+```
+Schwann_mye=EGR2,MPZ,PRX,SOX10
+Endothelial=CD34,CDH5,ENG,FLT1,ICAM1,KDR,MCAM,PDPN,PECAM1,PROM1,SELE,TEK,VWF
+Epithelial=ABI3BP,ADH7,ANPEP,AQP1,AQP3,CAPNS2,CDH1,CLCA2,DAPL1,EPCAM,FGFBP1,GPR87,GSTM2,HPGD,KRT14,KRT15,KRT16,KRT17,KRT4,KRT5,LY6D,SDC1,SEC14L3
+```
+
+**Usage in pipeline**:
+- Step 10 (04_score_markers.sbatch): Runs as an array job, processing each cell type
+- Step 12 (06_subcells.sbatch): Uses specified cell types for subsetting based on MODE
+
+**Notes**:
+- Cell type names should not contain spaces (use underscores: Schwann_muscle)
+- Genes are comma-separated with no spaces
+- No quotes around gene names or values
+- Scripts automatically check which markers are available in the dataset
+- Missing markers are reported in summary files but do not cause failures
 
 ---
 
@@ -503,4 +592,4 @@ results/seurat/
 
 ---
 
-**Last Updated**: 2025-11-23
+**Last Updated**: 2025-12-09

@@ -7,48 +7,56 @@
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
+# Script: 05_subcells.sbatch
+# Purpose: Subset cells based on marker scores and re-integrate
+# Description: Filters cells by cell type marker expression thresholds and re-runs integration
+
 set -euo pipefail
 
-# Parameters
+# Parameter defaults
 main_ID="${main_ID:-all}"
 ID="${ID:-enriched}"
 MODE="${MODE:-remove}"
 CELL_TYPES="${CELL_TYPES:-epithelial}"
 CELL_THRESHOLDS="${CELL_THRESHOLDS:-1.0}"
 
-# Paths
+# Load configuration and setup paths
 cd "$SLURM_SUBMIT_DIR"
 source "config/default_paths.sh"
 [ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
 
+# Redirect output to log file
 exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_JOB_ID}.log"
 exec 2>&1
 
-# Source marker file
+# Load marker definitions from file
 MARKER_FILE="${MARKER_FILE:-$WORK/scripts/seurat/cell_markers.txt}"
 source ${MARKER_FILE}
 
-# Split into array
+# Parse cell types into array
 IFS=';' read -ra cells <<< "$CELL_TYPES"
 
-# Build semicolon-separated markers
+# Build semicolon-separated marker list for selected cell types
 CELL_MARKERS=""
 for cell in "${cells[@]}"; do
     CELL_MARKERS="${CELL_MARKERS}${!cell};"
 done
-CELL_MARKERS="${CELL_MARKERS%;}"  # Remove trailing semicolon
+CELL_MARKERS="${CELL_MARKERS%;}"
 
+# Define script and output directories
 RUN="$WORK/scripts/seurat/Rscripts"
 OUT_integrate="$OUT/seurat/${main_ID}_05_integrated"
 OUT_subcells="$OUT/seurat/${ID}_05_integrated"
 
+# Create output directory
 mkdir -p "$OUT_subcells"
 
-# Environment
+# Activate conda environment
 eval "$(conda shell.bash hook)"
 conda activate seurat
 
-# Workflow
+# Cell subsetting workflow
+# Step 1: Subset cells based on marker scores (keep or remove mode)
 echo "Subsetting data..."
 Rscript "$RUN/12_subset_cells.R" \
   "$ID" \
@@ -60,6 +68,7 @@ Rscript "$RUN/12_subset_cells.R" \
   "$CELL_THRESHOLDS"
 echo "Subset completed✅"
 
+# Step 2: Re-normalize and re-integrate the subset
 echo "Re-running normalization and integration..."
 Rscript "$RUN/05_reintegrate_subset.R" \
   "$ID" \
@@ -67,5 +76,5 @@ Rscript "$RUN/05_reintegrate_subset.R" \
   "$OUT_subcells/${ID}_subset.rds"
 echo "Normalization and integration completed✅"
 
-# Sync
+# Sync results to work directory (exclude large RDS files)
 rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

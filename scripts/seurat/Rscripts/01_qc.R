@@ -1,7 +1,11 @@
 #!/usr/bin/env Rscript
-# Purpose: Run QC on a 10x sample
-# Usage: Rscript 1_qc.R <id> <output> <input>
+# Script: 01_qc.R
+# Purpose: Run quality control analysis on a mapped sample
+# Description: Calculates QC metrics (mitochondrial %, ribosomal %, complexity) and
+#              generates comprehensive visualization plots for quality assessment
+# Usage: Rscript 01_qc.R <id> <output> <input>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
@@ -10,39 +14,32 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id	<- args[1]
 outdir	<- args[2]
 input	<- args[3]
 
-# Load mapped object
+# Load Seurat object with mapped features
 obj <- readRDS(input)
 
-# QC metrics
+# Calculate quality control metrics
 obj[["percent.mt"]]	<- PercentageFeatureSet(obj, pattern = "^(COX|ND|CYTB|ATP)")
 obj[["percent.ribo"]]	<- PercentageFeatureSet(obj, pattern = "^RPS|^RPL")
 obj[["percent.rrna"]]	<- PercentageFeatureSet(obj, pattern = "^RRN")
 obj[["percent.trna"]]	<- PercentageFeatureSet(obj, pattern = "^TRNA")
 obj[["complexity"]]	<- log10(obj$nCount_RNA / obj$nFeature_RNA)
 
+# Define QC metrics to plot
 qc_metrics <- c("nCount_RNA", "nFeature_RNA", "percent.mt", "percent.ribo", "complexity", "percent.rrna", "percent.trna")
 df <- as_tibble(obj[[]], rownames="Cell.Barcode")
 
-# Plots
+# Generate QC plots
 pdf(file.path(outdir, paste0(id, "_plots.pdf")), width = 8, height = 6)
 
 for (dir in qc_metrics) {
   dir.create(file.path(outdir, dir), recursive = TRUE, showWarnings = FALSE)
 }
-
-# Define thresholds
-thresholds <- list(
-  nCount_RNA = c(min = 1000, max = 30000),
-  nFeature_RNA = c(min = 500, max = 5000),
-  percent.mt = c(max = 10),
-  percent.ribo = c(max = 35)
-)
 
 # Library prep control
 for (i in c("percent.rrna","percent.trna")) {
@@ -98,18 +95,6 @@ for (i in qc_metrics[1:5]) {
       legend.position = "none"
     )
 
-  # Add threshold lines
-  if (i %in% names(thresholds)) {
-    if ("min" %in% names(thresholds[[i]])) {
-      p <- p + geom_hline(yintercept = thresholds[[i]]["min"],
-                         color = "red", linetype = "dashed", size = 0.8)
-    }
-    if ("max" %in% names(thresholds[[i]])) {
-      p <- p + geom_hline(yintercept = thresholds[[i]]["max"],
-                         color = "red", linetype = "dashed", size = 0.8)
-    }
-  }
-
   ggsave(file.path(outdir, i, paste0(i, "_vln_", id, ".png")), p,
          width = 10.67, height = 8, dpi = 150, bg = "white")
   print(p)
@@ -130,18 +115,6 @@ for (i in qc_metrics[1:5]) {
       axis.text = element_text(size = 14)
     )
 
-  # Add threshold lines
-  if (i %in% names(thresholds)) {
-    if ("min" %in% names(thresholds[[i]])) {
-      p <- p + geom_vline(xintercept = thresholds[[i]]["min"],
-                         color = "red", linetype = "dashed", size = 0.8)
-    }
-    if ("max" %in% names(thresholds[[i]])) {
-      p <- p + geom_vline(xintercept = thresholds[[i]]["max"],
-                         color = "red", linetype = "dashed", size = 0.8)
-    }
-  }
-
   ggsave(file.path(outdir, i, paste0(i, "_dist_", id, ".png")), p,
          width = 10.67, height = 8, dpi = 150, bg = "white")
   print(p)
@@ -161,9 +134,7 @@ for (i in qc_metrics[1:5]) {
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
         axis.title = element_text(size = 18),
         axis.text = element_text(size = 14)
-      ) +
-      geom_vline(xintercept = thresholds[["nCount_RNA"]]["max"],
-                 color = "red", linetype = "dashed", size = 0.8)
+      )
 
     ggsave(file.path(outdir, i, paste0(i, "_dist_high_", id, ".png")), p,
            width = 10.67, height = 8, dpi = 150, bg = "white")
@@ -183,9 +154,7 @@ for (i in qc_metrics[1:5]) {
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
         axis.title = element_text(size = 18),
         axis.text = element_text(size = 14)
-      ) +
-      geom_vline(xintercept = thresholds[["nCount_RNA"]]["min"],
-                 color = "red", linetype = "dashed", size = 0.8)
+      )
 
     ggsave(file.path(outdir, i, paste0(i, "_dist_low_", id, ".png")), p,
            width = 10.67, height = 8, dpi = 150, bg = "white")
@@ -209,18 +178,6 @@ for (i in qc_metrics[1:5]) {
       axis.text = element_text(size = 14)
     )
 
-  # Add threshold lines
-  if (i %in% names(thresholds)) {
-    if ("min" %in% names(thresholds[[i]])) {
-      p <- p + geom_vline(xintercept = thresholds[[i]]["min"],
-                         color = "red", linetype = "dashed", size = 0.8)
-    }
-    if ("max" %in% names(thresholds[[i]])) {
-      p <- p + geom_vline(xintercept = thresholds[[i]]["max"],
-                         color = "red", linetype = "dashed", size = 0.8)
-    }
-  }
-
   ggsave(file.path(outdir, i, paste0(i, "_KDE_", id, ".png")), p,
          width = 10.67, height = 8, dpi = 150, bg = "white")
   print(p)
@@ -241,9 +198,7 @@ for (i in qc_metrics[1:5]) {
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
         axis.title = element_text(size = 18),
         axis.text = element_text(size = 14)
-      ) +
-      geom_vline(xintercept = thresholds[["nCount_RNA"]]["max"],
-                 color = "red", linetype = "dashed", size = 0.8)
+      )
 
     ggsave(file.path(outdir, i, paste0(i, "_KDE_high_", id, ".png")), p,
            width = 10.67, height = 8, dpi = 150, bg = "white")
@@ -264,9 +219,7 @@ for (i in qc_metrics[1:5]) {
         plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
         axis.title = element_text(size = 18),
         axis.text = element_text(size = 14)
-      ) +
-      geom_vline(xintercept = thresholds[["nCount_RNA"]]["min"],
-                 color = "red", linetype = "dashed", size = 0.8)
+      )
 
     ggsave(file.path(outdir, i, paste0(i, "_KDE_low_", id, ".png")), p,
            width = 10.67, height = 8, dpi = 150, bg = "white")
@@ -295,24 +248,6 @@ for (i in qc_metrics[1:5]) {
         axis.text = element_text(size = 14),
         legend.position = "none"
       )
-
-    # Add threshold lines
-    if (i %in% names(thresholds)) {
-      if ("min" %in% names(thresholds[[i]])) {
-        p <- p + geom_hline(yintercept = thresholds[[i]]["min"],
-                           color = "red", linetype = "dashed", size = 0.8)
-      }
-      if ("max" %in% names(thresholds[[i]])) {
-        p <- p + geom_hline(yintercept = thresholds[[i]]["max"],
-                           color = "red", linetype = "dashed", size = 0.8)
-      }
-    }
-    # Add nCount_RNA thresholds as vertical lines
-    p <- p +
-      geom_vline(xintercept = thresholds[["nCount_RNA"]]["min"],
-                 color = "red", linetype = "dashed", size = 0.8) +
-      geom_vline(xintercept = thresholds[["nCount_RNA"]]["max"],
-                 color = "red", linetype = "dashed", size = 0.8)
 
     ggsave(file.path(outdir, i, paste0(i, "_vs_nCount_RNA_", id, ".png")), p,
            width = 10.67, height = 8, dpi = 150, bg = "white")
@@ -357,17 +292,7 @@ for (i in qc_metrics[1:5]) {
         axis.text = element_text(size = 14),
         legend.title = element_text(size = 16),
         legend.text = element_text(size = 14)
-      ) +
-      # Add UMI count thresholds (vertical lines)
-      geom_vline(xintercept = thresholds[["nCount_RNA"]]["min"],
-                 color = "red", linetype = "dashed", size = 0.8) +
-      geom_vline(xintercept = thresholds[["nCount_RNA"]]["max"],
-                 color = "red", linetype = "dashed", size = 0.8) +
-      # Add feature count thresholds (horizontal lines)
-      geom_hline(yintercept = thresholds[["nFeature_RNA"]]["min"],
-                 color = "red", linetype = "dashed", size = 0.8) +
-      geom_hline(yintercept = thresholds[["nFeature_RNA"]]["max"],
-                 color = "red", linetype = "dashed", size = 0.8)
+      )
 
     ggsave(file.path(outdir, i, paste0(i, "_feature_vs_count_", id, ".png")), p,
            width = 10.67, height = 8, dpi = 150, bg = "white")

@@ -1,5 +1,11 @@
 #!/usr/bin/env Rscript
+# Script: 05_reintegrate_subset.R
+# Purpose: Re-normalize and re-integrate a subset of cells
+# Description: Splits subset by sample, re-runs SCTransform on each, and performs
+#              integration (skips integration if any sample has <30 cells)
+# Usage: Rscript 05_reintegrate_subset.R <id> <outdir> <input>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(dplyr)
@@ -8,25 +14,25 @@ suppressPackageStartupMessages({
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
 
-# Set up parallelization
+# Configure parallel processing
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 7)
 
-# Load subset object
+# Load subset Seurat object
 obj <- readRDS(input)
 
-# Switch back to RNA assay
+# Switch to RNA assay for re-normalization
 DefaultAssay(obj) <- "RNA"
 n_cells_before <- ncol(obj)
 n_features_before <- nrow(obj)
 
-# Split by sample to check cell counts
+# Split by sample and check if integration is feasible
 obj_list <- SplitObject(obj, split.by = "orig.ident")
 cell_counts <- sapply(obj_list, ncol)
 samples <- names(cell_counts)[cell_counts < 30]

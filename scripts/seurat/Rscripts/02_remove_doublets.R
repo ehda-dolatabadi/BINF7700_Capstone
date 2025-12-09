@@ -1,44 +1,50 @@
 #!/usr/bin/env Rscript
+# Script: 02_remove_doublets.R
+# Purpose: Detect and remove doublets using scDblFinder
+# Description: Converts Seurat object to SingleCellExperiment, runs doublet detection,
+#              and filters out predicted doublets to retain only singlet cells
+# Usage: Rscript 02_remove_doublets.R <id> <outdir> <input>
 
+# Load required libraries
 suppressPackageStartupMessages({
   library(Seurat)
   library(ggplot2)
   library(dplyr)
   library(SingleCellExperiment)
-  library(scDblFinder) 
+  library(scDblFinder)
 })
 
 set.seed(777)
 
-# Args
+# Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
 
-# Load mapped object
+# Load Seurat object
 obj <- readRDS(input)
 
 # Store initial counts
 n_cells_before <- ncol(obj)
 n_features_before <- nrow(obj)
 
-# Convert to SingleCellExperiment
+# Convert to SingleCellExperiment format for scDblFinder
 sce <- as.SingleCellExperiment(obj)
 
-# Run scDblFinder
+# Run doublet detection
 sce <- scDblFinder(sce)
 
-# Create vector of singlets
+# Extract singlet cell barcodes
 singlet_barcodes <- rownames(colData(sce))[sce$scDblFinder.class == "singlet"]
 
-# Subset out doublets in the Seurat object
+# Filter Seurat object to retain only singlets
 obj <- subset(obj, cells = singlet_barcodes)
 
-# Save object
+# Save filtered object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_DB_removed.rds")))
 
-# Summary table
+# Write summary statistics to file
 write.table(
   data.frame(
     id,
