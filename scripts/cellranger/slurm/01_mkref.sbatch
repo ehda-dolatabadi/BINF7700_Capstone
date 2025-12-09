@@ -1,8 +1,6 @@
 #!/bin/bash
 # Script: 01_mkref.sbatch
 # Purpose: Build Cell Ranger reference genomes from FASTA and GTF files
-# Description: Creates indexed reference genomes for use with Cell Ranger count
-# SLURM array job: processes multiple reference genomes in parallel
 
 #SBATCH --job-name=mkref
 #SBATCH --partition=courses

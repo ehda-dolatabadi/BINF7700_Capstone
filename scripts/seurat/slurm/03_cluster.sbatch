@@ -1,4 +1,7 @@
 #!/bin/bash
+# Script: 03_cluster.sbatch
+# Purpose: Perform dimensionality reduction, clustering, and marker identification
+
 #SBATCH --job-name=cluster
 #SBATCH --partition=courses
 #SBATCH --time=04:00:00
@@ -7,10 +10,7 @@
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
-# Script: 03_cluster.sbatch
-# Purpose: Perform dimensionality reduction, clustering, and marker identification
-# Description: Runs PCA, graph-based clustering, UMAP visualization, and finds cluster markers
-
+# Exit on error, undefined variables, and pipe failures
 set -euo pipefail
 
 # Parameter defaults
@@ -23,7 +23,7 @@ UMAP_METRIC="${UMAP_METRIC:-cosine}"
 SIGNIFICANCE="${SIGNIFICANCE:-0.05}"
 REGULATION="${REGULATION:-1}"
 ENRICHMENT="${ENRICHMENT:-0.2}"
-TOP_MARKERS="${TOP_MARKERS:-30}"
+TOP_MARKERS="${TOP_MARKERS:-100}"
 
 # Load configuration and setup paths
 cd "$SLURM_SUBMIT_DIR"

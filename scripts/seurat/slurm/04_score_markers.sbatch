@@ -1,4 +1,7 @@
 #!/bin/bash
+# Script: 04_score_markers.sbatch
+# Purpose: Score cells based on known cell type marker genes
+
 #SBATCH --job-name=markerScore
 #SBATCH --partition=courses
 #SBATCH --time=01:00:00
@@ -8,10 +11,7 @@
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
-# Script: 04_score_markers.sbatch
-# Purpose: Score cells based on known cell type marker genes
-# Description: Calculates module scores for predefined cell type markers in parallel using array jobs
-
+# Exit on error, undefined variables, and pipe failures
 set -euo pipefail
 
 # Parameter defaults

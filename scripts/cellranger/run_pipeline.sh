@@ -1,7 +1,6 @@
 #!/bin/bash
 # Script: run_pipeline.sh
 # Purpose: Submit Cell Ranger pipeline jobs to SLURM scheduler
-# Description: Orchestrates reference genome building, sample counting, and aggregation
 # Usage: ./run_pipeline.sh
 
 # Exit on error, undefined variables, and pipe failures

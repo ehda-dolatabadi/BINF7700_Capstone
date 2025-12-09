@@ -1,4 +1,7 @@
 #!/bin/bash
+# Script: 05_subcluster.sbatch
+# Purpose: Subset specific clusters and re-integrate for deeper analysis
+
 #SBATCH --job-name=subcluster
 #SBATCH --partition=courses
 #SBATCH --time=04:00:00
@@ -7,10 +10,7 @@
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
-# Script: 06_subcluster.sbatch
-# Purpose: Subset specific clusters and re-integrate for deeper analysis
-# Description: Extracts cells from specified clusters and re-runs integration for sub-clustering
-
+# Exit on error, undefined variables, and pipe failures
 set -euo pipefail
 
 # Parameter defaults

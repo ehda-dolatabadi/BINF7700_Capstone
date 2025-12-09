@@ -1,8 +1,6 @@
 #!/bin/bash
 # Script: 03_aggr.sbatch
 # Purpose: Aggregate multiple Cell Ranger count outputs into a single dataset
-# Description: Combines samples with optional normalization (raw or depth-normalized)
-# SLURM array job: processes multiple reference-normalization combinations
 
 #SBATCH --job-name=aggr
 #SBATCH --partition=courses

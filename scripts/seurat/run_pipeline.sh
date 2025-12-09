@@ -1,7 +1,6 @@
 #!/bin/bash
 # Script: run_pipeline.sh
 # Purpose: Submit Seurat scRNA-seq analysis pipeline to SLURM scheduler
-# Description: Orchestrates preprocessing, integration, clustering, marker scoring, and subsetting
 # Usage: ./run_pipeline.sh
 
 # Exit on error, undefined variables, and pipe failures
@@ -127,7 +126,7 @@ UMAP_METRIC="cosine",\
 SIGNIFICANCE=0.05,\
 REGULATION=0.5,\
 ENRICHMENT=0.1,\
-TOP_MARKERS=100\
+TOP_MARKERS=100 \
       --job-name=cluster_subcluster \
       --dependency=afterok:$JOB5 \
       $SLURM/03_cluster.sbatch)

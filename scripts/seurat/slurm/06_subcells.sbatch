@@ -1,4 +1,7 @@
 #!/bin/bash
+# Script: 06_subcells.sbatch
+# Purpose: Subset cells based on marker scores and re-integrate
+
 #SBATCH --job-name=subcells
 #SBATCH --partition=courses
 #SBATCH --time=04:00:00
@@ -7,10 +10,7 @@
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
-# Script: 05_subcells.sbatch
-# Purpose: Subset cells based on marker scores and re-integrate
-# Description: Filters cells by cell type marker expression thresholds and re-runs integration
-
+# Exit on error, undefined variables, and pipe failures
 set -euo pipefail
 
 # Parameter defaults

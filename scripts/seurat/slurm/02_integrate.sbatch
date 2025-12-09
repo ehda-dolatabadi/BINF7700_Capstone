@@ -1,4 +1,7 @@
 #!/bin/bash
+# Script: 02_integrate.sbatch
+# Purpose: Integrate normalized samples to correct for batch effects
+
 #SBATCH --job-name=integrate
 #SBATCH --partition=courses
 #SBATCH --time=04:00:00
@@ -7,10 +10,7 @@
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
-# Script: 02_integrate.sbatch
-# Purpose: Integrate normalized samples to correct for batch effects
-# Description: Performs batch correction across all normalized samples using Seurat integration
-
+# Exit on error, undefined variables, and pipe failures
 set -euo pipefail
 
 # Parameter defaults

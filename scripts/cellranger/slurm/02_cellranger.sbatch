@@ -1,8 +1,6 @@
 #!/bin/bash
 # Script: 02_cellranger.sbatch
 # Purpose: Run Cell Ranger count on FASTQ files to quantify gene expression
-# Description: Aligns reads to reference genome and generates count matrices
-# SLURM array job: processes multiple sample-reference combinations in parallel
 
 #SBATCH --job-name=cellranger
 #SBATCH --partition=courses

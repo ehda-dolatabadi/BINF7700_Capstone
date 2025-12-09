@@ -1,4 +1,7 @@
 #!/bin/bash
+# Script: 01_preprocess.sbatch
+# Purpose: Preprocess individual samples through the initial pipeline stages
+
 #SBATCH --job-name=preprocess
 #SBATCH --partition=courses
 #SBATCH --time=01:00:00
@@ -8,11 +11,7 @@
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
-# Script: 01_preprocess.sbatch
-# Purpose: Preprocess individual samples through the initial pipeline stages
-# Description: Runs feature mapping, QC, doublet removal, filtering, and normalization
-#              for each sample in parallel using SLURM array jobs
-
+# Exit on error, undefined variables, and pipe failures
 set -euo pipefail
 
 # Parameter defaults
