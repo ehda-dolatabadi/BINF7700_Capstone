@@ -91,7 +91,7 @@ scripts/seurat/
 
 ---
 
-## Installation
+## Configuration
 
 ### Setting up R environment
 
