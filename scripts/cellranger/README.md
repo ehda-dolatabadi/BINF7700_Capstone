@@ -59,30 +59,18 @@ Cell Ranger is provided as a pre-compiled binary and does not require compilatio
 **Installation Steps:**
 
 ```bash
-# Download Cell Ranger (example for v9.0.1)
-cd /path/to/software
+# Download Cell Ranger (v9.0.1)
 curl -o cellranger-9.0.1.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.1.tar.gz"
 
-# Extract the tarball
+# Extract
 tar -xzvf cellranger-9.0.1.tar.gz
 
-# Add Cell Ranger to your PATH
-export PATH=/path/to/software/cellranger-9.0.1:$PATH
+# Add to shell
+echo 'export PATH=/path/to/cellranger-9.0.1:$PATH' >> ~/.bashrc
+source ~/.bashrc
 
 # Verify installation
 cellranger --version
-# Should output: cellranger cellranger-9.0.1
-```
-
-**Making PATH changes permanent:**
-
-Add the export line to your shell configuration file:
-```bash
-# For bash
-echo 'export PATH=/path/to/software/cellranger-9.0.1:$PATH' >> ~/.bashrc
-source ~/.bashrc
-
-# For other shells, add to the appropriate file (~/.bash_profile, ~/.zshrc, etc.)
 ```
 
 **System Requirements:**
@@ -90,12 +78,8 @@ source ~/.bashrc
 - 64 GB RAM minimum (128+ GB recommended for large datasets)
 - 1 TB free disk space
 
-**Download Links:**
-- Latest version: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest
-- All versions: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/
-
 **Documentation:**
-- User Guide: https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger
+- User Guide: https://www.10xgenomics.com/support/software/cell-ranger/latest/getting-started
 
 ### Input Data
 
@@ -122,35 +106,6 @@ source "config/default_paths.sh"
 
 Variables defined in `local_paths.sh` override those in `default_paths.sh`.
 
-### Default Configuration
-
-The `config/default_paths.sh` file contains:
-
-```bash
-#!/bin/bash
-
-# Working directory (project root)
-export WORK="$(readlink -f .)"
-
-# Data directory
-export DATA="$WORK/data"
-export FQ_src="$DATA/Li_dataset"
-export FQ_names=("0HPA" "3HPA" "1DPA" "3DPA" "7DPA" "14DPA" "22DPA" "33DPA")
-export SMPS=("control" "3h" "24h" "72h" "7dpa" "14dpa" "22dpa" "33dpa")
-
-# Reference genome files directory
-export REF_FILES="$DATA/ref_files"
-export FA_names=("GCF_040938575.1_UKY_AmexF1_1_genomic.fna" "AmexG_v6.0-DD.fa")
-export GTF_names=("GCF_040938575.1_UKY_AmexF1_1_genomic.gtf" "AmexT_v47-AmexG_v6.0-DD.noWS.gtf")
-export REF_names=("UKY_AmexF1_1_genomic" "AmexT_v47-AmexG_v6_0-DD")
-
-# Outputs directory
-export OUT="$WORK/outputs"
-
-# Logs directory
-export LOG="$WORK/logs"
-```
-
 ### Customizing for Your System
 
 To customize paths for your system:
@@ -160,16 +115,7 @@ To customize paths for your system:
    cp config/default_paths.sh config/local_paths.sh
    ```
 
-2. **Edit `config/local_paths.sh`** to set your specific paths:
-   ```bash
-   export WORK="$HOME/your-project-directory"
-   export DATA="/path/to/your/data"
-   export SCRATCH="/path/to/your/scratch"
-   export OUT="$SCRATCH/outputs"
-   # ... modify other paths as needed
-   ```
-
-3. **Do not commit `local_paths.sh`** (it's in `.gitignore`)
+2. **Edit `config/local_paths.sh`** to set your specific paths.
 
 ### Configuration Variables
 
@@ -187,19 +133,13 @@ To customize paths for your system:
 | `GTF_names` | GTF filenames (array) | `("...genomic.gtf" "...DD.noWS.gtf")` |
 | `REF_names` | Reference names for output (array) | `("UKY_AmexF1_1_genomic" ...)` |
 
-**Important Notes:**
-
-- **Sample Name Mapping**:
-  - `FQ_names` = Directory names where FASTQ files are stored (e.g., "0HPA")
-  - `SMPS` = Corresponding sample names used in the pipeline (e.g., "control")
-  - Arrays must be the same length and in matching order
-  - Example: `FQ_names[0]="0HPA"` → `SMPS[0]="control"`
-
-- **Array Lengths**: All array variables must have consistent indices for proper sample-reference pairing
+**Sample Name Mapping:**
+- `FQ_names` = Directory names where FASTQ files are stored (e.g., "0HPA")
+- `SMPS` = Corresponding sample names used in the pipeline (e.g., "control")
+- Arrays must be the same length and in matching order
+- Example: `FQ_names[0]="0HPA"` → `SMPS[0]="control"`
 
 ### Input Data Organization
-
-Based on default configuration, organize your data as:
 
 ```
 $WORK/
@@ -256,40 +196,11 @@ graph TD
     F --> I[Results Directory]
 ```
 
-### Array Job Indexing
-
-The pipeline uses SLURM array jobs to process multiple samples in parallel:
-
-**02_cellranger.sbatch** (array=0-15):
-- Total jobs: 16 = 2 reference genomes × 8 timepoints
-- Index calculation:
-  ```bash
-  ref_idx = ARRAY_TASK_ID / 8    # Which reference (0 or 1)
-  fq_idx = ARRAY_TASK_ID % 8     # Which timepoint (0-7)
-  ```
-- Example:
-  - Task 0: ref_idx=0 (UKY_AmexF1_1), fq_idx=0 (0HPA/control)
-  - Task 8: ref_idx=1 (AmexG), fq_idx=0 (0HPA/control)
-  - Task 9: ref_idx=1 (AmexG), fq_idx=1 (3HPA/3h)
-
-**03_aggr.sbatch** (array=0-3):
-- Total jobs: 4 = 2 reference genomes × 2 normalization methods
-- Index calculation:
-  ```bash
-  ref_idx = ARRAY_TASK_ID / 2    # Which reference (0 or 1)
-  norm_idx = ARRAY_TASK_ID % 2   # Normalization (0=none, 1=mapped)
-  ```
-- Jobs:
-  - Task 0: UKY_AmexF1_1, no normalization (raw)
-  - Task 1: UKY_AmexF1_1, with normalization
-  - Task 2: AmexG, no normalization (raw)
-  - Task 3: AmexG, with normalization
-
 ---
 
 ## Usage
 
-### Automated Pipeline Execution (Recommended)
+### Automated Pipeline Execution
 
 The `run_pipeline.sh` script automates the entire pipeline with proper job dependencies:
 
@@ -321,18 +232,6 @@ sbatch scripts/cellranger/slurm/02_cellranger.sbatch
 # Step 3: Aggregate samples (4 jobs: 2 refs × 2 norm methods)
 # Wait for Step 2 to complete
 sbatch scripts/cellranger/slurm/03_aggr.sbatch
-```
-
-### Monitoring Jobs
-
-```bash
-# Check job status
-squeue -u $USER
-
-# View log files
-tail -f $LOG/mkref_*.log
-tail -f $LOG/cellranger_*_0.log
-tail -f $LOG/aggr_*.log
 ```
 
 ---
@@ -437,6 +336,17 @@ tail -f $LOG/aggr_*.log
 ### Directory Structure
 
 ```
+$DATA/
+└── ref_genomes/
+    └── cellranger_mkref/
+        ├── UKY_AmexF1_1_genomic/
+        │   ├── reference.json
+        │   ├── fasta/
+        │   ├── genes/
+        │   └── star/
+        └── AmexT_v47-AmexG_v6_0-DD/
+            └── (same structure)
+
 $OUT/
 └── cellranger/
     ├── ref_UKY_AmexF1_1_genomic/
@@ -473,47 +383,9 @@ $WORK/
         │   └── ... (all samples)
         └── ref_AmexT_v47-AmexG_v6_0-DD/
             └── (same structure)
-
-$DATA/
-└── ref_genomes/
-    └── cellranger_mkref/
-        ├── UKY_AmexF1_1_genomic/
-        │   ├── reference.json
-        │   ├── fasta/
-        │   ├── genes/
-        │   └── star/
-        └── AmexT_v47-AmexG_v6_0-DD/
-            └── (same structure)
 ```
 
-### Key Output Files
-
-| File | Description |
-|------|-------------|
-| **Reference Outputs** | |
-| `reference.json` | Reference genome metadata |
-| `star/` | STAR aligner index files |
-| `fasta/genome.fa` | Processed genome sequence |
-| `genes/genes.gtf` | Processed gene annotations |
-| **Count Outputs (per sample)** | |
-| `filtered_feature_bc_matrix/` | Gene-barcode UMI count matrix (main output) |
-| `barcodes.tsv.gz` | Cell barcodes passing filters |
-| `features.tsv.gz` | Gene IDs and names |
-| `matrix.mtx.gz` | Sparse UMI count matrix (Market Matrix format) |
-| `molecule_info.h5` | Molecule-level data for aggregation |
-| `web_summary.html` | Interactive QC report with plots |
-| `metrics_summary.csv` | Key metrics in CSV format |
-| **Aggregation Outputs** | |
-| `count/filtered_feature_bc_matrix/` | Combined count matrix from all samples |
-| `aggregation.csv` | Sample metadata and normalization factors |
-
-### Results Directory
-
-The `results/` directory contains copies of web summary reports for easy access:
-- Location: `$WORK/results/cellranger/`
-- Contents: Web summary HTML files for all samples
-- Updated after each count job completes
-- Useful for quick QC review without navigating full output structure
+The `results/` directory contains copies of web summary reports for easy access.
 
 ---
 

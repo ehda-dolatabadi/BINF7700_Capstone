@@ -80,7 +80,7 @@ scripts/seurat/
 
 ### R Packages
 
-- Seurat (tested with v5.3.0)
+- Seurat (tested with v5.3.1)
 - ggplot2
 - dplyr
 - future (for parallelization)

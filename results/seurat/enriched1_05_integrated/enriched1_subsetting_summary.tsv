@@ -1,2 +1,2 @@
 id	n_cells_before	n_features_before	n_Epithelial_markers_total	n_Epithelial_markers_available	Epithelial_threshold	n_cells_Epithelial	pct_cells_Epithelial	n_Erythrocytes_markers_total	n_Erythrocytes_markers_available	Erythrocytes_threshold	n_cells_Erythrocytes	pct_cells_Erythrocytes	n_Fibroblasts_markers_total	n_Fibroblasts_markers_available	Fibroblasts_threshold	n_cells_Fibroblasts	pct_cells_Fibroblasts	n_cells_after	n_features_after	pct_cells_kept
-enriched1	54806	18819	23	15	0.2	29824	54.4173995547933	23	18	0.5	5235	9.55187388242163	8	7	0.5	8312	15.1662226763493	12706	18819	23.1835930372587
+enriched1	54747	18817	23	15	0.2	29752	54.3445302938974	23	18	0.5	5252	9.593219719802	8	7	0.5	8387	15.3195608891811	12616	18817	23.0441850695015
