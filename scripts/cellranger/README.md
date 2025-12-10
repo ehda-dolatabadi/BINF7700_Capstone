@@ -52,11 +52,24 @@ scripts/cellranger/
 - Cell Ranger (tested with v9.0.1)
 - SLURM workload manager
 
+**System Requirements:**
+- 8-core Intel or AMD processor (16+ cores recommended)
+- 64 GB RAM minimum (128+ GB recommended for large datasets)
+- 1 TB free disk space
+
+### Input Data
+
+- **10X Genomics FASTQ files**: Illumina sequencing data from Chromium platform
+- **Reference genome FASTA**: Genomic sequence file (`.fna` or `.fa`)
+- **Gene annotation GTF**: Gene annotations (`.gtf`)
+
+---
+
+## Configuration
+
 ### Cell Ranger Installation
 
 Cell Ranger is provided as a pre-compiled binary and does not require compilation or installation of dependencies.
-
-**Installation Steps:**
 
 ```bash
 # Download Cell Ranger (v9.0.1)
@@ -73,51 +86,9 @@ source ~/.bashrc
 cellranger --version
 ```
 
-**System Requirements:**
-- 8-core Intel or AMD processor (16+ cores recommended)
-- 64 GB RAM minimum (128+ GB recommended for large datasets)
-- 1 TB free disk space
-
-**Documentation:**
-- User Guide: https://www.10xgenomics.com/support/software/cell-ranger/latest/getting-started
-
-### Input Data
-
-- **10X Genomics FASTQ files**: Illumina sequencing data from Chromium platform
-- **Reference genome FASTA**: Genomic sequence file (`.fna` or `.fa`)
-- **Gene annotation GTF**: Gene annotations (`.gtf`)
-
----
-
-## Configuration
-
-### Configuration Files
-
-The pipeline uses two configuration files in the `config/` directory:
-
-1. **`config/default_paths.sh`**: Default configuration template (tracked in git)
-2. **`config/local_paths.sh`**: Local overrides for your system (optional, not tracked in git)
-
-All scripts source both files in order:
-```bash
-source "config/default_paths.sh"
-[ -f "config/local_paths.sh" ] && source "config/local_paths.sh"
-```
-
-Variables defined in `local_paths.sh` override those in `default_paths.sh`.
-
-### Customizing for Your System
-
-To customize paths for your system:
-
-1. **Copy the default configuration:**
-   ```bash
-   cp config/default_paths.sh config/local_paths.sh
-   ```
-
-2. **Edit `config/local_paths.sh`** to set your specific paths.
-
 ### Configuration Variables
+
+The pipeline uses configuration files in the `config/` directory. Default paths are defined in `config/default_paths.sh` and can be overridden in `config/local_paths.sh`.
 
 | Variable | Description | Default Value |
 |----------|-------------|---------------|

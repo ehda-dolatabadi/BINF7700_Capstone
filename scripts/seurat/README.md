@@ -7,7 +7,7 @@ A comprehensive pipeline for processing and analyzing single-cell RNA-seq data f
 - [Overview](#overview)
 - [Directory Structure](#directory-structure)
 - [Prerequisites](#prerequisites)
-- [Installation](#installation)
+- [Configuration](#configuration)
 - [Pipeline Workflow](#pipeline-workflow)
 - [Usage](#usage)
 - [Scripts Description](#scripts-description)
@@ -81,11 +81,8 @@ scripts/seurat/
 ### R Packages
 
 - Seurat (tested with v5.3.1)
-- ggplot2
-- dplyr
-- future (for parallelization)
-- SingleCellExperiment
-- scDblFinder (for doublet detection)
+- future (v1.68.0, for parallelization)
+- scDblFinder (v1.23.4, for doublet detection)Future (for parallelization)
 
 ### Input Data
 
@@ -96,7 +93,7 @@ scripts/seurat/
 
 ## Installation
 
-### 1. Set up R environment
+### Setting up R environment
 
 The pipeline requires specific R packages. Use the provided conda environment file to create a reproducible environment.
 
@@ -105,37 +102,19 @@ The pipeline requires specific R packages. Use the provided conda environment fi
 conda env create -f config/env_seurat.yml
 ```
 
-**Verify installation**:
-```bash
-Rscript -e "library(Seurat); packageVersion('Seurat')"
-```
+### Configuration Variables
 
-### 2. Configure paths
+**Default paths**
 
 The pipeline uses configuration files in the `config/` directory. Default paths are defined in `config/default_paths.sh` and can be overridden in `config/local_paths.sh`.
-
-**Default paths** (`config/default_paths.sh`):
-```bash
-WORK="$(readlink -f .)"         # Working directory (project root)
-DATA="$WORK/data"               # Data directory
-OUT="$WORK/outputs"             # Outputs directory
-LOG="$WORK/logs"                # Logs directory
-REF_FILES="$DATA/ref_files"     # Reference genome files
-```
-
-**Optional local overrides** (`config/local_paths.sh`):
-- Create this file to override any paths from `default_paths.sh`
-- Useful for custom data locations or cluster-specific paths
-- This file is excluded from version control for user-specific configurations
 
 **Main analysis ID**: Set in `run_pipeline.sh`:
 ```bash
 export main_ID="all"            # Main analysis ID (default: "all")
 ```
 
-### 3. Prepare input data
+### Input Data Organization
 
-Ensure your data is organized as:
 ```
 $OUT/cellranger/
 └── ref_<genome>/
@@ -143,15 +122,12 @@ $OUT/cellranger/
     ├── 3h/outs/filtered_feature_bc_matrix/
     ├── 24h/outs/filtered_feature_bc_matrix/
     └── ...
-```
 
-And ensure you have a gene mapping file:
-```
 $REF_FILES/
 └── loc_map.tsv                 # Gene ID to symbol mapping (gene_id, symbol)
 ```
 
-### 4. Configure cell type markers
+### Configuration of cell type markers
 
 Edit `scripts/seurat/cell_markers.txt` to define cell type markers (see [Cell Markers File](#cell-markers-file) section).
 
@@ -197,11 +173,155 @@ The pipeline will automatically:
 1. Submit preprocessing jobs (array job for 8 samples)
 2. Wait for completion and integrate samples
 3. Perform clustering and analysis
-4. Optionally run subsetting workflows
+4. Run subsetting workflows
 
-### Running Individual Steps
+### Running Individual SLURM Scripts
 
-Each R script or SLURM batch script can be run independently:
+Each SLURM batch script can be run independently with custom parameters:
+
+#### 01_preprocess.sbatch
+Processes individual samples through mapping, QC, doublet removal, filtering, and normalization (steps 00-04).
+
+**Parameters**:
+- `ID`: Analysis identifier (default: "all")
+- `REF`: Reference genome name (default: "UKY_AmexF1_1_genomic")
+- `MIN_CELLS`: Minimum cells per gene (default: 5)
+- `MIN_FEATURES`: Minimum features per cell (default: 500)
+- `MAX_FEATURES`: Maximum features per cell (default: 5000)
+- `MIN_COUNTS`: Minimum UMI counts per cell (default: 1000)
+- `MAX_COUNTS`: Maximum UMI counts per cell (default: 30000)
+- `MAX_MT`: Maximum mitochondrial percentage (default: 10)
+- `MAX_RIBO`: Maximum ribosomal percentage (default: 35)
+
+**Usage**:
+```bash
+# Run with defaults
+sbatch scripts/seurat/slurm/01_preprocess.sbatch
+
+# Run with custom parameters
+sbatch --export=ALL,ID=test,MIN_COUNTS=2000,MAX_MT=5 scripts/seurat/slurm/01_preprocess.sbatch
+```
+
+---
+
+#### 02_integrate.sbatch
+Integrates all normalized samples with batch correction (step 05).
+
+**Parameters**:
+- `ID`: Analysis identifier (default: "all")
+
+**Usage**:
+```bash
+# Run with defaults
+sbatch scripts/seurat/slurm/02_integrate.sbatch
+
+# Run with custom ID
+sbatch --export=ALL,ID=myanalysis scripts/seurat/slurm/02_integrate.sbatch
+```
+
+---
+
+#### 03_cluster.sbatch
+Performs PCA, clustering, UMAP, and marker identification (steps 06-09).
+
+**Parameters**:
+- `ID`: Analysis identifier (default: "all")
+- `NPCS`: Number of principal components to compute (default: 50)
+- `DIMS`: Number of dimensions for clustering (default: 10)
+- `RES`: Clustering resolution (default: 0.5)
+- `UMAP_DIMS`: Number of dimensions for UMAP (default: 10)
+- `UMAP_METRIC`: Distance metric for UMAP (default: "cosine")
+- `SIGNIFICANCE`: p-value threshold for markers (default: 0.05)
+- `REGULATION`: Log fold-change threshold (default: 1)
+- `ENRICHMENT`: Minimum fraction of cells expressing marker (default: 0.2)
+- `TOP_MARKERS`: Number of top markers to keep (default: 100)
+
+**Usage**:
+```bash
+# Run with defaults
+sbatch scripts/seurat/slurm/03_cluster.sbatch
+
+# Run with custom clustering parameters
+sbatch --export=ALL,ID=test,DIMS=15,RES=0.8,NPCS=50 scripts/seurat/slurm/03_cluster.sbatch
+
+# Run with stricter marker filtering
+sbatch --export=ALL,ID=test,SIGNIFICANCE=0.01,REGULATION=1.5 scripts/seurat/slurm/03_cluster.sbatch
+```
+
+---
+
+#### 04_score_markers.sbatch
+Scores cells based on cell type marker genes (step 10). Runs as an array job, one task per cell type.
+
+**Parameters**:
+- `main_ID`: Main analysis identifier (default: "all")
+- `MARKER_FILE`: Path to cell markers file (default: "$WORK/scripts/seurat/cell_markers.txt")
+
+**Usage**:
+```bash
+# Run with defaults (scores all cell types in cell_markers.txt)
+sbatch scripts/seurat/slurm/04_score_markers.sbatch
+
+# Run with custom main_ID
+sbatch --export=ALL,main_ID=myanalysis scripts/seurat/slurm/04_score_markers.sbatch
+
+# Run with custom marker file and array size matching number of cell types
+sbatch --array=0-5 --export=ALL,MARKER_FILE=/path/to/markers.txt scripts/seurat/slurm/04_score_markers.sbatch
+```
+
+**Note**: Use `--array=0-N` where N is one less than the number of cell types in your marker file.
+
+---
+
+#### 05_subcluster.sbatch
+Subsets specific clusters and re-integrates for deeper analysis (step 11).
+
+**Parameters**:
+- `main_ID`: Main analysis identifier (default: "all")
+- `ID`: Subset identifier (default: "cluster1")
+- `IDENT`: Cluster identity/identities to subset (default: "1")
+
+**Usage**:
+```bash
+# Subset cluster 5
+sbatch --export=ALL,main_ID=all,ID=cluster5,IDENT=5 scripts/seurat/slurm/05_subcluster.sbatch
+
+# Subset multiple clusters (comma-separated)
+sbatch --export=ALL,main_ID=all,ID=clusters_1_2_3,IDENT="1,2,3" scripts/seurat/slurm/05_subcluster.sbatch
+```
+
+---
+
+#### 06_subcells.sbatch
+Subsets cells based on marker expression scores and re-integrates (step 12).
+
+**Parameters**:
+- `main_ID`: Main analysis identifier (default: "all")
+- `ID`: Subset identifier (default: "enriched")
+- `MODE`: Subsetting mode - "remove" or "keep" (default: "remove")
+- `CELL_TYPES`: Semicolon-separated cell type names (default: "epithelial")
+- `CELL_THRESHOLDS`: Semicolon-separated score thresholds (default: "1.0")
+- `MARKER_FILE`: Path to cell markers file (default: "$WORK/scripts/seurat/cell_markers.txt")
+
+**Usage**:
+```bash
+# Remove cells with high epithelial scores (filter out unwanted population)
+sbatch --export=ALL,main_ID=all,ID=no_epi,MODE=remove,CELL_TYPES=Epithelial,CELL_THRESHOLDS=0.5 scripts/seurat/slurm/06_subcells.sbatch
+
+# Keep cells with high stem cell scores (enrich for target population)
+sbatch --export=ALL,main_ID=all,ID=enriched_stem,MODE=keep,CELL_TYPES=StemCells,CELL_THRESHOLDS=1.0 scripts/seurat/slurm/06_subcells.sbatch
+
+# Filter multiple cell types
+sbatch --export=ALL,main_ID=all,ID=filtered,MODE=remove,CELL_TYPES="Epithelial;Erythrocytes",CELL_THRESHOLDS="0.5;3.0" scripts/seurat/slurm/06_subcells.sbatch
+```
+
+**Note**: Cell type names must match those defined in `cell_markers.txt`.
+
+---
+
+### Running Individual R Scripts
+
+Each R script can also be run independently:
 
 ```bash
 # Example: Run QC on a single sample
@@ -209,12 +329,6 @@ Rscript scripts/seurat/Rscripts/01_qc.R <sample_id> <output_dir> <input_rds>
 
 # Example: Run integration
 Rscript scripts/seurat/Rscripts/05_integrate.R <analysis_id> <output_dir> sample1.rds sample2.rds ...
-
-# Example: Submit preprocessing SLURM job
-sbatch --export=ALL,ID=main scripts/seurat/slurm/01_preprocess.sbatch
-
-# Example: Submit clustering with custom parameters
-sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_cluster.sbatch
 ```
 
 ---
@@ -248,7 +362,8 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 **Usage**: `Rscript 01_qc.R <id> <outdir> <input_rds>`
 
-**Output**: QC plots (violin, histogram, density, scatter plots) as PNG and PDF
+**Output**:
+- QC plots (violin, histogram, density, scatter plots) as PNG and PDF
 
 **Note**: QC plots do not show threshold lines - they are purely exploratory to help determine appropriate filtering thresholds.
 
@@ -264,24 +379,18 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 **Output**:
 - `<id>_DB_removed.rds`: Seurat object with doublets removed
 - `<id>_DB_removed_summary.tsv`: Summary statistics
-- QC plots showing metrics after doublet removal
 
 ---
 
 #### 03_filter.R
 **Purpose**: Filter cells based on QC thresholds.
 
-**Default Thresholds**:
-- `min_counts = 1000`: Minimum UMI counts
-- `max_counts = 30000`: Maximum UMI counts
-- `min_features = 500`: Minimum genes detected
-- `max_features = 5000`: Maximum genes detected
-- `max_mt = 10`: Maximum mitochondrial %
-- `max_ribo = 30`: Maximum ribosomal %
-
 **Usage**: `Rscript 03_filter.R <id> <outdir> <input_rds> <min_counts> <max_counts> <min_features> <max_features> <max_mt> <max_ribo>`
 
-**Output**: `<id>_filtered.rds`, `<id>_filtering_summary.tsv`, QC plots with red dashed threshold lines
+**Output**:
+- `<id>_filtered.rds`
+- `<id>_filtering_summary.tsv`
+- QC plots with red dashed threshold lines
 
 **Note**: Unlike QC plots, filtering plots show red dashed lines indicating the thresholds being applied.
 
@@ -296,7 +405,9 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 **Usage**: `Rscript 04_normalize.R <id> <outdir> <input_rds>`
 
-**Output**: `<id>_normalized.rds`, `<id>_normalization_summary.tsv`
+**Output**:
+- `<id>_normalized.rds`
+- `<id>_normalization_summary.tsv`
 
 ---
 
@@ -310,19 +421,32 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 **Usage**: `Rscript 05_integrate.R <id> <outdir> <sample1.rds> <sample2.rds> ...`
 
-**Output**: `<id>_integrated.rds`, `<id>_integration_summary.tsv`
+**Output**:
+- `<id>_integrated.rds`-
+- `<id>_integration_summary.tsv`
+
+#### 05_reintegrate_subset.R
+**Purpose**: Re-normalize and re-integrate a subset of cells.
+
+**Method**: Splits subset by sample, re-runs SCTransform on each, and performs integration. If any sample has <30 cells, integration is skipped and SCTransform is run on the entire subset>
+
+**Usage**: `Rscript 05_reintegrate_subset.R <id> <outdir> <input_rds>`
+
+**Output**:
+- `<id>_integrated.rds`
+- `<id>_integration_summary.tsv`
 
 ---
 
 #### 06_pca.R
 **Purpose**: Perform principal component analysis.
 
-**Parameters**:
-- `npcs = 50`: Number of PCs to compute
-
 **Usage**: `Rscript 06_pca.R <id> <outdir> <input_rds> <npcs>`
 
-**Output**: `<id>_06_pca.rds`, `<id>_06_pca_elbow.png`, `<id>_06_pca_summary.tsv`
+**Output**:
+- `<id>_06_pca.rds`
+- `<id>_06_pca_elbow.png`
+- `<id>_06_pca_summary.tsv`
 
 ---
 
@@ -330,27 +454,25 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 **Purpose**: Graph-based clustering using Leiden algorithm.
 
 **Parameters**:
-- `dims = 10`: Number of PCs to use
-- `res = 0.5`: Clustering resolution
 - `algorithm = 4`: Leiden clustering
 
 **Usage**: `Rscript 07_cluster.R <id> <outdir> <input_rds> <dims> <res>`
 
-**Output**: `<id>_07_clustered.rds`, `<id>_07_clustering_summary.tsv`
+**Output**:
+- `<id>_07_clustered.rds`
+- `<id>_07_clustering_summary.tsv`
 
 ---
 
 #### 08_umap.R
 **Purpose**: UMAP dimensionality reduction for visualization.
 
-**Parameters**:
-- `dims = 10`: Number of PCs to use
-- `metric = "cosine"`: Distance metric
-- `seed = 777`: Random seed for reproducibility
-
 **Usage**: `Rscript 08_umap.R <id> <outdir> <input_rds> <dims> <metric>`
 
-**Output**: `<id>_08_umap.rds`, `<id>_08_umap.png`, `<id>_08_umap_summary.tsv`
+**Output**:
+- `<id>_08_umap.rds`
+- `<id>_08_umap.png`-
+- `<id>_08_umap_summary.tsv`
 
 ---
 
@@ -360,10 +482,6 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 **Parameters**:
 - `max.cells.per.ident = 500`: Downsample cells per cluster
 - `only.pos = FALSE`: Find both up and down-regulated markers
-- `significance = 0.05`: Adjusted p-value threshold
-- `regulation = 1`: Log2FC threshold
-- `enrichment = 0.2`: Difference in detection rate (pct.1 - pct.2)
-- `top = 30`: Top markers per cluster per direction
 
 **Usage**: `Rscript 09_find_markers.R <id> <outdir> <input_rds> <significance> <regulation> <enrichment> <top>`
 
@@ -379,13 +497,6 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 **Method**: Calculates module scores using AddModuleScore and generates comprehensive visualizations grouped by both timepoints and clusters.
 
 **Usage**: `Rscript 10_score_markers.R <id> <outdir> <input_rds> <cell_name> <markers>`
-
-**Arguments**:
-- `id`: Sample or analysis identifier
-- `outdir`: Output directory
-- `input_rds`: Path to Seurat object
-- `cell_name`: Cell type name (used for labeling)
-- `markers`: Comma-separated list of marker genes (e.g., MBP,MPZ,PMP22)
 
 **Output**:
 - `<id>_scored.rds`: Object with added module score
@@ -403,10 +514,9 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 
 **Usage**: `Rscript 11_subset_clusters.R <id> <outdir> <input_rds> <cluster_ident>`
 
-**Arguments**:
-- `cluster_ident`: Cluster identity or identities to retain (e.g., 15 or 1,2,3)
-
-**Output**: `<id>_subset.rds`, `<id>_subsetting_summary.tsv`
+**Output**:
+- `<id>_subset.rds`
+- `<id>_subsetting_summary.tsv`
 
 ---
 
@@ -425,36 +535,11 @@ sbatch --export=ALL,ID=main,NPCS=50,DIMS=10,RES=0.5 scripts/seurat/slurm/03_clus
 - `cell_markers`: Semicolon-separated lists, comma-separated within (e.g., KRT8,KRT18;HBA1,HBB)
 - `cell_thresholds`: Semicolon-separated values (e.g., 0.5;3.0)
 
-**Example - Remove mode**:
-```bash
-# Remove epithelial, erythrocytes, and fibroblasts
-Rscript 12_subset_cells.R enriched1 $OUT/seurat/enriched1 integrated.rds \
-  remove Epithelial;Erythrocytes;Fibroblasts KRT8,KRT18;HBA1,HBB;COL1A1,COL1A2 0.2;0.5;0.5
-```
-
-**Example - Keep mode**:
-```bash
-# Keep only Schwann cells and immune cells
-Rscript 12_subset_cells.R enriched2 $OUT/seurat/enriched2 integrated.rds \
-  keep Schwann;Macrophage MBP,MPZ,PMP22;CD68,CD163 0.4;1.0
-```
-
 **Output**:
 - `<id>_subset.rds`: Filtered object
 - `<id>_<celltype>_score_distribution.png`: Score distribution histogram per cell type
 - `<id>_<celltype>_violin_score.png`: Violin plot by timepoint per cell type
 - `<id>_subsetting_summary.tsv`: Summary statistics including cells kept/removed per cell type
-
----
-
-#### 05_reintegrate_subset.R
-**Purpose**: Re-normalize and re-integrate a subset of cells.
-
-**Method**: Splits subset by sample, re-runs SCTransform on each, and performs integration. If any sample has <30 cells, integration is skipped and SCTransform is run on the entire subset without integration.
-
-**Usage**: `Rscript 05_reintegrate_subset.R <id> <outdir> <input_rds>`
-
-**Output**: `<id>_integrated.rds`, `<id>_integration_summary.tsv`
 
 ---
 
@@ -551,14 +636,7 @@ The `cell_markers.txt` file defines cell type markers used for scoring in step 1
 
 **Format**: Each line defines one cell type with the format:
 ```
-CELL_TYPE_NAME=GENE1,GENE2,GENE3,...
-```
-
-**Example** (`scripts/seurat/cell_markers.txt`):
-```
-Schwann_mye=EGR2,MPZ,PRX,SOX10
-Endothelial=CD34,CDH5,ENG,FLT1,ICAM1,KDR,MCAM,PDPN,PECAM1,PROM1,SELE,TEK,VWF
-Epithelial=ABI3BP,ADH7,ANPEP,AQP1,AQP3,CAPNS2,CDH1,CLCA2,DAPL1,EPCAM,FGFBP1,GPR87,GSTM2,HPGD,KRT14,KRT15,KRT16,KRT17,KRT4,KRT5,LY6D,SDC1,SEC14L3
+CELL_TYPE_NAME="GENE1,GENE2,GENE3,..."
 ```
 
 **Usage in pipeline**:
@@ -566,9 +644,8 @@ Epithelial=ABI3BP,ADH7,ANPEP,AQP1,AQP3,CAPNS2,CDH1,CLCA2,DAPL1,EPCAM,FGFBP1,GPR8
 - Step 12 (06_subcells.sbatch): Uses specified cell types for subsetting based on MODE
 
 **Notes**:
-- Cell type names should not contain spaces (use underscores: Schwann_muscle)
+- Cell type names should not contain spaces
 - Genes are comma-separated with no spaces
-- No quotes around gene names or values
 - Scripts automatically check which markers are available in the dataset
 - Missing markers are reported in summary files but do not cause failures
 
@@ -582,7 +659,7 @@ Epithelial=ABI3BP,ADH7,ANPEP,AQP1,AQP3,CAPNS2,CDH1,CLCA2,DAPL1,EPCAM,FGFBP1,GPR8
 
 - **SCTransform**: Hafemeister, C., & Satija, R. (2019). Normalization and variance stabilization of single-cell RNA-seq data using regularized negative binomial regression. *Genome Biology, 20*, 296. https://doi.org/10.1186/s13059-019-1874-1
 
-- **future package**: Bengtsson, H. (2021). A unifying framework for parallel and distributed processing in R using futures. *The R Journal, 13*(2), 208-227. https://doi.org/10.32614/RJ-2021-048
+- **Future package**: Bengtsson, H. (2021). A unifying framework for parallel and distributed processing in R using futures. *The R Journal, 13*(2), 208-227. https://doi.org/10.32614/RJ-2021-048
 
 ---
 
