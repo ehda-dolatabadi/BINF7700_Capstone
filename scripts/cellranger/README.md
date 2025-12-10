@@ -52,6 +52,51 @@ scripts/cellranger/
 - Cell Ranger (tested with v9.0.1)
 - SLURM workload manager
 
+### Cell Ranger Installation
+
+Cell Ranger is provided as a pre-compiled binary and does not require compilation or installation of dependencies.
+
+**Installation Steps:**
+
+```bash
+# Download Cell Ranger (example for v9.0.1)
+cd /path/to/software
+curl -o cellranger-9.0.1.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.1.tar.gz"
+
+# Extract the tarball
+tar -xzvf cellranger-9.0.1.tar.gz
+
+# Add Cell Ranger to your PATH
+export PATH=/path/to/software/cellranger-9.0.1:$PATH
+
+# Verify installation
+cellranger --version
+# Should output: cellranger cellranger-9.0.1
+```
+
+**Making PATH changes permanent:**
+
+Add the export line to your shell configuration file:
+```bash
+# For bash
+echo 'export PATH=/path/to/software/cellranger-9.0.1:$PATH' >> ~/.bashrc
+source ~/.bashrc
+
+# For other shells, add to the appropriate file (~/.bash_profile, ~/.zshrc, etc.)
+```
+
+**System Requirements:**
+- 8-core Intel or AMD processor (16+ cores recommended)
+- 64 GB RAM minimum (128+ GB recommended for large datasets)
+- 1 TB free disk space
+
+**Download Links:**
+- Latest version: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest
+- All versions: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/
+
+**Documentation:**
+- User Guide: https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger
+
 ### Input Data
 
 - **10X Genomics FASTQ files**: Illumina sequencing data from Chromium platform

@@ -7,8 +7,8 @@ A comprehensive bioinformatics pipeline for analyzing single-cell RNA-seq data f
 This repository contains a reproducible computational workflow for analyzing single-cell transcriptomic data from the axolotl (*Ambystoma mexicanum*) limb regeneration model. The project aims to:
 
 - **Reproduce and extend** Li et al. (2021) using updated genome assemblies and analytical methods
-- **Reconstruct neural cell trajectories** during regeneration
-- **Map ligand-receptor interactions** between neural cells and immune cells
+- **Reconstruct Schwann cell trajectories** during regeneration
+- **Map ligand-receptor interactions** between Schwann cells and immune cells
 
 ### Dataset
 
@@ -35,16 +35,11 @@ This repository contains a reproducible computational workflow for analyzing sin
 git clone https://github.com/ehda-dolatabadi/axolotl-regeneration-scrna.git
 cd axolotl-regeneration-scrna
 
-# Configure paths (optional - create local overrides)
-cp config/default_paths.sh config/local_paths.sh
-# Edit config/local_paths.sh with your specific paths
-
 # Run Cell Ranger alignment (Step 1)
 bash scripts/cellranger/run_pipeline.sh
 
 # Set up R environment for Seurat analysis
-conda env create -f config/seurat_env.yml
-conda activate seurat
+conda env create -f config/env_seurat.yml
 
 # Run Seurat analysis (Step 2)
 bash scripts/seurat/run_pipeline.sh
@@ -60,12 +55,12 @@ bash scripts/seurat/run_pipeline.sh
 
 ### Pipeline Components
 
-| Component | Purpose | Key Tools | Documentation |
-|-----------|---------|-----------|---------------|
-| **Cell Ranger** | FASTQ → Count Matrix | `mkref`, `count`, `aggr` | [Cell Ranger README](scripts/cellranger/README.md) |
-| **Seurat Analysis** | QC → Clustering → Markers | Seurat, SCTransform, Leiden | [Seurat README](scripts/seurat/README.md) |
-| **Monocle3** | Trajectory Inference & Pseudotime | Monocle3, UMAP | [Monocle3 README](scripts/monocle3/README.md) *(Coming soon)* |
-| **CellChat** | Cell-Cell Communication | CellChat | [CellChat README](scripts/cellchat/README.md) *(Coming soon)* |
+| Component | Purpose | Documentation |
+|-----------|---------|---------------|
+| **Cell Ranger** | FASTQ → Count Matrix | [Cell Ranger README](scripts/cellranger/README.md) |
+| **Seurat Analysis** | QC → Clustering → Markers | [Seurat README](scripts/seurat/README.md) |
+| **Monocle3** | Trajectory Inference & Pseudotime | [Monocle3 README](scripts/monocle3/README.md) *(Coming soon)* |
+| **CellChat** | Cell-Cell Communication | [CellChat README](scripts/cellchat/README.md) *(Coming soon)* |
 
 ---
 
@@ -77,7 +72,28 @@ bash scripts/seurat/run_pipeline.sh
 - Conda (for R environment management)
 - SLURM job scheduler
 
-**R Packages** (installed via conda environment for Seurat/Monocle3/CellChat):
+**Cell Ranger Installation:**
+
+Cell Ranger is provided as a pre-compiled binary and does not require compilation or installation of dependencies.
+
+```bash
+# Download Cell Ranger (example for v9.0.1)
+cd /path/to/software
+curl -o cellranger-9.0.1.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.1.tar.gz"
+
+# Extract
+tar -xzvf cellranger-9.0.1.tar.gz
+
+# Add to PATH (add to ~/.bashrc or ~/.bash_profile for persistence)
+export PATH=/path/to/software/cellranger-9.0.1:$PATH
+
+# Verify installation
+cellranger --version
+```
+
+For the latest version and detailed installation instructions, visit: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest
+
+**R Packages** (installed via conda environment):
 - Seurat (tested with v5.3.1)
 - ggplot2 (v4.0.1)
 - dplyr (v1.1.4)
@@ -87,7 +103,7 @@ bash scripts/seurat/run_pipeline.sh
 - Monocle3 (for trajectory analysis - coming soon)
 - CellChat (for communication analysis - coming soon)
 
-See `config/seurat_env.yml` for complete environment specification and `config/seurat_R_sessionInfo.txt` for detailed package versions.
+See `config/env_seurat.yml` for complete Seurat environment specification.
 
 ---
 
@@ -117,10 +133,9 @@ This step processes raw FASTQ files and generates count matrices. Cell Ranger ru
 
 **Step 2: Seurat Analysis**
 
-First, set up and activate the R environment:
+First, set up the R environment:
 ```bash
-conda env create -f config/seurat_env.yml
-conda activate seurat
+conda env create -f config/env_seurat.yml
 ```
 
 Verify installation:
@@ -135,13 +150,11 @@ bash scripts/seurat/run_pipeline.sh
 
 **Step 3: Trajectory Inference with Monocle3** *(Coming soon)*
 ```bash
-conda activate seurat  # Use the same R environment
 bash scripts/monocle3/run_monocle3.sh
 ```
 
 **Step 4: Cell-Cell Communication with CellChat** *(Coming soon)*
 ```bash
-conda activate seurat  # Use the same R environment
 bash scripts/cellchat/run_cellchat.sh
 ```
 
@@ -157,19 +170,19 @@ bash scripts/cellchat/run_cellchat.sh
 - **Input**: Count matrices from Cell Ranger
 - **Output**: Clustered cells with annotations, marker genes, QC reports
 - **Time**: ~2-3 hours for full dataset
-- **Requirements**: R environment (seurat conda environment)
+- **Requirements**: R environment (set up via `config/env_seurat.yml`)
 
 #### Stage 3: Monocle3 (Trajectory Inference) *(Coming soon)*
 - **Input**: Annotated Seurat objects
 - **Output**: Pseudotime trajectories, developmental paths, gene dynamics
 - **Time**: TBD
-- **Requirements**: R environment (seurat conda environment)
+- **Requirements**: Dedicated R environment
 
 #### Stage 4: CellChat (Cell-Cell Communication) *(Coming soon)*
 - **Input**: Annotated Seurat objects
 - **Output**: Ligand-receptor networks, signaling pathways, communication patterns
 - **Time**: TBD
-- **Requirements**: R environment (seurat conda environment)
+- **Requirements**: Dedicated R environment
 
 ---
 
@@ -180,8 +193,7 @@ bash scripts/cellchat/run_cellchat.sh
 ├── config/                        # Configuration files
 │   ├── default_paths.sh           # Default path configurations
 │   ├── local_paths.sh             # Optional local overrides (not tracked)
-│   ├── seurat_env.yml             # Conda environment specification
-│   └── seurat_R_sessionInfo.txt   # R session info and package versions
+│   └── env_seurat.yml             # Conda environment specification for Seurat
 │
 ├── scripts/
 │   ├── cellranger/                # Cell Ranger alignment pipeline

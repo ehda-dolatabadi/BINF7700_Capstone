@@ -102,16 +102,13 @@ The pipeline requires specific R packages. Use the provided conda environment fi
 
 **Create environment from yml file**:
 ```bash
-conda env create -f config/seurat_env.yml
-conda activate seurat
+conda env create -f config/env_seurat.yml
 ```
 
 **Verify installation**:
 ```bash
 Rscript -e "library(Seurat); packageVersion('Seurat')"
 ```
-
-The `config/seurat_R_sessionInfo.txt` file contains detailed information about the R session and package versions used in testing.
 
 ### 2. Configure paths
 
@@ -189,9 +186,6 @@ graph TD
 ### Full Pipeline
 
 ```bash
-# Activate conda environment
-conda activate seurat
-
 # Navigate to the working directory
 cd $WORK
 

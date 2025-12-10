@@ -1,0 +1,9 @@
+name: seurat
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base=4.5.2
+  - bioconductor-scdblfinder=1.23.4
+  - r-seurat=5.3.1
+  - r-future=1.68.0
