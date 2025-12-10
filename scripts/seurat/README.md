@@ -311,7 +311,7 @@ sbatch --export=ALL,main_ID=all,ID=no_epi,MODE=remove,CELL_TYPES=Epithelial,CELL
 # Keep cells with high macrophage scores (enrich for target population)
 sbatch --export=ALL,main_ID=all,ID=enriched_macrophages,MODE=keep,CELL_TYPES=Macrophage,CELL_THRESHOLDS=1.0 scripts/seurat/slurm/06_subcells.sbatch
 
-# Filter multiple cell types
+# Filter multiple cell types (semi-colon separated)
 sbatch --export=ALL,main_ID=all,ID=filtered,MODE=remove,CELL_TYPES="Epithelial;Erythrocytes",CELL_THRESHOLDS="0.5;3.0" scripts/seurat/slurm/06_subcells.sbatch
 ```
 
