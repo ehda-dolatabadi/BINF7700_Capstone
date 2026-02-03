@@ -28,10 +28,10 @@ SBATCH_OPTS="--parsable"
 preprocess=true
 integrate=true
 cluster_all=true
-score_all=true
-subcluster=true
-enrich1=true
-enrich2=true
+score_all=false
+subcluster=false
+enrich1=false
+enrich2=false
 
 # Step 1: Preprocessing
 # Map features, run QC, remove doublets, filter cells, and normalize
