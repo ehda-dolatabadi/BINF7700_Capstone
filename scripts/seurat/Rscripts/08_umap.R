@@ -12,6 +12,7 @@ suppressPackageStartupMessages({
   library(future)
 })
 
+seed <- 777
 set.seed(777)
 
 # Parse command line arguments
@@ -21,9 +22,6 @@ outdir  <- args[2]
 input   <- args[3]
 dims    <- as.numeric(args[4])
 metric  <- args[5]
-
-# Parameters
-seed	<- 777
 
 # Set up parallelization
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB

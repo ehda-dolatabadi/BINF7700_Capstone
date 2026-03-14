@@ -1,0 +1,17 @@
+all="fibroblasts/stromal,\
+macrophage,\
+basal/epithelial,\
+basal/epithelial/mesenchymal_progenitor,\
+epithelial/enterocyte_progenitor,\
+epithelial/secretory,\
+erythrocyte,\
+neutrophil/monocyte,\
+epithelial/secretory,\
+basal/epithelial,\
+mesenchymal_progenitor,\
+not_detected,\
+basal/alveolar,\
+erythrocyte,\
+endothelial,\
+endothelial/fibroblasts/muscle,\
+megakaryocytes"

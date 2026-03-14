@@ -10,12 +10,9 @@ set -euo pipefail
 export main_ID="all"
 export REF="UKY_AmexF1_1_genomic"
 
-# Load cell type markers and annotations from file
+# Load cell type markers from file
 export MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt"
 n_marker=$(grep -cE '^[a-zA-Z_]+=' ${MARKER_FILE})
-
-export ANNOTATION_FILE="$(pwd)/scripts/seurat/clusters_annotation.txt"
-n_annotation=$(grep -cE '^[a-zA-Z_]+=' ${ANNOTATION_FILE})
 
 # Load configuration paths
 source "config/default_paths.sh"
@@ -28,14 +25,26 @@ SLURM="$WORK/scripts/seurat/slurm"
 SBATCH_OPTS="--parsable"
 
 # Pipeline control flags (set to false to skip steps)
-preprocess=false
-integrate=false
-cluster_all=false
-score_all=false
-subcluster=false
-enrich1=false
-enrich2=false
-annotate=true
+preprocess=true
+integrate=true
+cluster_all=true
+score_all=true
+subcluster=true
+enrich1=true
+enrich2=true
+
+# Cluster annotation labels (comma-separated, one label per cluster in order)
+annotate_all=false
+LABELS_ALL=""
+
+annotate_subcluster=false
+LABELS_SUBCLUSTER=""
+
+annotate_enrich1=false
+LABELS_ENRICH1=""
+
+annotate_enrich2=false
+LABELS_ENRICH2=""
 
 # -----------------------------------------------------------------------------
 
@@ -93,6 +102,21 @@ TOP_MARKERS=100 \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/03_cluster.sbatch)
     echo "  Job ID: $JOB3"
+fi
+
+# -----------------------------------------------------------------------------
+
+# Step 3b: Cluster annotation
+# Rename cluster identities using ordered labels (requires LABELS_ALL to be set)
+if [ "$annotate_all" = true ]; then
+    echo "Submitting cluster annotation..."
+    JOB_ANN_ALL=$(sbatch $SBATCH_OPTS \
+      --export=ALL,\
+ID=$main_ID,\
+LABELS="$LABELS_ALL" \
+      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
+      $SLURM/07_annotate.sbatch)
+    echo "  Job ID: $JOB_ANN_ALL"
 fi
 
 # -----------------------------------------------------------------------------
@@ -158,6 +182,18 @@ MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB7"
 
+    # Annotate subcluster (requires LABELS_SUBCLUSTER to be set)
+    if [ "$annotate_subcluster" = true ]; then
+        echo "Submitting subcluster annotation..."
+        JOB_ANN_SUB=$(sbatch $SBATCH_OPTS \
+          --export=ALL,\
+ID="all_cluster15",\
+LABELS="$LABELS_SUBCLUSTER" \
+          --job-name=annotate_subcluster \
+          --dependency=afterok:$JOB6 \
+          $SLURM/07_annotate.sbatch)
+        echo "  Job ID: $JOB_ANN_SUB"
+    fi
 fi
 
 # -----------------------------------------------------------------------------
@@ -211,6 +247,18 @@ MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB10"
 
+    # Annotate enriched1 (requires LABELS_ENRICH1 to be set)
+    if [ "$annotate_enrich1" = true ]; then
+        echo "Submitting enriched1 annotation..."
+        JOB_ANN_E1=$(sbatch $SBATCH_OPTS \
+          --export=ALL,\
+ID="enriched1",\
+LABELS="$LABELS_ENRICH1" \
+          --job-name=annotate_enrich1 \
+          --dependency=afterok:$JOB9 \
+          $SLURM/07_annotate.sbatch)
+        echo "  Job ID: $JOB_ANN_E1"
+    fi
 fi
 
 # -----------------------------------------------------------------------------
@@ -264,30 +312,18 @@ MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB13"
 
-fi
-
-# -----------------------------------------------------------------------------
-
-# Step 8: Annotation
-if [ "$annotate" = true ]; then
-    echo "Submitting annotations..."
-
-    ANNOTATION_IDS="all,all_cluster15,enriched1,enriched2"
-
-    ANN_DEPS=""
-    [ "$cluster_all" = true ] && ANN_DEPS="${ANN_DEPS:+$ANN_DEPS:}$JOB3"
-    [ "$subcluster" = true ]  && ANN_DEPS="${ANN_DEPS:+$ANN_DEPS:}$JOB6"
-    [ "$enrich1" = true ]     && ANN_DEPS="${ANN_DEPS:+$ANN_DEPS:}$JOB9"
-    [ "$enrich2" = true ]     && ANN_DEPS="${ANN_DEPS:+$ANN_DEPS:}$JOB12"
-
-    JOB14=$(sbatch $SBATCH_OPTS \
-      --array=0-$((n_annotation-1)) \
-      --export=ALL,\
-ANNOTATION_IDS="$ANNOTATION_IDS",\
-ANNOTATION_FILE="$ANNOTATION_FILE" \
-      ${ANN_DEPS:+--dependency=afterok:$ANN_DEPS} \
-      $SLURM/07_annotate.sbatch)
-    echo "  Job ID: $JOB14"
+    # Annotate enriched2 (requires LABELS_ENRICH2 to be set)
+    if [ "$annotate_enrich2" = true ]; then
+        echo "Submitting enriched2 annotation..."
+        JOB_ANN_E2=$(sbatch $SBATCH_OPTS \
+          --export=ALL,\
+ID="enriched2",\
+LABELS="$LABELS_ENRICH2" \
+          --job-name=annotate_enrich2 \
+          --dependency=afterok:$JOB12 \
+          $SLURM/07_annotate.sbatch)
+        echo "  Job ID: $JOB_ANN_E2"
+    fi
 fi
 
 echo "Pipeline submitted successfully!"

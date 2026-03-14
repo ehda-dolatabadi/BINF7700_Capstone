@@ -1,19 +1,20 @@
 #!/usr/bin/env Rscript
-# Script: 07_cluster.R
-# Purpose: Perform graph-based clustering using the Leiden algorithm
-# Description: Builds nearest neighbor graph and identifies cell clusters using
-#              Leiden community detection algorithm
-# Usage: Rscript 07_cluster.R <id> <output> <input> <dims> <res>
+# Script: trajectory.R
+# Purpose:
+# Description:
+# Usage: Rscript trajectory.R <id> <output> <input> <dims> <res>
 
 # Load required libraries
 suppressPackageStartupMessages({
-  library(Seurat)
+  library(monocle3)
   library(ggplot2)
   library(future)
 })
 
-seed <- 777
-set.seed(seed)
+if (!requireNamespace("SeuratWrappers", quietly = TRUE))
+    remotes::install_github("satijalab/seurat-wrappers")
+
+set.seed(777)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -31,8 +32,8 @@ plan("multicore", workers = 56)
 obj <- readRDS(input)
 
 # Neighbors and clustering (Leiden)
-obj <- FindNeighbors(obj, dims = 1:dims, seed.use = seed)
-obj <- FindClusters(obj, res = res, algorithm = 4, random.seed = seed)
+obj <- FindNeighbors(obj, dims = 1:dims)
+obj <- FindClusters(obj, res = res, algorithm = 4)
 
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_clustered.rds")))
