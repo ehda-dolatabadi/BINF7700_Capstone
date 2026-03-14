@@ -27,7 +27,7 @@ obj <- RenameIdents(obj, labels)
 
 # Plot
 png(file.path(outdir, paste0(id, "_umap.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", label = TRUE, label.size = 7) +
+print(DimPlot(obj, reduction = "umap", label = TRUE, label.size = 3) +
         labs(
                 title = "UMAP Clustering",
                 x = "UMAP 1",
@@ -37,25 +37,7 @@ print(DimPlot(obj, reduction = "umap", label = TRUE, label.size = 7) +
                 plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
                 axis.title = element_text(size = 14, face = "bold"),
                 axis.text = element_text(size = 12),
-                legend.title = element_text(size = 12, face = "bold"),
                 legend.text = element_text(size = 11)
-        ))
-dev.off()
-
-png(file.path(outdir, paste0(id, "_umap_split.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", split.by = "orig.ident", ncol = 4, label = TRUE) +
-        labs(
-                title = "UMAP Clustering by Timepoint",
-                x = "UMAP 1",
-                y = "UMAP 2"
-        ) +
-        theme(
-                plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-                axis.title = element_text(size = 14, face = "bold"),
-                axis.text = element_text(size = 12),
-                legend.title = element_text(size = 12, face = "bold"),
-                legend.text = element_text(size = 11),
-                strip.text = element_text(size = 12, face = "bold")
         ))
 dev.off()
 
