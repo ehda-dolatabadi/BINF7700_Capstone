@@ -9,9 +9,9 @@ erythrocyte,\
 neutrophil,\
 epithelial,\
 epithelial,\
-mesenchymal,\
+mesenchymal_progenitor,\
 not_detected,\
-alveolar,\
+epithelial,\
 erythrocyte,\
 endothelial,\
 endothelial,\
@@ -20,7 +20,7 @@ megakaryocyte"
 
 all_cluster15="\
 endothelial,\
-not detected,\
+not_detected,\
 endothelial,\
 endothelial,\
 endothelial,\
@@ -29,15 +29,33 @@ endothelial,\
 endothelial,\
 T-cell"
 
+
+enriched1="\
+macrophage,\
+macrophage,\
+neutrophil,\
+neutrophil,\
+endothelial,\
+endothelial,\
+epithelium,\
+mesenchymal_progenitor,\
+epithelial,\
+epithelial,\
+endothelial,\
+dendritic,\
+megakaryocyte"
+
+
 enriched2="\
-Neutrophil,\
-Macrophage,\
-Mesenchymal,\
-Macrophage,\
-Endothelial,\
-Macrophage,\
-Epithelial,\
-Epithelial,\
-Loop_of_Henle,\
-Endothelial,\
-Schwann Cells"
+neutrophil,\
+macrophage,\
+mesenchymal_progenitor,\
+macrophage,\
+endothelial,\
+macrophage,\
+epithelial,\
+epithelial,\
+epithelial,\
+endothelial,\
+schwann"
+
