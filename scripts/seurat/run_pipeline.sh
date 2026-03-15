@@ -270,21 +270,21 @@ fi
 
 # Step 8: Annotation
 if [ "$annotate" = true ]; then
-    echo "Submitting annotations..."
+    echo "Submitting annotation..."
     JOB14=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_annotation-1)) \
       --export=ALL,\
 ANNOTATION_FILE="$ANNOTATION_FILE" \
+      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
+      $([ "$subcluster" = true ] && echo "--dependency=afterok:$JOB6") \
+      $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB9") \
+      $([ "$enrich2" = true ] && echo "--dependency=afterok:$JOB12") \
       $SLURM/07_annotate.sbatch)
     echo "  Job ID: $JOB14"
 fi
 
+# -----------------------------------------------------------------------------
+
 echo "Pipeline submitted successfully!"
 
 
-
-
-#      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
-#      $([ "$subcluster" = true ] && echo "--dependency=afterok:$JOB6") \
-#      $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB9") \
-#      $([ "$enrich2" = true ] && echo "--dependency=afterok:$JOB12") \

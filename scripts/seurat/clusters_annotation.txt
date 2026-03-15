@@ -31,8 +31,8 @@ endothelial"
 
 enriched1="\
 macrophage,\
-macrophage,\
 neutrophil,\
+macrophage,\
 neutrophil,\
 endothelial,\
 endothelial,\
@@ -42,8 +42,8 @@ epithelial,\
 epithelial,\
 macrophage,\
 endothelial,\
-dendritic,\
-megakaryocyte"
+lymphocytes,\
+megakaryocytes"
 
 
 enriched2="\

@@ -44,17 +44,25 @@ OUT_umap="$OUT/seurat/${ID}_08_umap"
 
 # Activate conda environment
 eval "$(conda shell.bash hook)"
-conda activate seurat
+conda activate seurat_a
 
 # Annotation workflow
 # Rename cluster identities using ordered labels
-echo "Annotating clusters..."
+echo "Annotating clusters using labels..."
 Rscript "$RUN/13_annotate_clusters.R" \
   "$ID" \
   "$OUT_umap" \
   "$OUT_umap/${ID}_umap.rds" \
   "$LABELS"
 echo "Annotation completed✅"
+
+# Rename cluster identities using auto annotation
+echo "Annotating clusters automatically..."
+Rscript "$RUN/14_auto_annotate.R" \
+  "$ID" \
+  "$OUT_umap" \
+  "$OUT_umap/${ID}_umap.rds" \
+echo "Auto annotation completed✅"
 
 # Sync results to work directory (exclude large RDS files)
 rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

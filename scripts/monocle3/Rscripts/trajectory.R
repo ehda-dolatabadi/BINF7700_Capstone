@@ -2,17 +2,21 @@
 # Script: trajectory.R
 # Purpose:
 # Description:
-# Usage: Rscript trajectory.R <id> <output> <input> <dims> <res>
+# Usage: Rscript trajectory.R <id> <output> <input>
 
 # Load required libraries
 suppressPackageStartupMessages({
+  library(Seurat)
   library(monocle3)
-  library(ggplot2)
-  library(future)
+  library(remotes)
 })
 
 if (!requireNamespace("SeuratWrappers", quietly = TRUE))
     remotes::install_github("satijalab/seurat-wrappers")
+
+suppressPackageStartupMessages({
+  library(SeuratWrappers)
+})
 
 set.seed(777)
 
@@ -21,37 +25,48 @@ args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
-dims    <- as.numeric(args[4])
-res     <- as.numeric(args[5])
 
-# Set up parallelization
-options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
-plan("multicore", workers = 56)
-
-# Load PCA object
+# Load object
 obj <- readRDS(input)
 
-# Neighbors and clustering (Leiden)
-obj <- FindNeighbors(obj, dims = 1:dims)
-obj <- FindClusters(obj, res = res, algorithm = 4)
+# Convert to CDS
+cds <- as.cell_data_set(obj)
+
+# Recreate partitions (all in one partition for connected trajectory)
+partitions <- rep(1, ncol(cds))
+names(partitions) <- colnames(cds)
+cds@clusters$UMAP$partitions <- as.factor(partitions)
+
+# Transfer cluster labels from Seurat
+cds@clusters$UMAP$clusters <- Idents(obj)
+
+# Transfer UMAP coordinates
+cds@int_colData@listData$reducedDims$UMAP <- obj@reductions$umap@cell.embeddings
+
+# Learn trajectory graph
+cds <- learn_graph(cds, use_partition = FALSE)
+
+# Order cells by pseudotime
+earliest_cells <- rownames(colData(cds)[colData(cds)$timepoint == "control", ])
+cds <- order_cells(cds, root_cells = earliest_cells)
+
+# Plot by cell type
+png(file.path(outdir, paste0(id, "_trajectory_celltype.png")), width = 1600, height = 1200, res=150)
+print(plot_cells(cds,
+           color_cells_by = "cluster",
+           label_groups_by_cluster = TRUE,
+           label_leaves = TRUE,
+           label_branch_points = TRUE))
+dev.off()
+
+# Plot by pseudotime
+png(file.path(outdir, paste0(id, "_trajectory_pseudotime.png")), width = 1600, height = 1200, res=150)
+print(plot_cells(cds,
+           color_cells_by = "pseudotime",
+           label_groups_by_cluster = FALSE,
+           label_leaves = TRUE,
+           label_branch_points = TRUE))
+dev.off()
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_clustered.rds")))
-
-# Summary table
-cluster_counts <- table(obj$seurat_clusters)
-cluster_sizes <- paste(names(cluster_counts), cluster_counts, sep = ":", collapse = "; ")
-
-write.table(
-  data.frame(
-    id,
-    n_clusters = length(unique(obj$seurat_clusters)),
-    cells_per_cluster = cluster_sizes,
-    dims,
-    res
-  ),
-  file = file.path(outdir, paste0(id, "_clustering_summary.tsv")),
-  sep = "\t",
-  quote = FALSE,
-  row.names = FALSE
-)
+saveRDS(cds, file = file.path(outdir, paste0(id, "_trajectory.rds")))
