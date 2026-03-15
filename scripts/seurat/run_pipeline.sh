@@ -35,7 +35,8 @@ score_all=false
 subcluster=false
 enrich1=false
 enrich2=false
-annotate=true
+auto_annotate=true
+manual_annotate=false
 
 # -----------------------------------------------------------------------------
 
@@ -105,7 +106,7 @@ if [ "$score_all" = true ]; then
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID=$main_ID,\
-MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
+MARKER_FILE="${MARKER_FILE}",\
       $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
       $SLURM/04_score_markers.sbatch)
     echo "  Job ID: $JOB4"
@@ -152,7 +153,7 @@ TOP_MARKERS=100 \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID="all_cluster15",\
-MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
+MARKER_FILE="${MARKER_FILE}",\
       --job-name=score_subcluster \
       --dependency=afterok:$JOB6 \
       $SLURM/04_score_markers.sbatch)
@@ -171,7 +172,7 @@ if [ "$enrich1" = true ]; then
 ID="enriched1",\
 main_ID=$main_ID,\
 MODE="remove",\
-MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
+MARKER_FILE="${MARKER_FILE}",\
 CELL_TYPES="Epithelial;Erythrocytes;Fibroblasts",\
 CELL_THRESHOLDS="0.2;0.5;0.5" \
       --job-name=subset1 \
@@ -205,7 +206,7 @@ TOP_MARKERS=100 \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID="enriched1",\
-MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
+MARKER_FILE="${MARKER_FILE}",\
       --job-name=score_subset1 \
       --dependency=afterok:$JOB9 \
       $SLURM/04_score_markers.sbatch)
@@ -224,7 +225,7 @@ if [ "$enrich2" = true ]; then
 ID="enriched2",\
 main_ID=$main_ID,\
 MODE="keep",\
-MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt",\
+MARKER_FILE="${MARKER_FILE}",\
 CELL_TYPES="Schwann_muscle;Schwann_mye;Schwann_nmye;Schwann_other;Schwann_spc;Macrophage;Neutrophil",\
 CELL_THRESHOLDS="0.4;0.2;0.2;0.2;0.2;1;1" \
       --job-name=subset2 \
@@ -258,7 +259,7 @@ TOP_MARKERS=100 \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID="enriched2",\
-MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt" \
+MARKER_FILE="${MARKER_FILE}" \
       --job-name=score_subset2 \
       --dependency=afterok:$JOB12 \
       $SLURM/04_score_markers.sbatch)
@@ -268,10 +269,24 @@ fi
 
 # -----------------------------------------------------------------------------
 
-# Step 8: Annotation
-if [ "$annotate" = true ]; then
-    echo "Submitting annotation..."
+# Step 8: Automatic annotation using SingleR
+if [ "$auto_annotate" = true ]; then
+    echo "Submitting auto annotation..."
     JOB14=$(sbatch $SBATCH_OPTS \
+      --export=ALL,\
+ID="all",\
+CELLS="Neurons" \
+      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
+      $SLURM/07_auto_annotate.sbatch)
+    echo "  Job ID: $JOB14"
+fi
+
+# -----------------------------------------------------------------------------
+
+# Step 9: Manual annotation using labels
+if [ "$manual_annotate" = true ]; then
+    echo "Submitting manual annotation..."
+    JOB15=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_annotation-1)) \
       --export=ALL,\
 ANNOTATION_FILE="$ANNOTATION_FILE" \
@@ -279,12 +294,10 @@ ANNOTATION_FILE="$ANNOTATION_FILE" \
       $([ "$subcluster" = true ] && echo "--dependency=afterok:$JOB6") \
       $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB9") \
       $([ "$enrich2" = true ] && echo "--dependency=afterok:$JOB12") \
-      $SLURM/07_annotate.sbatch)
-    echo "  Job ID: $JOB14"
+      $SLURM/08_manual_annotate.sbatch)
+    echo "  Job ID: $JOB15"
 fi
 
 # -----------------------------------------------------------------------------
 
 echo "Pipeline submitted successfully!"
-
-

@@ -2,7 +2,7 @@
 # Script: 14_auto_annotate.R
 # Purpose: Annotate clusters
 # Description: Annotate clusters automatically using SingleR
-# Usage: Rscript 14_auto_annotate.R <id> <output> <input>
+# Usage: Rscript 14_auto_annotate.R <id> <output> <input> <cells>
 
 # Load required libraries
 suppressPackageStartupMessages({
@@ -18,6 +18,7 @@ args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
+cells	<- unlist(strsplit(args[4], ","))
 
 # Load object
 obj <- readRDS(input)
@@ -80,6 +81,24 @@ dev.off()
 # UMAP colored by SingleR annotation
 png(file.path(outdir, paste0(id, "_auto_colored.png")), width = 1600, height = 1200, res=150)
 print(DimPlot(obj, reduction = "umap", group.by = "singler_label", label = FALSE) +
+        labs(
+                title = "UMAP Clustering",
+                x = "UMAP 1",
+                y = "UMAP 2"
+        ) +
+        theme(
+                plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+                axis.title = element_text(size = 14, face = "bold"),
+                axis.text = element_text(size = 12),
+                legend.text = element_text(size = 11)
+        ))
+dev.off()
+
+# Subset cells
+cells_to_keep <- rownames(obj@meta.data[obj$singler_label %in% cells, ])
+
+png(file.path(outdir, paste0(id, "_auto_colored.png")), width = 1600, height = 1200, res=150)
+print(DimPlot(obj, reduction = "umap", cells = cells_to_plot, group.by = "singler_label", label = FALSE) +
         labs(
                 title = "UMAP Clustering",
                 x = "UMAP 1",

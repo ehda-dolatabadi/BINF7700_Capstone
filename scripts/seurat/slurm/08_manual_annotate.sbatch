@@ -2,7 +2,7 @@
 # Script: 07_annotate.sbatch
 # Purpose: Annotate clusters with cell type labels
 
-#SBATCH --job-name=annotate
+#SBATCH --job-name=manual_annotate
 #SBATCH --partition=courses
 #SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=4
@@ -49,20 +49,12 @@ conda activate seurat_a
 # Annotation workflow
 # Rename cluster identities using ordered labels
 echo "Annotating clusters using labels..."
-Rscript "$RUN/13_annotate_clusters.R" \
+Rscript "$RUN/14_manual_annotate.R" \
   "$ID" \
   "$OUT_umap" \
   "$OUT_umap/${ID}_umap.rds" \
   "$LABELS"
 echo "Annotation completed✅"
-
-# Rename cluster identities using auto annotation
-echo "Annotating clusters automatically..."
-Rscript "$RUN/14_auto_annotate.R" \
-  "$ID" \
-  "$OUT_umap" \
-  "$OUT_umap/${ID}_umap.rds" \
-echo "Auto annotation completed✅"
 
 # Sync results to work directory (exclude large RDS files)
 rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"
