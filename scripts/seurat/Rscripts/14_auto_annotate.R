@@ -77,5 +77,21 @@ print(DimPlot(obj, reduction = "umap", label = TRUE, repel = TRUE, label.size = 
         ))
 dev.off()
 
+# UMAP colored by SingleR annotation
+png(file.path(outdir, paste0(id, "_auto_colored.png")), width = 1600, height = 1200, res=150)
+print(DimPlot(obj, reduction = "umap", group.by = "singler_label", label = TRUE, repel = TRUE, label.size = 5) +
+        labs(
+                title = "UMAP Clustering",
+                x = "UMAP 1",
+                y = "UMAP 2"
+        ) +
+        theme(
+                plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+                axis.title = element_text(size = 14, face = "bold"),
+                axis.text = element_text(size = 12),
+                legend.text = element_text(size = 11)
+        ))
+dev.off()
+
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_auto_annotated.rds")))
