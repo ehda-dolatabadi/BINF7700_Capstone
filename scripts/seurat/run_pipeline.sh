@@ -33,9 +33,9 @@ integrate=false
 cluster_all=false
 score_all=false
 subcluster=false
-enrich1=false
-enrich2=false
-annotate=true
+enrich1=true
+enrich2=true
+annotate=false
 
 # -----------------------------------------------------------------------------
 

@@ -18,6 +18,17 @@ endothelial,\
 megakaryocyte"
 
 
+all_cluster15="\
+endothelial,\
+not detected,\
+endothelial,\
+endothelial,\
+endothelial,\
+endothelial,\
+endothelial,\
+endothelial,\
+T-cell"
+
 enriched2="\
 Neutrophil,\
 Macrophage,\
