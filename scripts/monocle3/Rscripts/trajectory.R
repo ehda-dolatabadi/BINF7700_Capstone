@@ -38,7 +38,7 @@ names(partitions) <- colnames(cds)
 cds@clusters$UMAP$partitions <- as.factor(partitions)
 
 # Transfer cluster labels from Seurat
-cds@clusters$UMAP$clusters <- Idents(obj)
+cds@clusters$UMAP$clusters <- colData(cds)$singler_label
 
 # Transfer UMAP coordinates
 cds@int_colData@listData$reducedDims$UMAP <- obj@reductions$umap@cell.embeddings
@@ -53,7 +53,7 @@ cds <- order_cells(cds, root_cells = earliest_cells)
 # Plot by cell type
 png(file.path(outdir, paste0(id, "_trajectory_celltype.png")), width = 1600, height = 1200, res=150)
 print(plot_cells(cds,
-           color_cells_by = "cluster",
+           color_cells_by = "singler_label",
            label_groups_by_cluster = TRUE,
            label_leaves = TRUE,
            label_branch_points = TRUE))
