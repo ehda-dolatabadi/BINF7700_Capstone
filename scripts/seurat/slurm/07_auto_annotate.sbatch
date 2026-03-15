@@ -36,7 +36,7 @@ conda activate seurat_a
 
 # Annotation workflow
 # Rename cluster identities using auto annotation
-echo "Annotating clusters automatically..."
+echo "Annotating cells automatically..."
 Rscript "$RUN/13_auto_annotate.R" \
   "$ID" \
   "$OUT_umap" \
