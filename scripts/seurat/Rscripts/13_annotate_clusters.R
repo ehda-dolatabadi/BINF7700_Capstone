@@ -26,8 +26,8 @@ obj <- readRDS(input)
 obj <- RenameIdents(obj, labels)
 
 # Plot
-png(file.path(outdir, paste0(id, "_umap.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", label = TRUE, label.size = 3) +
+png(file.path(outdir, paste0(id, "_annotated.png")), width = 1600, height = 1200, res=150)
+print(DimPlot(obj, reduction = "umap", label = TRUE) +
         labs(
                 title = "UMAP Clustering",
                 x = "UMAP 1",

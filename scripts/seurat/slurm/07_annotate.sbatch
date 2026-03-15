@@ -41,10 +41,6 @@ LABELS="${!ID}"
 # Define script and output directories
 RUN="$WORK/scripts/seurat/Rscripts"
 OUT_umap="$OUT/seurat/${ID}_08_umap"
-OUT_annotated="$OUT/seurat/${ID}_13_annotated"
-
-# Create output directory
-mkdir -p "$OUT_annotated"
 
 # Activate conda environment
 eval "$(conda shell.bash hook)"
@@ -55,7 +51,7 @@ conda activate seurat
 echo "Annotating clusters..."
 Rscript "$RUN/13_annotate_clusters.R" \
   "$ID" \
-  "$OUT_annotated" \
+  "$OUT_umap" \
   "$OUT_umap/${ID}_umap.rds" \
   "$LABELS"
 echo "Annotation completed✅"
