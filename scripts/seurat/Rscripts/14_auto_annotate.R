@@ -63,7 +63,7 @@ obj <- RenameIdents(obj, cluster_labels)
 
 # Plots
 png(file.path(outdir, paste0(id, "_auto_annotated.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", label = TRUE, repel = TRUE, label.size = 5) +
+print(DimPlot(obj, reduction = "umap", label = TRUE, repel = TRUE, label.size = 4) +
         labs(
                 title = "UMAP Clustering",
                 x = "UMAP 1",
