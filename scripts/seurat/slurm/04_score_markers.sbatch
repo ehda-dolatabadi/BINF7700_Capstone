@@ -7,7 +7,7 @@
 #SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
-#SBATCH --array=0-2
+#SBATCH --array=0-10
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
@@ -29,7 +29,7 @@ exec 2>&1
 # Load marker definitions from file
 MARKER_FILE="${MARKER_FILE:-$WORK/scripts/seurat/cell_markers.txt}"
 source ${MARKER_FILE}
-cells=($(grep -E '^[a-zA-Z_]+=' ${MARKER_FILE} | cut -d'=' -f1))
+cells=($(grep -E '^[a-zA-Z_][a-zA-Z0-9_]+=' ${MARKER_FILE} | cut -d'=' -f1))
 
 # Safety check: exit if array task exceeds number of cell types
 if [ ${SLURM_ARRAY_TASK_ID} -ge ${#cells[@]} ]; then

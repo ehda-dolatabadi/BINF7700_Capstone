@@ -12,10 +12,10 @@ export REF="UKY_AmexF1_1_genomic"
 
 # Load cell type markers and annotations from file
 export MARKER_FILE="$(pwd)/scripts/seurat/cell_markers.txt"
-n_marker=$(grep -cE '^[a-zA-Z_]+=' ${MARKER_FILE})
+n_marker=$(grep -cE '^[a-zA-Z_][a-zA-Z0-9_]+=' ${MARKER_FILE})
 
 export ANNOTATION_FILE="$(pwd)/scripts/seurat/clusters_annotation.txt"
-n_annotation=$(grep -cE '^[a-zA-Z_]+=' ${ANNOTATION_FILE})
+n_annotation=$(grep -cE '^[a-zA-Z_][a-zA-Z0-9_]+=' ${ANNOTATION_FILE})
 
 # Load configuration paths
 source "config/default_paths.sh"
@@ -271,23 +271,20 @@ fi
 # Step 8: Annotation
 if [ "$annotate" = true ]; then
     echo "Submitting annotations..."
-
-    ANNOTATION_IDS="all,all_cluster15,enriched1,enriched2"
-
-    ANN_DEPS=""
-    [ "$cluster_all" = true ] && ANN_DEPS="${ANN_DEPS:+$ANN_DEPS:}$JOB3"
-    [ "$subcluster" = true ]  && ANN_DEPS="${ANN_DEPS:+$ANN_DEPS:}$JOB6"
-    [ "$enrich1" = true ]     && ANN_DEPS="${ANN_DEPS:+$ANN_DEPS:}$JOB9"
-    [ "$enrich2" = true ]     && ANN_DEPS="${ANN_DEPS:+$ANN_DEPS:}$JOB12"
-
     JOB14=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_annotation-1)) \
       --export=ALL,\
-ANNOTATION_IDS="$ANNOTATION_IDS",\
 ANNOTATION_FILE="$ANNOTATION_FILE" \
-      ${ANN_DEPS:+--dependency=afterok:$ANN_DEPS} \
       $SLURM/07_annotate.sbatch)
     echo "  Job ID: $JOB14"
 fi
 
 echo "Pipeline submitted successfully!"
+
+
+
+
+#      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
+#      $([ "$subcluster" = true ] && echo "--dependency=afterok:$JOB6") \
+#      $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB9") \
+#      $([ "$enrich2" = true ] && echo "--dependency=afterok:$JOB12") \

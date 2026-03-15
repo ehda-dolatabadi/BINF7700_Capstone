@@ -7,15 +7,12 @@
 #SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
+#SBATCH --array=0-3
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
 # Exit on error, undefined variables, and pipe failures
 set -euo pipefail
-
-# Parameter defaults
-ANNOTATION_IDS="${ANNOTATION_IDS:-all}"
-ANNOTATION_FILE="${ANNOTATION_FILE:-$WORK/scripts/seurat/clusters_annotation.txt}"
 
 # Load configuration and setup paths
 cd "$SLURM_SUBMIT_DIR"
@@ -27,12 +24,18 @@ exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log"
 exec 2>&1
 
 # Load annotations from file
-MARKER_FILE="${ANNOTATION_FILE:-$WORK/scripts/seurat/clusters_annotation.txt}"
+ANNOTATION_FILE="${ANNOTATION_FILE:-$WORK/scripts/seurat/clusters_annotation.txt}"
 source ${ANNOTATION_FILE}
+ids=($(grep -E '^[a-zA-Z_][a-zA-Z0-9_]+=' ${ANNOTATION_FILE} | cut -d'=' -f1))
 
-# Select ID for this array task
-IFS=';' read -ra ids <<< "$ANNOTATION_IDS"
-ID="${ids[$SLURM_ARRAY_TASK_ID]}"
+# Safety check: exit if array task exceeds number of ids
+if [ ${SLURM_ARRAY_TASK_ID} -ge ${#ids[@]} ]; then
+  echo "End of IDs."
+  exit 0
+fi
+
+# Select ID and labels based on array task ID
+ID="${ids[$((SLURM_ARRAY_TASK_ID))]}"
 LABELS="${!ID}"
 
 # Define script and output directories
