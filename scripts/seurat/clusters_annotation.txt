@@ -20,14 +20,13 @@ megakaryocyte"
 
 all_cluster15="\
 endothelial,\
+endothelial,\
+endothelial,\
+epithelial,\
 not_detected,\
 endothelial,\
 endothelial,\
-endothelial,\
-endothelial,\
-endothelial,\
-endothelial,\
-T-cell"
+endothelial"
 
 
 enriched1="\
@@ -37,10 +36,11 @@ neutrophil,\
 neutrophil,\
 endothelial,\
 endothelial,\
-epithelium,\
+epithelial,\
 mesenchymal_progenitor,\
 epithelial,\
 epithelial,\
+macrophage,\
 endothelial,\
 dendritic,\
 megakaryocyte"
@@ -53,7 +53,6 @@ mesenchymal_progenitor,\
 macrophage,\
 endothelial,\
 macrophage,\
-epithelial,\
 epithelial,\
 epithelial,\
 endothelial,\
