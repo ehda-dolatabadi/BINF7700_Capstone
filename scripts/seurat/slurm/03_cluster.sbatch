@@ -79,7 +79,15 @@ Rscript "$RUN/08_umap.R" \
   "$UMAP_METRIC"
 echo "UMAP completed✅"
 
-# Step 4: Find differentially expressed marker genes for each cluster
+# Step 4: Rename cluster identities using auto annotation
+echo "Annotating clusters automatically..."
+Rscript "$RUN/14_auto_annotate.R" \
+  "$ID" \
+  "$OUT_umap" \
+  "$OUT_umap/${ID}_umap.rds" \
+echo "Auto annotation completed✅"
+
+# Step 5: Find differentially expressed marker genes for each cluster
 echo "Finding Markers..."
 Rscript "$RUN/09_find_markers.R" \
   "$ID" \
