@@ -49,11 +49,11 @@ megakaryocyte"
 enriched2="\
 neutrophil,\
 macrophage,\
+macrophage,\
 mesenchymal_progenitor,\
-macrophage,\
 endothelial,\
-macrophage,\
 epithelial,\
 epithelial,\
-endothelial,\
-schwann"
+epithelial,\
+schwann,\
+endothelial"
