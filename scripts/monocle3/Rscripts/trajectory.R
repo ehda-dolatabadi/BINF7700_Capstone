@@ -47,7 +47,7 @@ cds@int_colData@listData$reducedDims$UMAP <- obj@reductions$umap@cell.embeddings
 cds <- learn_graph(cds, use_partition = FALSE)
 
 # Order cells by pseudotime
-earliest_cells <- rownames(colData(cds)[colData(cds)$timepoint == "control", ])
+earliest_cells <- rownames(colData(cds)[colData(cds)$orig.ident == "control", ])
 cds <- order_cells(cds, root_cells = earliest_cells)
 
 # Plot by cell type

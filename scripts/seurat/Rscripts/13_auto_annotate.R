@@ -97,7 +97,7 @@ dev.off()
 # Subset cells
 cells_to_keep <- rownames(obj@meta.data[obj$singler_label %in% cells, ])
 
-png(file.path(outdir, paste0(id, "_auto_colored.png")), width = 1600, height = 1200, res=150)
+png(file.path(outdir, paste0(id, "_auto_colored_filtered.png")), width = 1600, height = 1200, res=150)
 print(DimPlot(obj, reduction = "umap", cells = cells_to_keep, group.by = "singler_label", label = FALSE) +
         labs(
                 title = "UMAP Clustering",
@@ -114,3 +114,19 @@ dev.off()
 
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_auto_annotated.rds")))
+
+# Summary table
+write.table(
+  data.frame(
+    id,
+    cells,
+    n_cells_before,
+    n_cells_after = ncol(obj),
+    n_features_before,
+    n_features_after = nrow(obj[["SCT"]])
+  ),
+  file = file.path(outdir, paste0(id, "_subsetting_summary.tsv")),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
+)
