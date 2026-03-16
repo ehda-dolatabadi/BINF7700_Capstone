@@ -104,8 +104,13 @@ dev.off()
 cells_to_keep <- rownames(obj@meta.data[obj$singler_label %in% cells, ])
 
 # Filtered UMAP colored by SingleR cell annotation
+cols <- setNames(rep("lightgrey", length(unique(obj$singler_label))),
+                 unique(obj$singler_label))
+cols[cells] <- scales::hue_pal()(length(cells))
+
 png(file.path(outdir, paste0(id, "_cell_annotated_subset.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", group.by = "singler_label", cells.highlight = cells_to_keep, cols.highlight = "red", cols = "lightgrey") +
+print(DimPlot(obj, reduction = "umap", group.by = "singler_label", cols = cols) + 
+# cells.highlight = cells_to_keep, cols.highlight = "red", cols = "lightgrey") +
         labs(
                 title = "UMAP Clustering",
                 x = "UMAP 1",
