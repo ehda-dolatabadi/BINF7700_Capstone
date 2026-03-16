@@ -53,7 +53,7 @@ cds <- cluster_cells(cds, reduction_method = "UMAP")
 
 # Learn the principal graph separately for each partition
 # use_partition = TRUE allows disconnected trajectories for unrelated cell populations
-cds <- learn_graph(cds, use_partition = TRUE)
+cds <- learn_graph(cds, use_partition = FALSE)
 
 # Select control cells as the pseudotime root based on orig.ident metadata
 earliest_cells <- rownames(colData(cds)[colData(cds)$orig.ident == "control", ])
@@ -61,22 +61,13 @@ earliest_cells <- rownames(colData(cds)[colData(cds)$orig.ident == "control", ])
 # Assign pseudotime values to all cells starting from the control cells
 cds <- order_cells(cds, root_cells = earliest_cells)
 
-# Plot trajectory colored by SingleR cell type annotation
-png(file.path(outdir, paste0(id, "_trajectory_celltype.png")), width = 1600, height = 1200, res = 150)
-print(plot_cells(cds,
-                 color_cells_by      = "singler_label",  # color by SingleR annotation
-                 label_cell_groups   = FALSE,            # suppress cluster ID labels on plot
-                 label_leaves        = TRUE,             # label trajectory endpoints
-                 label_branch_points = TRUE))            # label trajectory branch points
-dev.off()
-
 # Plot trajectory colored by pseudotime value
 png(file.path(outdir, paste0(id, "_trajectory_pseudotime.png")), width = 1600, height = 1200, res = 150)
 print(plot_cells(cds,
                  color_cells_by      = "pseudotime",     # color by pseudotime value
                  label_cell_groups   = FALSE,            # suppress cluster ID labels on plot
                  label_leaves        = TRUE,             # label trajectory endpoints
-                 label_branch_points = TRUE))            # label trajectory branch points
+                 label_branch_points = FALSE))            # label trajectory branch points
 dev.off()
 
 # Save full CDS object including nearest neighbor indices
