@@ -30,7 +30,7 @@ RUN="$WORK/scripts/monocle3/Rscripts"
 OUT_umap="$OUT/seurat/${ID}_08_umap"
 OUT_trajectory="$OUT/monocle3/${ID}"
 
-mkdir -p OUT_trajectory
+mkdir -p $OUT_trajectory
 
 # Activate conda environment
 eval "$(conda shell.bash hook)"

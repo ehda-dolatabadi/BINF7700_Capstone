@@ -53,7 +53,7 @@ cds <- order_cells(cds, root_cells = earliest_cells)
 # Plot by cell type
 png(file.path(outdir, paste0(id, "_trajectory_celltype.png")), width = 1600, height = 1200, res=150)
 print(plot_cells(cds,
-           color_cells_by = "singler_label",
+	   color_cells_by = "singler_label",
            label_groups_by_cluster = TRUE,
            label_leaves = TRUE,
            label_branch_points = TRUE))
@@ -69,4 +69,4 @@ print(plot_cells(cds,
 dev.off()
 
 # Save object
-saveRDS(cds, file = file.path(outdir, paste0(id, "_trajectory.rds")))
+save_monocle_objects(cds = cds, directory_path = file.path(outdir, paste0(id, "_trajectory")))
