@@ -50,21 +50,21 @@ obj$singler_pruned	<- predictions$pruned.labels
 obj$singler_score	<- apply(predictions$scores, 1, max)
 
 # Get consensus label per cluster by majority vote
-cluster_labels <- obj@meta.data %>%
+clusters <- obj@meta.data %>%
   group_by(seurat_clusters, singler_label) %>%
   summarise(n = n(), .groups = "drop") %>%
   group_by(seurat_clusters) %>%
   slice_max(n, n = 1) %>%
   select(seurat_clusters, singler_label)
 
-cluster_labels <- setNames(cluster_labels$singler_label, cluster_labels$seurat_clusters)
+clusters <- setNames(clusters$singler_label, clusters$seurat_clusters)
 
-# Rename cluster identities in Seurat object
-obj <- RenameIdents(obj, cluster_labels)
+# Add cluster identities as a metadata column
+obj$singler_cluster <- unname(clusters[as.character(obj$seurat_clusters)])
 
-# Plots
-png(file.path(outdir, paste0(id, "_auto_annotated.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", label = TRUE, repel = TRUE, label.size = 4) +
+# UMAP colored by SingleR cluster annotation
+png(file.path(outdir, paste0(id, "_cluster_annotated.png")), width = 1600, height = 1200, res=150)
+print(DimPlot(obj, reduction = "umap", group.by = "singler_cluster", label = TRUE, repel = TRUE, label.size = 4) +
         labs(
                 title = "UMAP Clustering",
                 x = "UMAP 1",
@@ -78,9 +78,15 @@ print(DimPlot(obj, reduction = "umap", label = TRUE, repel = TRUE, label.size = 
         ))
 dev.off()
 
-# UMAP colored by SingleR annotation
-png(file.path(outdir, paste0(id, "_auto_colored.png")), width = 1600, height = 1200, res=150)
+# Add cell counts to cell labels
+cell_counts <- table(obj$singler_label)
+cell_labels <- paste0(names(cell_counts), " (", cell_counts, ")")
+names(cell_labels) <- names(cell_counts)
+
+# UMAP colored by SingleR cell annotation
+png(file.path(outdir, paste0(id, "_cell_annotated.png")), width = 1600, height = 1200, res=150)
 print(DimPlot(obj, reduction = "umap", group.by = "singler_label", label = FALSE) +
+	scale_color_discrete(labels = cell_labels) +
         labs(
                 title = "UMAP Clustering",
                 x = "UMAP 1",
@@ -94,11 +100,13 @@ print(DimPlot(obj, reduction = "umap", group.by = "singler_label", label = FALSE
         ))
 dev.off()
 
-# Subset cells
+# Filter desired cell type
 cells_to_keep <- rownames(obj@meta.data[obj$singler_label %in% cells, ])
 
-png(file.path(outdir, paste0(id, "_auto_colored_filtered.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", cells = cells_to_keep, group.by = "singler_label", label = FALSE) +
+# Filtered UMAP colored by SingleR cell annotation
+png(file.path(outdir, paste0(id, "_cell_annotated_subset.png")), width = 1600, height = 1200, res=150)
+print(DimPlot(obj, reduction = "umap", group.by = "singler_label", cells.highlight = cells_to_keep, cols.highlight = "red", cols = "lightgrey") +
+	scale_color_discrete(labels = cell_labels) +
         labs(
                 title = "UMAP Clustering",
                 x = "UMAP 1",
@@ -114,19 +122,3 @@ dev.off()
 
 # Save object
 saveRDS(obj, file = file.path(outdir, paste0(id, "_auto_annotated.rds")))
-
-# Summary table
-write.table(
-  data.frame(
-    id,
-    cells,
-    n_cells_before,
-    n_cells_after = ncol(obj),
-    n_features_before,
-    n_features_after = nrow(obj[["SCT"]])
-  ),
-  file = file.path(outdir, paste0(id, "_subsetting_summary.tsv")),
-  sep = "\t",
-  quote = FALSE,
-  row.names = FALSE
-)

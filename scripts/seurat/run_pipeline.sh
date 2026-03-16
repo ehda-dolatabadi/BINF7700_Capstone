@@ -35,8 +35,8 @@ score_all=false
 subcluster=false
 enrich1=false
 enrich2=false
-auto_annotate=true
 manual_annotate=false
+auto_annotate=true
 
 # -----------------------------------------------------------------------------
 
@@ -269,24 +269,10 @@ fi
 
 # -----------------------------------------------------------------------------
 
-# Step 8: Automatic annotation using SingleR
-if [ "$auto_annotate" = true ]; then
-    echo "Submitting auto annotation..."
-    JOB14=$(sbatch $SBATCH_OPTS \
-      --export=ALL,\
-ID="all",\
-CELLS="Neurons" \
-      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
-      $SLURM/07_auto_annotate.sbatch)
-    echo "  Job ID: $JOB14"
-fi
-
-# -----------------------------------------------------------------------------
-
-# Step 9: Manual annotation using labels
+# Step 8: Manual annotation using labels
 if [ "$manual_annotate" = true ]; then
     echo "Submitting manual annotation..."
-    JOB15=$(sbatch $SBATCH_OPTS \
+    JOB14=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_annotation-1)) \
       --export=ALL,\
 ANNOTATION_FILE="$ANNOTATION_FILE" \
@@ -294,7 +280,22 @@ ANNOTATION_FILE="$ANNOTATION_FILE" \
       $([ "$subcluster" = true ] && echo "--dependency=afterok:$JOB6") \
       $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB9") \
       $([ "$enrich2" = true ] && echo "--dependency=afterok:$JOB12") \
-      $SLURM/08_manual_annotate.sbatch)
+      $SLURM/07_manual_annotate.sbatch)
+    echo "  Job ID: $JOB14"
+fi
+
+# -----------------------------------------------------------------------------
+
+# Step 9: Automatic annotation using SingleR
+if [ "$auto_annotate" = true ]; then
+    echo "Submitting auto annotation..."
+    JOB15=$(sbatch $SBATCH_OPTS \
+      --export=ALL,\
+ID="all",\
+CELLS="Neurons" \
+      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
+      $([ "$manual_annotate" = true ] && echo "--dependency=afterok:$JOB14") \
+      $SLURM/08_auto_annotate.sbatch)
     echo "  Job ID: $JOB15"
 fi
 
