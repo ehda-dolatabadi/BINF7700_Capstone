@@ -42,7 +42,7 @@ echo 'export PATH=/path/to/cellranger-9.0.1:$PATH' >> ~/.bashrc
 source ~/.bashrc
 
 # Clone the repository
-git clone https://github.com/ehda-dolatabadi/axolotl-regeneration-scrna.git
+git clone --depth 1 https://github.com/ehda-dolatabadi/axolotl-regeneration-scrna.git
 cd axolotl-regeneration-scrna
 
 # Run Cell Ranger alignment
