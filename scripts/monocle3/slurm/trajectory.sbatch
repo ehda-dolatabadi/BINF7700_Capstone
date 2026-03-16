@@ -28,7 +28,7 @@ exec 2>&1
 # Define script and output directories
 RUN="$WORK/scripts/monocle3/Rscripts"
 OUT_umap="$OUT/seurat/${ID}_08_umap"
-OUT_trajectory="$OUT/monocle3/${ID}"
+OUT_trajectory="$OUT/monocle3"
 
 mkdir -p $OUT_trajectory
 
@@ -46,4 +46,4 @@ Rscript "$RUN/trajectory.R" \
 echo "Trajectory analysis completed✅"
 
 # Sync results to work directory (exclude large RDS files)
-rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/monocle3/" "$WORK/results/monocle3/"
+rsync -av --info=progress2 --stats --exclude '*.rds' --exclude '*.idx' "$OUT/monocle3/" "$WORK/results/monocle3/"

@@ -29,44 +29,57 @@ input   <- args[3]
 # Load object
 obj <- readRDS(input)
 
-# Convert to CDS
+# Join split sample layers into one counts matrix (each sample is stored separately)
+obj <- JoinLayers(obj, assay = "RNA")
+
+# Set default assay to RNA to ensure full gene set is transferred
+DefaultAssay(obj) <- "RNA"
+
+# Convert Seurat object to Monocle3 cell_data_set
+# this transfers raw counts, cell metadata, and gene metadata
 cds <- as.cell_data_set(obj)
 
-# Recreate partitions (all in one partition for connected trajectory)
-partitions <- rep(1, ncol(cds))
-names(partitions) <- colnames(cds)
-cds@clusters$UMAP$partitions <- as.factor(partitions)
+# Normalize and reduce to 10 dimensions using PCA
+# num_dim = 10 based on meaningful components identified in prior Seurat analysis
+cds <- preprocess_cds(cds, num_dim = 10)
 
-# Transfer cluster labels from Seurat
-cds@clusters$UMAP$clusters <- colData(cds)$singler_label
+# Compute UMAP embedding using Monocle3's own pipeline
+# this is separate from Seurat's UMAP and optimized for trajectory inference
+cds <- reduce_dimension(cds, reduction_method = "UMAP", preprocess_method = "PCA")
 
-# Transfer UMAP coordinates
-cds@int_colData@listData$reducedDims$UMAP <- obj@reductions$umap@cell.embeddings
+# Cluster cells using Louvain community detection on the UMAP embedding
+# Monocle3 uses these clusters internally to structure the trajectory graph
+cds <- cluster_cells(cds, reduction_method = "UMAP")
 
-# Learn trajectory graph
-cds <- learn_graph(cds, use_partition = FALSE)
+# Learn the principal graph separately for each partition
+# use_partition = TRUE allows disconnected trajectories for unrelated cell populations
+cds <- learn_graph(cds, use_partition = TRUE)
 
-# Order cells by pseudotime
+# Select control cells as the pseudotime root based on orig.ident metadata
 earliest_cells <- rownames(colData(cds)[colData(cds)$orig.ident == "control", ])
+
+# Assign pseudotime values to all cells starting from the control cells
 cds <- order_cells(cds, root_cells = earliest_cells)
 
-# Plot by cell type
-png(file.path(outdir, paste0(id, "_trajectory_celltype.png")), width = 1600, height = 1200, res=150)
+# Plot trajectory colored by SingleR cell type annotation
+png(file.path(outdir, paste0(id, "_trajectory_celltype.png")), width = 1600, height = 1200, res = 150)
 print(plot_cells(cds,
-	   color_cells_by = "singler_label",
-           label_groups_by_cluster = TRUE,
-           label_leaves = TRUE,
-           label_branch_points = TRUE))
+                 color_cells_by      = "singler_label",  # color by SingleR annotation
+                 label_cell_groups   = FALSE,            # suppress cluster ID labels on plot
+                 label_leaves        = TRUE,             # label trajectory endpoints
+                 label_branch_points = TRUE))            # label trajectory branch points
 dev.off()
 
-# Plot by pseudotime
-png(file.path(outdir, paste0(id, "_trajectory_pseudotime.png")), width = 1600, height = 1200, res=150)
+# Plot trajectory colored by pseudotime value
+png(file.path(outdir, paste0(id, "_trajectory_pseudotime.png")), width = 1600, height = 1200, res = 150)
 print(plot_cells(cds,
-           color_cells_by = "pseudotime",
-           label_groups_by_cluster = FALSE,
-           label_leaves = TRUE,
-           label_branch_points = TRUE))
+                 color_cells_by      = "pseudotime",     # color by pseudotime value
+                 label_cell_groups   = FALSE,            # suppress cluster ID labels on plot
+                 label_leaves        = TRUE,             # label trajectory endpoints
+                 label_branch_points = TRUE))            # label trajectory branch points
 dev.off()
 
-# Save object
-save_monocle_objects(cds = cds, directory_path = file.path(outdir, paste0(id, "_trajectory")))
+# Save full CDS object including nearest neighbor indices
+# save_monocle_objects is preferred over saveRDS to preserve all internal graph structures
+save_monocle_objects(cds            = cds,
+                     directory_path = file.path(outdir, paste0(id, "_trajectory")))
