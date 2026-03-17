@@ -285,7 +285,7 @@ obj <- subset(
 )
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_filtered.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, ".rds")))
 
 # Summary table
 write.table(

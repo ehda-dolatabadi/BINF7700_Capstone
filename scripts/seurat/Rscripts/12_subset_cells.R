@@ -19,9 +19,6 @@ set.seed(777)
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 56)
 
-# Close any open graphics devices
-while (!is.null(dev.list())) dev.off()
-
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id			<- args[1]

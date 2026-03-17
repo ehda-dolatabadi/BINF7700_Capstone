@@ -40,9 +40,6 @@ echo "Annotating cells automatically..."
 Rscript "$RUN/14_auto_annotate.R" \
   "$ID" \
   "$OUT_umap" \
-  "$OUT_umap/${ID}_annotated.rds" \
+  "$OUT_umap/${ID}_processed.rds" \
   "$CELLS"
 echo "Auto annotation completed✅"
-
-# Sync results to work directory (exclude large RDS files)
-rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

@@ -65,7 +65,7 @@ obj <- CreateSeuratObject(
 n_features_after <- nrow(obj)
 
 # Save mapped Seurat object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_mapped.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, ".rds")))
 
 # Write summary statistics to file
 write.table(

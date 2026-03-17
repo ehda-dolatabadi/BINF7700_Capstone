@@ -58,5 +58,5 @@ cellranger count \
   --localcores="$SLURM_CPUS_PER_TASK" \
   --localmem=$(( SLURM_MEM_PER_NODE / 1024 - 20))
 
-# Copy web summary to results directory for easy access
-rsync -av --info=progress2 --stats "$OUT_cellranger/$SMP/outs/web_summary.html" "$WORK/results/cellranger/ref_${REF_name}/$SMP/"
+# Copy web summary to output directory for easy access
+rsync -av "$OUT_cellranger/$SMP/outs/web_summary.html" "$OUT_cellranger/${SMP}_summary.html"

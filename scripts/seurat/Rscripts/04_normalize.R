@@ -42,7 +42,7 @@ n_variable_features <- length(VariableFeatures(obj))
 DefaultAssay(obj) <- "SCT"
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_normalized.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, ".rds")))
 
 # Summary table
 write.table(

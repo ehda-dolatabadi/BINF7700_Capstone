@@ -51,8 +51,11 @@ if (length(samples) > 0) {
   # Set default to SCT (not integrated, since integration was skipped)
   DefaultAssay(obj) <- "SCT"
   
+  # Clear old integrated assay
+  obj[["integrated"]] <- NULL
+  
   # Save object
-  saveRDS(obj, file = file.path(outdir, paste0(id, "_integrated.rds")))
+  saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_integrated.rds")))
 
   # Summary table
   write.table(
@@ -104,12 +107,15 @@ obj <- IntegrateData(
 # Set default assay to integrated for downstream steps
 DefaultAssay(obj) <- "integrated"
 
+# Clear scale.data (only needed for integrate)
+LayerData(obj, assay = "SCT", layer = "scale.data") <- NULL
+
 # Correct timepoints order
 timepoint_order <- c("control", "3h", "24h", "72h", "7dpa", "14dpa", "22dpa", "33dpa")
 obj$orig.ident <- factor(obj$orig.ident, levels = timepoint_order)
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_integrated.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, ".rds")))
 
 # Summary table
 write.table(

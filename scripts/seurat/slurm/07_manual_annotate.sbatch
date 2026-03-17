@@ -52,9 +52,6 @@ echo "Annotating clusters using labels..."
 Rscript "$RUN/13_manual_annotate.R" \
   "$ID" \
   "$OUT_umap" \
-  "$OUT_umap/${ID}_umap.rds" \
+  "$OUT_umap/${ID}_processed.rds" \
   "$LABELS"
 echo "Annotation completed✅"
-
-# Sync results to work directory (exclude large RDS files)
-rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

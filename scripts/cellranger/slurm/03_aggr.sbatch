@@ -14,9 +14,6 @@
 # Exit on error, undefined variables, and pipe failures
 set -euo pipefail
 
-# CSV file listing samples to aggregate
-CSV="aggr_samples.csv"
-
 # Navigate to submission directory and load configuration
 cd "$SLURM_SUBMIT_DIR"
 source "config/default_paths.sh"
@@ -25,6 +22,9 @@ source "config/default_paths.sh"
 # Redirect output to log file
 exec > "$LOG/${SLURM_JOB_NAME}_${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.log"
 exec 2>&1
+
+# CSV file listing samples to aggregate
+CSV="$WORK/scripts/cellranger/aggr_samples.csv"
 
 # Define normalization options
 NORM_FLAGS=("none" "mapped")

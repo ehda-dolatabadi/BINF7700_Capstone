@@ -28,11 +28,11 @@ plan("multicore", workers = 56)
 # Load integrated object
 obj <- readRDS(input)
 
-# Set default assay to integrated
-DefaultAssay(obj) <- "integrated"
-
 # PCA
 obj <- RunPCA(obj, npcs = npcs)
+
+# Clear scale.data (only needed for pca)
+LayerData(obj, assay = DefaultAssay(obj), layer = "scale.data") <- NULL
 
 # PCA info
 pca_stdev <- obj@reductions$pca@stdev
@@ -58,7 +58,7 @@ print(ElbowPlot(obj, ndims = npcs) +
 dev.off()
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_pca.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_processed.rds")))
 
 # Summary table
 write.table(

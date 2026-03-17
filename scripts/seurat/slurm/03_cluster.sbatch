@@ -64,7 +64,7 @@ echo "Clustering..."
 Rscript "$RUN/07_cluster.R" \
   "$ID" \
   "$OUT_cluster" \
-  "$OUT_pca/${ID}_pca.rds" \
+  "$OUT_pca/${ID}_processed.rds" \
   "$DIMS" \
   "$RES"
 echo "Clustering completed✅"
@@ -74,7 +74,7 @@ echo "Running UMAP..."
 Rscript "$RUN/08_umap.R" \
   "$ID" \
   "$OUT_umap" \
-  "$OUT_cluster/${ID}_clustered.rds" \
+  "$OUT_cluster/${ID}_processed.rds" \
   "$UMAP_DIMS" \
   "$UMAP_METRIC"
 echo "UMAP completed✅"
@@ -84,12 +84,9 @@ echo "Finding Markers..."
 Rscript "$RUN/09_find_markers.R" \
   "$ID" \
   "$OUT_markers" \
-  "$OUT_cluster/${ID}_clustered.rds" \
+  "$OUT_cluster/${ID}_processed.rds" \
   "$SIGNIFICANCE" \
   "$REGULATION" \
   "$ENRICHMENT" \
   "$TOP_MARKERS"
 echo "Markers finding completed✅"
-
-# Sync results to work directory (exclude large RDS files)
-rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

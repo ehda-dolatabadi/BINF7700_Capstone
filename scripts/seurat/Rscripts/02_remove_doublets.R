@@ -42,7 +42,7 @@ singlet_barcodes <- rownames(colData(sce))[sce$scDblFinder.class == "singlet"]
 obj <- subset(obj, cells = singlet_barcodes)
 
 # Save filtered object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_DB_removed.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, ".rds")))
 
 # Write summary statistics to file
 write.table(

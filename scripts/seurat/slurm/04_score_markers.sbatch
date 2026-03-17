@@ -60,10 +60,7 @@ echo "Scoring $CELL_NAME markers..."
 Rscript "$RUN/10_score_markers.R" \
   "$ID" \
   "$OUT_score" \
-  "$OUT_cluster/${main_ID}_clustered.rds" \
+  "$OUT_cluster/${main_ID}_processed.rds" \
   "$CELL_NAME" \
   "$MARKERS"
 echo "Scoring completed✅"
-
-# Sync results to work directory (exclude large RDS files)
-rsync -av --info=progress2 --stats --exclude '*.rds' "$OUT/seurat/" "$WORK/results/seurat/"

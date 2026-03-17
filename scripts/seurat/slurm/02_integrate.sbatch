@@ -40,8 +40,14 @@ conda activate seurat
 # Integration workflow
 # Integrate all normalized samples using Seurat's integration method
 echo "Integrating normalized samples..."
+
+rds_files=()
+for smp in "${SMPS[@]}"; do
+    rds_files+=("$OUT/${smp}"*.rds)
+done
+
 Rscript "$RUN/05_integrate.R"\
     "$ID"\
     "$OUT_integrate"\
-    "$OUT_normalize"/*_normalized.rds
+	"${rds_files[@]}"
 echo "Integration completed✅"

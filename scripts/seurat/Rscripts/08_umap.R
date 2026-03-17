@@ -73,7 +73,7 @@ print(DimPlot(obj, reduction = "umap", split.by = "orig.ident", ncol = 4, label 
 dev.off()
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_umap.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_processed.rds")))
 
 # Summary table
 write.table(

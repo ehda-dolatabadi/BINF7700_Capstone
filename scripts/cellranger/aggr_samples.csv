@@ -1,0 +1,9 @@
+sample_id,molecule_h5
+control,control/outs/molecule_info.h5
+3h,3h/outs/molecule_info.h5
+24h,24h/outs/molecule_info.h5
+72h,72h/outs/molecule_info.h5
+7dpa,7dpa/outs/molecule_info.h5
+14dpa,14dpa/outs/molecule_info.h5
+22dpa,22dpa/outs/molecule_info.h5
+33dpa,33dpa/outs/molecule_info.h5

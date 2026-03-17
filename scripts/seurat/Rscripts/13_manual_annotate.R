@@ -42,4 +42,4 @@ print(DimPlot(obj, reduction = "umap", label = TRUE, repel = TRUE, label.size = 
 dev.off()
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_annotated.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_processed.rds")))

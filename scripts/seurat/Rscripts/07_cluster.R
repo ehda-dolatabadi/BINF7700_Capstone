@@ -35,7 +35,7 @@ obj <- FindNeighbors(obj, dims = 1:dims, seed.use = seed)
 obj <- FindClusters(obj, res = res, algorithm = 4, random.seed = seed)
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_clustered.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_processed.rds")))
 
 # Summary table
 cluster_counts <- table(obj$seurat_clusters)

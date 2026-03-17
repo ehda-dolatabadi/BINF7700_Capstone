@@ -63,7 +63,7 @@ clusters <- setNames(clusters$singler_label, clusters$seurat_clusters)
 obj$singler_cluster <- unname(clusters[as.character(obj$seurat_clusters)])
 
 # UMAP colored by SingleR cluster annotation
-png(file.path(outdir, paste0(id, "_cluster_annotated.png")), width = 1600, height = 1200, res=150)
+png(file.path(outdir, paste0(id, "_cluster_annotated.png")), width = 1600, height = 900, res=150)
 print(DimPlot(obj, reduction = "umap", group.by = "singler_cluster", label = TRUE, repel = TRUE, label.size = 4) +
         labs(
                 title = "UMAP Clustering",
@@ -84,7 +84,7 @@ cell_labels <- paste0(names(cell_counts), " (", cell_counts, ")")
 names(cell_labels) <- names(cell_counts)
 
 # UMAP colored by SingleR cell annotation
-png(file.path(outdir, paste0(id, "_cell_annotated.png")), width = 1600, height = 1200, res=150)
+png(file.path(outdir, paste0(id, "_cell_annotated.png")), width = 1600, height = 900, res=150)
 print(DimPlot(obj, reduction = "umap", group.by = "singler_label", label = FALSE) +
 	scale_color_discrete(labels = cell_labels) +
         labs(
@@ -101,28 +101,25 @@ print(DimPlot(obj, reduction = "umap", group.by = "singler_label", label = FALSE
 dev.off()
 
 # Filter desired cell type
-cells_to_keep <- rownames(obj@meta.data[obj$singler_label %in% cells, ])
+cells_to_keep <- split(rownames(obj@meta.data), obj$singler_label) [cells]
 
 # Filtered UMAP colored by SingleR cell annotation
-cols <- setNames(rep("lightgrey", length(unique(obj$singler_label))),
-                 unique(obj$singler_label))
-cols[cells] <- scales::hue_pal()(length(cells))
-
-png(file.path(outdir, paste0(id, "_cell_annotated_subset.png")), width = 1600, height = 1200, res=150)
-print(DimPlot(obj, reduction = "umap", group.by = "singler_label", cols = cols) + 
-# cells.highlight = cells_to_keep, cols.highlight = "red", cols = "lightgrey") +
+png(file.path(outdir, paste0(id, "_cell_annotated_filtered.png")), width = 1600, height = 900, res=150)
+print(DimPlot(obj, reduction = "umap", cells.highlight = cells_to_keep, cols.highlight = scales::hue_pal()(length(cells)), cols = "lightgrey") + 
         labs(
                 title = "UMAP Clustering",
                 x = "UMAP 1",
                 y = "UMAP 2"
         ) +
+	guides(color = guide_legend(ncol = 1)) +
         theme(
                 plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
                 axis.title = element_text(size = 14, face = "bold"),
                 axis.text = element_text(size = 12),
+		legend.key.width = unit(1, "cm"),
                 legend.text = element_text(size = 11)
         ))
 dev.off()
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_auto_annotated.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_processed.rds")))

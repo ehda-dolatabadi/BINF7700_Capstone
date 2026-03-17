@@ -139,9 +139,6 @@ abline(v = 0, col = "gray", lty = 2, lwd = 2)
 legend("topright", legend = "Zero reference", lty = 2, col = "gray", lwd = 2, cex = 1.1)
 dev.off()
 
-# Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_scored.rds")))
-
 # Summary table
 write.table(
   data.frame(

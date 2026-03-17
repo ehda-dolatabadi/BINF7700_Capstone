@@ -28,14 +28,14 @@ SLURM="$WORK/scripts/seurat/slurm"
 SBATCH_OPTS="--parsable"
 
 # Pipeline control flags (set to false to skip steps)
-preprocess=false
-integrate=false
-cluster_all=false
-score_all=false
-subcluster=false
-enrich1=false
-enrich2=false
-manual_annotate=false
+preprocess=true
+integrate=true
+cluster_all=true
+score_all=true
+subcluster=true
+enrich1=true
+enrich2=true
+manual_annotate=true
 auto_annotate=true
 
 # -----------------------------------------------------------------------------
@@ -272,14 +272,21 @@ fi
 # Step 8: Manual annotation using labels
 if [ "$manual_annotate" = true ]; then
     echo "Submitting manual annotation..."
-    JOB14=$(sbatch $SBATCH_OPTS \
+
+    DEPS=""
+    [ "$cluster_all" = true ] && DEPS="${DEPS}:$JOB3"
+    [ "$subcluster" = true ]  && DEPS="${DEPS}:$JOB6"
+    [ "$enrich1" = true ]     && DEPS="${DEPS}:$JOB9"
+    [ "$enrich2" = true ]     && DEPS="${DEPS}:$JOB12"
+
+    DEP_FLAG=""
+    [ -n "$DEPS" ] && DEP_FLAG="--dependency=afterok${DEPS}"
+
+JOB14=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_annotation-1)) \
       --export=ALL,\
 ANNOTATION_FILE="$ANNOTATION_FILE" \
-      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
-      $([ "$subcluster" = true ] && echo "--dependency=afterok:$JOB6") \
-      $([ "$enrich1" = true ] && echo "--dependency=afterok:$JOB9") \
-      $([ "$enrich2" = true ] && echo "--dependency=afterok:$JOB12") \
+      $DEP_FLAG \
       $SLURM/07_manual_annotate.sbatch)
     echo "  Job ID: $JOB14"
 fi
@@ -289,12 +296,19 @@ fi
 # Step 9: Automatic annotation using SingleR
 if [ "$auto_annotate" = true ]; then
     echo "Submitting auto annotation..."
+
+    DEPS=""
+    [ "$cluster_all" = true ] && DEPS="${DEPS}:$JOB3"
+    [ "$manual_annotate" = true ]  && DEPS="${DEPS}:$JOB14"
+
+    DEP_FLAG=""
+    [ -n "$DEPS" ] && DEP_FLAG="--dependency=afterok${DEPS}"
+
     JOB15=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID="all",\
 CELLS="Neurons" \
-      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
-      $([ "$manual_annotate" = true ] && echo "--dependency=afterok:$JOB14") \
+      $DEP_FLAG \
       $SLURM/08_auto_annotate.sbatch)
     echo "  Job ID: $JOB15"
 fi
