@@ -12,7 +12,8 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-set.seed(777)
+seed <- 777
+set.seed(seed)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -26,11 +27,15 @@ plan("multicore", workers = 7)
 
 # Load subset Seurat object
 obj <- readRDS(input)
+n_cells_before <- ncol(obj)
+n_features_before <- nrow(obj)
 
 # Switch to RNA assay for re-normalization
 DefaultAssay(obj) <- "RNA"
-n_cells_before <- ncol(obj)
-n_features_before <- nrow(obj)
+
+# clear extra assays
+# obj[["SCT"]] <- NULL
+# obj[["integrated"]] <- NULL
 
 # Split by sample and check if integration is feasible
 obj_list <- SplitObject(obj, split.by = "orig.ident")
@@ -45,14 +50,11 @@ if (length(samples) > 0) {
   obj <- SCTransform(
     obj,
     assay = "RNA",
-    new.assay.name = "SCT"
+    new.assay.name = "SCT",
   )
   
   # Set default to SCT (not integrated, since integration was skipped)
   DefaultAssay(obj) <- "SCT"
-  
-  # Clear old integrated assay
-  obj[["integrated"]] <- NULL
   
   # Save object
   saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_integrated.rds")))
@@ -108,14 +110,14 @@ obj <- IntegrateData(
 DefaultAssay(obj) <- "integrated"
 
 # Clear scale.data (only needed for integrate)
-LayerData(obj, assay = "SCT", layer = "scale.data") <- NULL
+# LayerData(obj, assay = "SCT", layer = "scale.data") <- NULL
 
 # Correct timepoints order
 timepoint_order <- c("control", "3h", "24h", "72h", "7dpa", "14dpa", "22dpa", "33dpa")
 obj$orig.ident <- factor(obj$orig.ident, levels = timepoint_order)
 
 # Save object
-saveRDS(obj, file = file.path(dirname(outdir), paste0(id, ".rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_integrated.rds")))
 
 # Summary table
 write.table(

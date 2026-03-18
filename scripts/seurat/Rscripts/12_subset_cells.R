@@ -152,7 +152,7 @@ if (mode == "keep") {
 }
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_subset.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_integrated.rds")))
 
 # Complete summary
 summary_data$n_cells_after <- ncol(obj)

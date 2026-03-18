@@ -74,7 +74,7 @@ echo "Running QC of $SMP..."
 Rscript "$RUN/01_qc.R" \
   "$SMP" \
   "$OUT_qc" \
-  "$OUT_map/${SMP}.rds"
+  "$OUT/seurat/${SMP}.rds"
 echo "QC of $SMP completed✅"
 
 # Step 3: Detect and remove doublets using scDblFinder
@@ -82,7 +82,7 @@ echo "Removing doublets from $SMP..."
 Rscript "$RUN/02_remove_doublets.R" \
   "$SMP" \
   "$OUT_db" \
-  "$OUT_map/${SMP}.rds"
+  "$OUT/seurat/${SMP}.rds"
 echo "Doublet removal of $SMP completed✅"
 
 # Step 4: Filter cells based on QC thresholds
@@ -90,7 +90,7 @@ echo "Filtering of $SMP..."
 Rscript "$RUN/03_filter.R" \
   "$SMP" \
   "$OUT_filter" \
-  "$OUT_db/${SMP}.rds" \
+  "$OUT/seurat/${SMP}.rds" \
   "$MIN_COUNTS" \
   "$MAX_COUNTS" \
   "$MIN_FEATURES" \
@@ -104,5 +104,5 @@ echo "Normalizing of $SMP..."
 Rscript "$RUN/04_normalize.R" \
   "$SMP" \
   "$OUT_normalize" \
-  "$OUT_filter/${SMP}.rds"
+  "$OUT/seurat/${SMP}.rds"
 echo "Normalization of $SMP completed✅"

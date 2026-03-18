@@ -32,7 +32,7 @@ obj <- readRDS(input)
 obj <- RunPCA(obj, npcs = npcs)
 
 # Clear scale.data (only needed for pca)
-LayerData(obj, assay = DefaultAssay(obj), layer = "scale.data") <- NULL
+# LayerData(obj, assay = DefaultAssay(obj), layer = "scale.data") <- NULL
 
 # PCA info
 pca_stdev <- obj@reductions$pca@stdev

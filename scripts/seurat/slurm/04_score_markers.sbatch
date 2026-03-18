@@ -60,7 +60,7 @@ echo "Scoring $CELL_NAME markers..."
 Rscript "$RUN/10_score_markers.R" \
   "$ID" \
   "$OUT_score" \
-  "$OUT_cluster/${main_ID}_processed.rds" \
+  "$OUT/seurat/${main_ID}_processed.rds" \
   "$CELL_NAME" \
   "$MARKERS"
 echo "Scoring completed✅"

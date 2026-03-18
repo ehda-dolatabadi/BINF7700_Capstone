@@ -13,7 +13,7 @@ suppressPackageStartupMessages({
 })
 
 seed <- 777
-set.seed(777)
+set.seed(seed)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)

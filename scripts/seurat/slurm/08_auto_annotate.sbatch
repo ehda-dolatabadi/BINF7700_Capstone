@@ -40,6 +40,6 @@ echo "Annotating cells automatically..."
 Rscript "$RUN/14_auto_annotate.R" \
   "$ID" \
   "$OUT_umap" \
-  "$OUT_umap/${ID}_processed.rds" \
+  "$OUT/seurat/${ID}_processed.rds" \
   "$CELLS"
 echo "Auto annotation completed✅"

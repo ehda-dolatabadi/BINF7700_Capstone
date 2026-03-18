@@ -45,7 +45,7 @@ echo "Subsetting data..."
 Rscript "$RUN/11_subset_clusters.R"\
     "$ID"\
     "$OUT_subset"\
-    "$OUT_cluster/${main_ID}_processed.rds"\
+    "$OUT/seurat/${main_ID}_processed.rds"\
     "$IDENT"
 echo "Subset completed✅"
 
@@ -54,5 +54,5 @@ echo "Re-running normalization and integration..."
 Rscript "$RUN/05_reintegrate_subset.R"\
     "$ID"\
     "$OUT_subset"\
-    "$OUT_subset/${ID}_integrated.rds"
+    "$OUT/seurat/${ID}_integrated.rds"
 echo "Normalization and integration completed✅"

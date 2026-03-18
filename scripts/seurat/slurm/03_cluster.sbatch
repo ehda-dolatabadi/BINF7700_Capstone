@@ -55,7 +55,7 @@ echo "Running PCA..."
 Rscript "$RUN/06_pca.R" \
   "$ID" \
   "$OUT_pca" \
-  "$OUT_integrate/${ID}_integrated.rds" \
+  "$OUT/seurat/${ID}_integrated.rds" \
   "$NPCS"
 echo "PCA completed✅"
 
@@ -64,7 +64,7 @@ echo "Clustering..."
 Rscript "$RUN/07_cluster.R" \
   "$ID" \
   "$OUT_cluster" \
-  "$OUT_pca/${ID}_processed.rds" \
+  "$OUT/seurat/${ID}_processed.rds" \
   "$DIMS" \
   "$RES"
 echo "Clustering completed✅"
@@ -74,7 +74,7 @@ echo "Running UMAP..."
 Rscript "$RUN/08_umap.R" \
   "$ID" \
   "$OUT_umap" \
-  "$OUT_cluster/${ID}_processed.rds" \
+  "$OUT/seurat/${ID}_processed.rds" \
   "$UMAP_DIMS" \
   "$UMAP_METRIC"
 echo "UMAP completed✅"
@@ -84,7 +84,7 @@ echo "Finding Markers..."
 Rscript "$RUN/09_find_markers.R" \
   "$ID" \
   "$OUT_markers" \
-  "$OUT_cluster/${ID}_processed.rds" \
+  "$OUT/seurat/${ID}_processed.rds" \
   "$SIGNIFICANCE" \
   "$REGULATION" \
   "$ENRICHMENT" \

@@ -11,7 +11,8 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-set.seed(777)
+seed <- 777
+set.seed(seed)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -53,14 +54,14 @@ obj <- IntegrateData(
 DefaultAssay(obj) <- "integrated"
 
 # Clear scale.data (only needed for integrate)
-LayerData(obj, assay = "SCT", layer = "scale.data") <- NULL
+# LayerData(obj, assay = "SCT", layer = "scale.data") <- NULL
 
 # Correct timepoints order
 timepoint_order <- c("control", "3h", "24h", "72h", "7dpa", "14dpa", "22dpa", "33dpa")
 obj$orig.ident <- factor(obj$orig.ident, levels = timepoint_order)
 
 # Save object
-saveRDS(obj, file = file.path(dirname(outdir), paste0(id, ".rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_integrated.rds")))
 
 # Summary table
 write.table(

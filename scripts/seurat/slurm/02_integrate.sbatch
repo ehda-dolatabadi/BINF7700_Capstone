@@ -43,7 +43,7 @@ echo "Integrating normalized samples..."
 
 rds_files=()
 for smp in "${SMPS[@]}"; do
-    rds_files+=("$OUT/${smp}"*.rds)
+    rds_files+=("$OUT/seurat/${smp}"*.rds)
 done
 
 Rscript "$RUN/05_integrate.R"\

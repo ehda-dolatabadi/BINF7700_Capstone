@@ -34,7 +34,7 @@ n_features_before <- nrow(obj[["SCT"]])
 obj <- subset(obj, idents = idents)
 
 # Save object
-saveRDS(obj, file = file.path(outdir, paste0(id, "_subset.rds")))
+saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_integrated.rds")))
 
 # Summary table
 write.table(

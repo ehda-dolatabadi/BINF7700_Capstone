@@ -52,6 +52,6 @@ echo "Annotating clusters using labels..."
 Rscript "$RUN/13_manual_annotate.R" \
   "$ID" \
   "$OUT_umap" \
-  "$OUT_umap/${ID}_processed.rds" \
+  "$OUT/seurat/${ID}_processed.rds" \
   "$LABELS"
 echo "Annotation completed✅"
