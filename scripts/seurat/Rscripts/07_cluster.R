@@ -12,8 +12,7 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-seed <- 777
-set.seed(seed)
+set.seed(777)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -31,8 +30,8 @@ plan("multicore", workers = 56)
 obj <- readRDS(input)
 
 # Neighbors and clustering (Leiden)
-obj <- FindNeighbors(obj, dims = 1:dims, seed.use = seed)
-obj <- FindClusters(obj, res = res, algorithm = 4, random.seed = seed)
+obj <- FindNeighbors(obj, dims = 1:dims)
+obj <- FindClusters(obj, res = res, algorithm = 4)
 
 # Save object
 saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_processed.rds")))

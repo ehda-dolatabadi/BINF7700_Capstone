@@ -13,6 +13,8 @@ suppressPackageStartupMessages({
   library(celldex)
 })
 
+set.seed(777)
+
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
