@@ -12,8 +12,7 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-seed <- 777
-set.seed(seed)
+set.seed(777)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -50,7 +49,7 @@ if (length(samples) > 0) {
   obj <- SCTransform(
     obj,
     assay = "RNA",
-    new.assay.name = "SCT",
+    new.assay.name = "SCT"
   )
   
   # Set default to SCT (not integrated, since integration was skipped)

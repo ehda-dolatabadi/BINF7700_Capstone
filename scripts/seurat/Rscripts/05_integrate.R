@@ -11,8 +11,7 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-seed <- 777
-set.seed(seed)
+set.seed(777)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)

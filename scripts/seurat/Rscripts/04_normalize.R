@@ -11,8 +11,7 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-seed <- 777
-set.seed(seed)
+set.seed(777)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -33,8 +32,7 @@ obj <- SCTransform(
   assay = "RNA",
   new.assay.name = "SCT",
   ncells = 5000,		# default
-  variable.features.n = 3000,	# default
-  seed.use = seed
+  variable.features.n = 3000	# default
 )
 n_variable_features <- length(VariableFeatures(obj))
 

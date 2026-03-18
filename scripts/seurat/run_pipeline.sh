@@ -28,15 +28,15 @@ SLURM="$WORK/scripts/seurat/slurm"
 SBATCH_OPTS="--parsable"
 
 # Pipeline control flags (set to false to skip steps)
-preprocess=false
+preprocess=true
 integrate=true
 cluster_all=true
-score_all=false
-subcluster=false
-enrich1=false
-enrich2=false
-manual_annotate=false
-auto_annotate=false
+score_all=true
+subcluster=true
+enrich1=true
+enrich2=true
+manual_annotate=true
+auto_annotate=true
 
 # -----------------------------------------------------------------------------
 
