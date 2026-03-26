@@ -22,6 +22,7 @@ input   <- args[3]
 npcs    <- as.numeric(args[4])
 
 # Set up parallelization
+options(future.seed = TRUE)
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 56)
 
@@ -29,7 +30,11 @@ plan("multicore", workers = 56)
 obj <- readRDS(input)
 
 # PCA
-obj <- RunPCA(obj, npcs = npcs)
+obj <- RunPCA(
+  obj,
+  npcs = npcs, 
+  seed.use = 42		# default
+)
 
 # Clear scale.data (only needed for pca)
 # LayerData(obj, assay = DefaultAssay(obj), layer = "scale.data") <- NULL

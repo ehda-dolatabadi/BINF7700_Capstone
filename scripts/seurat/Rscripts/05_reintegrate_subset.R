@@ -21,6 +21,7 @@ outdir  <- args[2]
 input   <- args[3]
 
 # Configure parallel processing
+options(future.seed = TRUE)
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 7)
 

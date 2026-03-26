@@ -45,7 +45,7 @@ MARKERS="${!CELL_NAME}"
 # Define script and output directories
 RUN="$WORK/scripts/seurat/Rscripts"
 OUT_cluster="$OUT/seurat/${main_ID}_07_clustered"
-OUT_score="$OUT/seurat/${main_ID}_10_scored"
+OUT_score="$OUT/seurat/${main_ID}_12_scored"
 
 # Create output directory
 mkdir -p "$OUT_score"
@@ -57,7 +57,7 @@ conda activate seurat
 # Marker scoring workflow
 # Calculate module score for cell type specific markers
 echo "Scoring $CELL_NAME markers..."
-Rscript "$RUN/10_score_markers.R" \
+Rscript "$RUN/12_score_markers.R" \
   "$ID" \
   "$OUT_score" \
   "$OUT/seurat/${main_ID}_processed.rds" \

@@ -5,8 +5,8 @@
 #SBATCH --job-name=cluster
 #SBATCH --partition=courses
 #SBATCH --time=04:00:00
-#SBATCH --cpus-per-task=56
-#SBATCH --mem=128G
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
@@ -24,6 +24,7 @@ SIGNIFICANCE="${SIGNIFICANCE:-0.05}"
 REGULATION="${REGULATION:-1}"
 ENRICHMENT="${ENRICHMENT:-0.2}"
 TOP_MARKERS="${TOP_MARKERS:-100}"
+CELLS="${CELLS:-Neurons}"
 
 # Load configuration and setup paths
 cd "$SLURM_SUBMIT_DIR"
@@ -50,7 +51,7 @@ eval "$(conda shell.bash hook)"
 conda activate seurat
 
 # Clustering workflow
-# Step 1: Perform principal component analysis for dimensionality reduction
+Step 1: Perform principal component analysis for dimensionality reduction
 echo "Running PCA..."
 Rscript "$RUN/06_pca.R" \
   "$ID" \
@@ -79,7 +80,7 @@ Rscript "$RUN/08_umap.R" \
   "$UMAP_METRIC"
 echo "UMAP completed✅"
 
-# Step 4: Find differentially expressed marker genes for each cluster
+# Step 4: Find differentially expressed marker genes for manual annotation
 echo "Finding Markers..."
 Rscript "$RUN/09_find_markers.R" \
   "$ID" \
@@ -90,3 +91,12 @@ Rscript "$RUN/09_find_markers.R" \
   "$ENRICHMENT" \
   "$TOP_MARKERS"
 echo "Markers finding completed✅"
+
+# Step 5: Auto annotate cells and clusters using SingleR
+echo "Annotating cells automatically..."
+Rscript "$RUN/10_auto_annotate.R" \
+  "$ID" \
+  "$OUT_umap" \
+  "$OUT/seurat/${ID}_processed.rds" \
+  "$CELLS"
+echo "Auto annotation completed✅"

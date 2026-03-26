@@ -29,7 +29,6 @@ exec 2>&1
 
 # Define script and output directories
 RUN="$WORK/scripts/seurat/Rscripts"
-OUT_cluster="$OUT/seurat/${main_ID}_07_clustered"
 OUT_subset="$OUT/seurat/${ID}_05_integrated"
 
 # Create output directory
@@ -42,7 +41,7 @@ conda activate seurat
 # Cluster subsetting workflow
 # Step 1: Subset cells from specified cluster identities
 echo "Subsetting data..."
-Rscript "$RUN/11_subset_clusters.R"\
+Rscript "$RUN/13_subset_clusters.R"\
     "$ID"\
     "$OUT_subset"\
     "$OUT/seurat/${main_ID}_processed.rds"\

@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
-# Script: 11_subset_clusters.R
+# Script: 13_subset_clusters.R
 # Purpose: Extract cells from specific cluster identities
 # Description: Subsets the Seurat object to retain only cells from specified clusters
 #              for focused downstream analysis
-# Usage: Rscript 11_subset_clusters.R <id> <outdir> <input> <idents>
+# Usage: Rscript 13_subset_clusters.R <id> <outdir> <input> <idents>
 
 # Load required libraries
 suppressPackageStartupMessages({
@@ -22,6 +22,7 @@ input   <- args[3]
 idents	<- args[4]
 
 # Set up parallelization
+options(future.seed = TRUE)
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 56)
 

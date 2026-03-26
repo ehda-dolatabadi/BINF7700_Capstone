@@ -25,6 +25,7 @@ enrichment   <- as.numeric(args[6])
 top          <- as.numeric(args[7])
 
 # Set up parallelization
+options(future.seed = TRUE)
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 56)
 

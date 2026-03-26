@@ -35,8 +35,8 @@ score_all=true
 subcluster=true
 enrich1=true
 enrich2=true
-manual_annotate=true
-auto_annotate=true
+
+manual_annotate=false
 
 # -----------------------------------------------------------------------------
 
@@ -90,7 +90,8 @@ UMAP_METRIC="cosine",\
 SIGNIFICANCE=0.05,\
 REGULATION=1,\
 ENRICHMENT=0.2,\
-TOP_MARKERS=100 \
+TOP_MARKERS=100,\
+CELLS="Neurons" \
       $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
       $SLURM/03_cluster.sbatch)
     echo "  Job ID: $JOB3"
@@ -141,7 +142,8 @@ UMAP_METRIC="cosine",\
 SIGNIFICANCE=0.05,\
 REGULATION=0.5,\
 ENRICHMENT=0.1,\
-TOP_MARKERS=100 \
+TOP_MARKERS=100,\
+CELLS="Neurons" \
       --job-name=cluster_subcluster \
       --dependency=afterok:$JOB5 \
       $SLURM/03_cluster.sbatch)
@@ -194,7 +196,8 @@ UMAP_METRIC="cosine",\
 SIGNIFICANCE=0.05,\
 REGULATION=1,\
 ENRICHMENT=0.2,\
-TOP_MARKERS=100 \
+TOP_MARKERS=100,\
+CELLS="Neurons" \
       --job-name=cluster_subset1 \
       --dependency=afterok:$JOB8 \
       $SLURM/03_cluster.sbatch)
@@ -247,7 +250,8 @@ UMAP_METRIC="cosine",\
 SIGNIFICANCE=0.05,\
 REGULATION=1,\
 ENRICHMENT=0.2,\
-TOP_MARKERS=100 \
+TOP_MARKERS=100,\
+CELLS="Neurons" \
       --job-name=cluster_subset2 \
       --dependency=afterok:$JOB11 \
       $SLURM/03_cluster.sbatch)
@@ -269,15 +273,15 @@ fi
 
 # -----------------------------------------------------------------------------
 
-# Step 8: Manual annotation using labels
+# Step 7: Manual annotation using labels file
 if [ "$manual_annotate" = true ]; then
     echo "Submitting manual annotation..."
 
     DEPS=""
-    [ "$cluster_all" = true ] && DEPS="${DEPS}:$JOB3"
-    [ "$subcluster" = true ]  && DEPS="${DEPS}:$JOB6"
-    [ "$enrich1" = true ]     && DEPS="${DEPS}:$JOB9"
-    [ "$enrich2" = true ]     && DEPS="${DEPS}:$JOB12"
+    [ "$cluster_all" = true ]	&& DEPS="${DEPS}:$JOB3"
+    [ "$subcluster" = true ]  	&& DEPS="${DEPS}:$JOB6"
+    [ "$enrich1" = true ]     	&& DEPS="${DEPS}:$JOB9"
+    [ "$enrich2" = true ]     	&& DEPS="${DEPS}:$JOB12"
 
     DEP_FLAG=""
     [ -n "$DEPS" ] && DEP_FLAG="--dependency=afterok${DEPS}"
@@ -289,28 +293,6 @@ ANNOTATION_FILE="$ANNOTATION_FILE" \
       $DEP_FLAG \
       $SLURM/07_manual_annotate.sbatch)
     echo "  Job ID: $JOB14"
-fi
-
-# -----------------------------------------------------------------------------
-
-# Step 9: Automatic annotation using SingleR
-if [ "$auto_annotate" = true ]; then
-    echo "Submitting auto annotation..."
-
-    DEPS=""
-    [ "$cluster_all" = true ] && DEPS="${DEPS}:$JOB3"
-    [ "$manual_annotate" = true ]  && DEPS="${DEPS}:$JOB14"
-
-    DEP_FLAG=""
-    [ -n "$DEPS" ] && DEP_FLAG="--dependency=afterok${DEPS}"
-
-    JOB15=$(sbatch $SBATCH_OPTS \
-      --export=ALL,\
-ID="all",\
-CELLS="Neurons" \
-      $DEP_FLAG \
-      $SLURM/08_auto_annotate.sbatch)
-    echo "  Job ID: $JOB15"
 fi
 
 # -----------------------------------------------------------------------------

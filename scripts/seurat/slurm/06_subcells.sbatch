@@ -45,7 +45,6 @@ CELL_MARKERS="${CELL_MARKERS%;}"
 
 # Define script and output directories
 RUN="$WORK/scripts/seurat/Rscripts"
-OUT_integrate="$OUT/seurat/${main_ID}_05_integrated"
 OUT_subcells="$OUT/seurat/${ID}_05_integrated"
 
 # Create output directory
@@ -58,7 +57,7 @@ conda activate seurat
 # Cell subsetting workflow
 # Step 1: Subset cells based on marker scores (keep or remove mode)
 echo "Subsetting data..."
-Rscript "$RUN/12_subset_cells.R" \
+Rscript "$RUN/14_subset_cells.R" \
   "$ID" \
   "$OUT_subcells" \
   "$OUT/seurat/${main_ID}_integrated.rds" \

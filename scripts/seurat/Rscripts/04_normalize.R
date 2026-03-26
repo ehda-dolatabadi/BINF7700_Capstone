@@ -20,6 +20,7 @@ outdir  <- args[2]
 input   <- args[3]
 
 # Configure parallel processing
+options(future.seed = TRUE)
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 4)
 
@@ -31,8 +32,9 @@ obj <- SCTransform(
   object = obj,
   assay = "RNA",
   new.assay.name = "SCT",
-  ncells = 5000,		# default
-  variable.features.n = 3000	# default
+  ncells = 5000,				# default
+  variable.features.n = 3000,	# default
+  seed.use = 1448145			# default
 )
 n_variable_features <- length(VariableFeatures(obj))
 

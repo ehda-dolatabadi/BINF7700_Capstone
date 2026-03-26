@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
-# Script: 13_manual_annotate.R
+# Script: 11_manual_annotate.R
 # Purpose: Annotate clusters
 # Description: Renames cluster identities using ordered labels
-# Usage: Rscript 13_manual_annotate.R <id> <output> <input> <labels>
+# Usage: Rscript 11_manual_annotate.R <id> <output> <input> <labels>
 #	<labels>: comma-separated labels in cluster order
 
 # Load required libraries

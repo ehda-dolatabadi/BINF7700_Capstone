@@ -23,6 +23,7 @@ dims    <- as.numeric(args[4])
 res     <- as.numeric(args[5])
 
 # Set up parallelization
+options(future.seed = TRUE)
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 56)
 
@@ -31,7 +32,7 @@ obj <- readRDS(input)
 
 # Neighbors and clustering (Leiden)
 obj <- FindNeighbors(obj, dims = 1:dims)
-obj <- FindClusters(obj, res = res, algorithm = 4)
+obj <- FindClusters(obj, res = res, algorithm = 4, leiden_method = "igraph")
 
 # Save object
 saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_processed.rds")))

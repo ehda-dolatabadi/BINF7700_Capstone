@@ -44,12 +44,12 @@ OUT_umap="$OUT/seurat/${ID}_08_umap"
 
 # Activate conda environment
 eval "$(conda shell.bash hook)"
-conda activate seurat_a
+conda activate seurat
 
 # Annotation workflow
 # Rename cluster identities using ordered labels
 echo "Annotating clusters using labels..."
-Rscript "$RUN/13_manual_annotate.R" \
+Rscript "$RUN/14_manual_annotate.R" \
   "$ID" \
   "$OUT_umap" \
   "$OUT/seurat/${ID}_processed.rds" \

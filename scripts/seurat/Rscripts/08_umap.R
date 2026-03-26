@@ -23,6 +23,7 @@ dims    <- as.numeric(args[4])
 metric  <- args[5]
 
 # Set up parallelization
+options(future.seed = TRUE)
 options(future.globals.maxSize = 64000 * 1024^2)  # 64 GB
 plan("multicore", workers = 56)
 
@@ -31,9 +32,10 @@ obj <- readRDS(input)
 
 # UMAP
 obj <- RunUMAP(
-  object       = obj,
-  dims         = 1:dims,
-  metric       = metric
+  object	= obj,
+  dims		= 1:dims,
+  metric	= metric,
+  seed.use	= 42		# default
 )
 
 # Plot
