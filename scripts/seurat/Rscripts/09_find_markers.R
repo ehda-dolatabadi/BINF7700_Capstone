@@ -12,7 +12,8 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-set.seed(777)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(271)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -40,7 +41,8 @@ obj <- PrepSCTFindMarkers(obj)
 markers <- FindAllMarkers(
   obj,
   max.cells.per.ident = 500,
-  only.pos = FALSE
+  only.pos = FALSE,
+  random.seed = 271  # default: 1; used by set.seed() internally before downsampling
 )
 
 # Order markers

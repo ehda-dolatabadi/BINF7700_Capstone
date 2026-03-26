@@ -12,7 +12,8 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-set.seed(777)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(271)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -31,8 +32,10 @@ plan("multicore", workers = 56)
 obj <- readRDS(input)
 
 # Neighbors and clustering (Leiden)
+# FindNeighbors uses Annoy (C-level RNG) — set.seed() does not control it; switch to annoy.metric with nn.method="rann" for R-level reproducibility
+set.seed(271)
 obj <- FindNeighbors(obj, dims = 1:dims)
-obj <- FindClusters(obj, res = res, algorithm = 4, leiden_method = "igraph")
+obj <- FindClusters(obj, res = res, algorithm = 4, leiden_method = "igraph", random.seed = 271)  # default random.seed: 0 (warns and resets to 1)
 
 # Save object
 saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_processed.rds")))

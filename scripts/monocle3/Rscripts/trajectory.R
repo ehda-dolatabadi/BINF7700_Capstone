@@ -18,7 +18,8 @@ suppressPackageStartupMessages({
   library(SeuratWrappers)
 })
 
-set.seed(777)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(271)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -41,18 +42,24 @@ cds <- as.cell_data_set(obj)
 
 # Normalize and reduce to 10 dimensions using PCA
 # num_dim = 10 based on meaningful components identified in prior Seurat analysis
+# preprocess_cds has no seed parameter; calls set.seed(2016) internally — external set.seed() is overridden and ineffective
+set.seed(271)
 cds <- preprocess_cds(cds, num_dim = 10)
 
 # Compute UMAP embedding using Monocle3's own pipeline
 # this is separate from Seurat's UMAP and optimized for trajectory inference
+# reduce_dimension has no seed parameter; calls set.seed(2016) internally — external set.seed() is overridden and ineffective
+set.seed(271)
 cds <- reduce_dimension(cds, reduction_method = "UMAP", preprocess_method = "PCA")
 
 # Cluster cells using Louvain community detection on the UMAP embedding
 # Monocle3 uses these clusters internally to structure the trajectory graph
-cds <- cluster_cells(cds, reduction_method = "UMAP")
+cds <- cluster_cells(cds, reduction_method = "UMAP", random_seed = 271)  # default: 42
 
 # Learn the principal graph separately for each partition
 # use_partition = TRUE allows disconnected trajectories for unrelated cell populations
+# learn_graph has no seed parameter; uses internal graph learning with stochastic initialization
+set.seed(271)
 cds <- learn_graph(cds, use_partition = FALSE)
 
 # Select control cells as the pseudotime root based on orig.ident metadata

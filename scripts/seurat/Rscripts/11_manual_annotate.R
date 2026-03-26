@@ -11,7 +11,8 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
-set.seed(777)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(271)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)

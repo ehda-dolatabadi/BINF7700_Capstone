@@ -12,7 +12,8 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-set.seed(777)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(271)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -35,7 +36,7 @@ obj <- RunUMAP(
   object	= obj,
   dims		= 1:dims,
   metric	= metric,
-  seed.use	= 42		# default
+  seed.use	= 271		# default: 42
 )
 
 # Plot

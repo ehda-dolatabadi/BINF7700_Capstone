@@ -11,7 +11,8 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
-set.seed(777)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(271)
 
 # Close any open graphics devices
 while (!is.null(dev.list())) dev.off()
@@ -44,7 +45,8 @@ cell_name <- paste0(cell_name, "_score")
 obj <- AddModuleScore(
   obj,
   features = list(markers_available),
-  name = cell_name
+  name = cell_name,
+  seed = 271  # default: 1
 )
 feature_name = paste0(cell_name, "1")
 

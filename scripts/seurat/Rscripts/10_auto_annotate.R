@@ -13,7 +13,8 @@ suppressPackageStartupMessages({
   library(celldex)
 })
 
-set.seed(777)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(271)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -38,7 +39,8 @@ ref <- celldex::HumanPrimaryCellAtlasData()
 #	label.main: broad cell types
 #	label.fine: finer subtypes
 #	fine.tune: TRUE improves accuracy on ambiguous cells
-
+# SingleR has no seed parameter; uses bootstrap internally — set.seed() here influences bootstrap sampling
+set.seed(271)
 predictions <- SingleR(
   test      = LayerData(obj, assay = "SCT", layer = "data"),
   ref       = ref,

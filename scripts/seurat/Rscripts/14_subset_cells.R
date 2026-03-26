@@ -13,7 +13,8 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-set.seed(777)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(271)
 
 # Configure parallel processing
 options(future.seed = TRUE)
@@ -72,7 +73,8 @@ for (i in seq_along(cell_types)) {
   obj <- AddModuleScore(
     obj,
     features = list(markers_available),
-    name = score_name
+    name = score_name,
+    seed = 271  # default: 1
   )
 
   # Note: AddModuleScore adds "1" to the name

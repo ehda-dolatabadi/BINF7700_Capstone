@@ -11,7 +11,8 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-set.seed(777)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(271)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -34,7 +35,7 @@ obj <- SCTransform(
   new.assay.name = "SCT",
   ncells = 5000,				# default
   variable.features.n = 3000,	# default
-  seed.use = 1448145			# default
+  seed.use = 271				# default: 1448145
 )
 n_variable_features <- length(VariableFeatures(obj))
 

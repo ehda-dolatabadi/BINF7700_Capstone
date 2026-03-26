@@ -12,7 +12,8 @@ suppressPackageStartupMessages({
   library(future)
 })
 
-set.seed(777)
+RNGkind("L'Ecuyer-CMRG")
+set.seed(271)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -50,7 +51,8 @@ if (length(samples) > 0) {
   obj <- SCTransform(
     obj,
     assay = "RNA",
-    new.assay.name = "SCT"
+    new.assay.name = "SCT",
+    seed.use = 271                # default: 1448145
   )
   
   # Set default to SCT (not integrated, since integration was skipped)
@@ -80,7 +82,7 @@ if (length(samples) > 0) {
 
 # Re-run SCTransform on each sample separately
 obj_list <- lapply(obj_list, function(x) {
-  SCTransform(x, assay = "RNA", new.assay.name = "SCT")
+  SCTransform(x, assay = "RNA", new.assay.name = "SCT", seed.use = 271)  # default: 1448145
 })
 
 # Set to SCT assay for each object in the list
@@ -94,6 +96,8 @@ features <- SelectIntegrationFeatures(object.list = obj_list, nfeatures = 3000)
 obj_list <- PrepSCTIntegration(object.list = obj_list, anchor.features = features)
 
 # Find anchors and integrate (batch correction)
+# FindIntegrationAnchors uses Annoy (C-level RNG) by default — set.seed() does not control it; switch to nn.method="rann" for R-level reproducibility
+set.seed(271)
 anchors <- FindIntegrationAnchors(
   object.list = obj_list,
   normalization.method = "SCT",
