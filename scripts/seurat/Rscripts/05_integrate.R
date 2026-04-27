@@ -16,9 +16,9 @@ set.seed(271)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
-id	<- args[1]
-outdir	<- args[2]
-paths	<- args[3:length(args)]
+id     <- args[1]
+outdir <- args[2]
+paths  <- args[3:length(args)]
 
 # Configure parallel processing
 options(future.seed = TRUE)
@@ -38,7 +38,8 @@ features <- SelectIntegrationFeatures(object.list = obj_list, nfeatures = 3000)
 obj_list <- PrepSCTIntegration(object.list = obj_list, anchor.features = features)
 
 # Find integration anchors across samples
-# FindIntegrationAnchors uses Annoy (C-level RNG) by default — set.seed() does not control it; switch to nn.method="rann" for R-level reproducibility
+# FindIntegrationAnchors uses Annoy (C-level RNG) by default — set.seed() does not control it;
+# switch to nn.method="rann" for R-level reproducibility
 set.seed(271)
 anchors <- FindIntegrationAnchors(
   object.list = obj_list,

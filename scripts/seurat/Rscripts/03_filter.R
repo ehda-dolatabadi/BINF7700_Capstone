@@ -3,7 +3,8 @@
 # Purpose: Filter cells based on QC thresholds
 # Description: Applies filtering thresholds for UMI counts, feature counts, mitochondrial
 #              and ribosomal content, and generates QC plots with threshold lines
-# Usage: Rscript 03_filter.R <id> <output> <input> <min_counts> <max_counts> <min_features> <max_features> <max_mito> <max_ribo>
+# Usage: Rscript 03_filter.R <id> <output> <input> <min_counts> <max_counts>
+#        <min_features> <max_features> <max_mito> <max_ribo>
 
 # Load required libraries
 suppressPackageStartupMessages({

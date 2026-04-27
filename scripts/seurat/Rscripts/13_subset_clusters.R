@@ -20,7 +20,7 @@ args <- commandArgs(trailingOnly = TRUE)
 id      <- args[1]
 outdir  <- args[2]
 input   <- args[3]
-idents	<- args[4]
+idents  <- args[4]
 
 # Set up parallelization
 options(future.seed = TRUE)

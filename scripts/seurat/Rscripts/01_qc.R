@@ -17,22 +17,25 @@ set.seed(271)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
-id	<- args[1]
-outdir	<- args[2]
-input	<- args[3]
+id     <- args[1]
+outdir <- args[2]
+input  <- args[3]
 
 # Load Seurat object with mapped features
 obj <- readRDS(input)
 
 # Calculate quality control metrics
-obj[["percent.mt"]]	<- PercentageFeatureSet(obj, pattern = "^(COX|ND|CYTB|ATP)")
-obj[["percent.ribo"]]	<- PercentageFeatureSet(obj, pattern = "^RPS|^RPL")
-obj[["percent.rrna"]]	<- PercentageFeatureSet(obj, pattern = "^RRN")
-obj[["percent.trna"]]	<- PercentageFeatureSet(obj, pattern = "^TRNA")
-obj[["complexity"]]	<- log10(obj$nCount_RNA / obj$nFeature_RNA)
+obj[["percent.mt"]]   <- PercentageFeatureSet(obj, pattern = "^(COX|ND|CYTB|ATP)")
+obj[["percent.ribo"]] <- PercentageFeatureSet(obj, pattern = "^RPS|^RPL")
+obj[["percent.rrna"]] <- PercentageFeatureSet(obj, pattern = "^RRN")
+obj[["percent.trna"]] <- PercentageFeatureSet(obj, pattern = "^TRNA")
+obj[["complexity"]]   <- log10(obj$nCount_RNA / obj$nFeature_RNA)
 
 # Define QC metrics to plot
-qc_metrics <- c("nCount_RNA", "nFeature_RNA", "percent.mt", "percent.ribo", "complexity", "percent.rrna", "percent.trna")
+qc_metrics <- c(
+  "nCount_RNA", "nFeature_RNA", "percent.mt",
+  "percent.ribo", "complexity", "percent.rrna", "percent.trna"
+)
 df <- as_tibble(obj[[]], rownames="Cell.Barcode")
 
 # Generate QC plots
@@ -44,7 +47,7 @@ for (dir in qc_metrics) {
 
 # Library prep control
 for (i in c("percent.rrna","percent.trna")) {
-  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.05) +
+  p <- VlnPlot(obj, features = i, layer = "counts", pt.size = 0.05) +
     labs(
       x = NULL,
       y = "Percentage (%)",
@@ -83,7 +86,7 @@ for (i in qc_metrics[1:5]) {
   )
 
   # violin plots
-  p <- VlnPlot(obj, features = i, layer = "counts", pt.size=0.05) +
+  p <- VlnPlot(obj, features = i, layer = "counts", pt.size = 0.05) +
     labs(
       x = NULL,
       y = y_label,
@@ -257,7 +260,7 @@ for (i in qc_metrics[1:5]) {
   
   
   # scatter plots with mt and ribo
-  if (i %in% c("percent.mt","percent.ribo")) {
+  if (i %in% c("percent.mt", "percent.ribo")) {
     color_label <- switch(i,
       "percent.mt" = "Mitochondrial\nContent (%)",
       "percent.ribo" = "Ribosomal\nContent (%)"

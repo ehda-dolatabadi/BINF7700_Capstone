@@ -33,9 +33,9 @@ obj <- SCTransform(
   object = obj,
   assay = "RNA",
   new.assay.name = "SCT",
-  ncells = 5000,				# default
-  variable.features.n = 3000,	# default
-  seed.use = 271				# default: 1448145
+  ncells = 5000,               # default
+  variable.features.n = 3000,  # default
+  seed.use = 271               # default: 1448145
 )
 n_variable_features <- length(VariableFeatures(obj))
 

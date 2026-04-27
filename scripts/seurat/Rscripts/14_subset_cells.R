@@ -3,7 +3,8 @@
 # Purpose: Filter cells based on cell type marker expression scores
 # Description: Calculates module scores for cell type markers and filters cells based
 #              on thresholds (keep mode retains high-scoring cells, remove mode excludes them)
-# Usage: Rscript 14_subset_cells.R <id> <outdir> <input> <mode> <cell_types> <cell_markers> <cell_thresholds>
+# Usage: Rscript 14_subset_cells.R <id> <outdir> <input> <mode>
+#        <cell_types> <cell_markers> <cell_thresholds>
 
 # Load required libraries
 suppressPackageStartupMessages({
@@ -23,13 +24,13 @@ plan("multicore", workers = 56)
 
 # Parse command line arguments
 args <- commandArgs(trailingOnly = TRUE)
-id			<- args[1]
-outdir			<- args[2]
-input			<- args[3]
-mode			<- args[4]
-cell_types_str		<- args[5]
-cell_markers_str	<- args[6]
-cell_thresholds_str	<- args[7]
+id                  <- args[1]
+outdir              <- args[2]
+input               <- args[3]
+mode                <- args[4]
+cell_types_str      <- args[5]
+cell_markers_str    <- args[6]
+cell_thresholds_str <- args[7]
 
 # Parse arguments
 cell_types <- unlist(strsplit(cell_types_str, ";"))
@@ -37,7 +38,8 @@ cell_markers_list <- strsplit(unlist(strsplit(cell_markers_str, ";")), ",")
 cell_thresholds <- as.numeric(unlist(strsplit(cell_thresholds_str, ";")))
 
 # Validate inputs
-if (length(cell_types) != length(cell_markers_list) || length(cell_types) != length(cell_thresholds)) {
+if (length(cell_types) != length(cell_markers_list) ||
+    length(cell_types) != length(cell_thresholds)) {
   stop("Number of cell types, marker lists, and thresholds must match")
 }
 
@@ -102,7 +104,10 @@ for (i in seq_along(cell_types)) {
   dev.off()
 
   # Violin plot
-  png(file.path(outdir, paste0(id, "_", cell_type, "_violin_score.png")), width = 1600, height = 1200, res=150)
+  png(
+    file.path(outdir, paste0(id, "_", cell_type, "_violin_score.png")),
+    width = 1600, height = 1200, res = 150
+  )
   print(VlnPlot(obj, features = score_name, pt.size = 0, group.by = "orig.ident") +
     geom_hline(yintercept = c(0, threshold), linetype = "dashed", color = c("gray", "red")) +
     labs(

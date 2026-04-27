@@ -51,7 +51,7 @@ eval "$(conda shell.bash hook)"
 conda activate seurat
 
 # Clustering workflow
-Step 1: Perform principal component analysis for dimensionality reduction
+# Step 1: Perform principal component analysis for dimensionality reduction
 echo "Running PCA..."
 Rscript "$RUN/06_pca.R" \
   "$ID" \

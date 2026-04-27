@@ -3,7 +3,8 @@
 # Purpose: Identify differentially expressed marker genes for each cluster
 # Description: Finds cluster-specific markers using Wilcoxon test, filters by significance
 #              and expression thresholds, and exports top markers per cluster
-# Usage: Rscript 09_find_markers.R <id> <output> <input> <significance> <regulation> <enrichment> <top>
+# Usage: Rscript 09_find_markers.R <id> <output> <input>
+#        <significance> <regulation> <enrichment> <top>
 
 # Load required libraries
 suppressPackageStartupMessages({

@@ -28,13 +28,13 @@ SLURM="$WORK/scripts/seurat/slurm"
 SBATCH_OPTS="--parsable"
 
 # Pipeline control flags (set to false to skip steps)
-preprocess=true
-integrate=true
+preprocess=false
+integrate=false
 cluster_all=true
-score_all=true
-subcluster=true
-enrich1=true
-enrich2=true
+score_all=false
+subcluster=false
+enrich1=false
+enrich2=false
 
 manual_annotate=false
 
@@ -44,7 +44,7 @@ manual_annotate=false
 # Map features, run QC, remove doublets, filter cells, and normalize
 if [ "$preprocess" = true ]; then
     echo "Submitting preprocessing..."
-    JOB1=$(sbatch $SBATCH_OPTS \
+    JOB_preprocess=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID=$main_ID,\
 MIN_CELLS=5,\
@@ -56,7 +56,7 @@ MAX_FEATURES=5000,\
 MAX_MT=10,\
 MAX_RIBO=35 \
       $SLURM/01_preprocess.sbatch)
-    echo "  Job ID: $JOB1"
+    echo "  Job ID: $JOB_preprocess"
 fi
 
 # -----------------------------------------------------------------------------
@@ -65,12 +65,12 @@ fi
 # Integrate normalized samples using Seurat integration
 if [ "$integrate" = true ]; then
     echo "Submitting integration..."
-    JOB2=$(sbatch $SBATCH_OPTS \
+    JOB_integrate=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID=$main_ID \
-      $([ "$preprocess" = true ] && echo "--dependency=afterok:$JOB1") \
+      $([ "$preprocess" = true ] && echo "--dependency=afterok:$JOB_preprocess") \
       $SLURM/02_integrate.sbatch)
-    echo "  Job ID: $JOB2"
+    echo "  Job ID: $JOB_integrate"
 fi
 
 # -----------------------------------------------------------------------------
@@ -79,7 +79,7 @@ fi
 # Run PCA, clustering, UMAP, and find marker genes
 if [ "$cluster_all" = true ]; then
     echo "Submitting clustering..."
-    JOB3=$(sbatch $SBATCH_OPTS \
+    JOB_cluster=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID=$main_ID,\
 NPCS=50,\
@@ -92,9 +92,9 @@ REGULATION=1,\
 ENRICHMENT=0.2,\
 TOP_MARKERS=100,\
 CELLS="Neurons" \
-      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
+      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB_integrate") \
       $SLURM/03_cluster.sbatch)
-    echo "  Job ID: $JOB3"
+    echo "  Job ID: $JOB_cluster"
 fi
 
 # -----------------------------------------------------------------------------
@@ -103,14 +103,14 @@ fi
 # Score cells based on cell type marker gene expression
 if [ "$score_all" = true ]; then
     echo "Submitting marker-based scoring..."
-    JOB4=$(sbatch $SBATCH_OPTS \
+    JOB_score=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID=$main_ID,\
 MARKER_FILE="${MARKER_FILE}",\
-      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
+      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB_cluster") \
       $SLURM/04_score_markers.sbatch)
-    echo "  Job ID: $JOB4"
+    echo "  Job ID: $JOB_score"
 fi
 
 # -----------------------------------------------------------------------------
@@ -119,18 +119,18 @@ fi
 # Extract specific cluster (cluster 15) and re-cluster at higher resolution
 if [ "$subcluster" = true ]; then
     echo "Submitting subclustering..."
-    JOB5=$(sbatch $SBATCH_OPTS \
+    JOB_subcluster=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 main_ID=$main_ID,\
 ID="all_cluster15",\
 IDENT="15" \
-      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB3") \
+      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB_cluster") \
       $SLURM/05_subcluster.sbatch)
-    echo "  Job ID: $JOB5"
+    echo "  Job ID: $JOB_subcluster"
 
     # Re-cluster the subset at higher resolution
     echo "Submitting clustering..."
-    JOB6=$(sbatch $SBATCH_OPTS \
+    JOB_cluster_subcluster=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 main_ID=$main_ID,\
 ID="all_cluster15",\
@@ -145,21 +145,21 @@ ENRICHMENT=0.1,\
 TOP_MARKERS=100,\
 CELLS="Neurons" \
       --job-name=cluster_subcluster \
-      --dependency=afterok:$JOB5 \
+      --dependency=afterok:$JOB_subcluster \
       $SLURM/03_cluster.sbatch)
-    echo "  Job ID: $JOB6"
+    echo "  Job ID: $JOB_cluster_subcluster"
 
     # Score subcluster with cell type markers
     echo "Submitting marker-based scoring..."
-    JOB7=$(sbatch $SBATCH_OPTS \
+    JOB_score_subcluster=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID="all_cluster15",\
 MARKER_FILE="${MARKER_FILE}",\
       --job-name=score_subcluster \
-      --dependency=afterok:$JOB6 \
+      --dependency=afterok:$JOB_cluster_subcluster \
       $SLURM/04_score_markers.sbatch)
-    echo "  Job ID: $JOB7"
+    echo "  Job ID: $JOB_score_subcluster"
 
 fi
 
@@ -169,7 +169,7 @@ fi
 # Remove epithelial, erythrocytes, and fibroblasts to enrich for other cell types
 if [ "$enrich1" = true ]; then
     echo "Submitting subcells removal..."
-    JOB8=$(sbatch $SBATCH_OPTS \
+    JOB_subset1=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID="enriched1",\
 main_ID=$main_ID,\
@@ -178,13 +178,13 @@ MARKER_FILE="${MARKER_FILE}",\
 CELL_TYPES="Epithelial;Erythrocytes;Fibroblasts",\
 CELL_THRESHOLDS="0.2;0.5;0.5" \
       --job-name=subset1 \
-      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
+      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB_integrate") \
       $SLURM/06_subcells.sbatch)
-    echo "  Job ID: $JOB8"
+    echo "  Job ID: $JOB_subset1"
 
     # Re-cluster the enriched dataset
     echo "Submitting clustering..."
-    JOB9=$(sbatch $SBATCH_OPTS \
+    JOB_cluster_subset1=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID="enriched1",\
 main_ID="enriched1",\
@@ -199,21 +199,21 @@ ENRICHMENT=0.2,\
 TOP_MARKERS=100,\
 CELLS="Neurons" \
       --job-name=cluster_subset1 \
-      --dependency=afterok:$JOB8 \
+      --dependency=afterok:$JOB_subset1 \
       $SLURM/03_cluster.sbatch)
-    echo "  Job ID: $JOB9"
+    echo "  Job ID: $JOB_cluster_subset1"
 
     # Score enriched dataset with cell type markers
     echo "Submitting marker-based scoring..."
-    JOB10=$(sbatch $SBATCH_OPTS \
+    JOB_score_subset1=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID="enriched1",\
 MARKER_FILE="${MARKER_FILE}",\
       --job-name=score_subset1 \
-      --dependency=afterok:$JOB9 \
+      --dependency=afterok:$JOB_cluster_subset1 \
       $SLURM/04_score_markers.sbatch)
-    echo "  Job ID: $JOB10"
+    echo "  Job ID: $JOB_score_subset1"
 
 fi
 
@@ -223,7 +223,7 @@ fi
 # Keep only cells scoring high for Schwann cell and immune cell markers
 if [ "$enrich2" = true ]; then
     echo "Submitting subcells enrichment..."
-    JOB11=$(sbatch $SBATCH_OPTS \
+    JOB_subset2=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID="enriched2",\
 main_ID=$main_ID,\
@@ -232,13 +232,13 @@ MARKER_FILE="${MARKER_FILE}",\
 CELL_TYPES="Schwann_muscle;Schwann_mye;Schwann_nmye;Schwann_other;Schwann_spc;Macrophage;Neutrophil",\
 CELL_THRESHOLDS="0.4;0.2;0.2;0.2;0.2;1;1" \
       --job-name=subset2 \
-      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB2") \
+      $([ "$integrate" = true ] && echo "--dependency=afterok:$JOB_integrate") \
       $SLURM/06_subcells.sbatch)
-    echo "  Job ID: $JOB11"
+    echo "  Job ID: $JOB_subset2"
 
     # Re-cluster the enriched dataset
     echo "Submitting clustering..."
-    JOB12=$(sbatch $SBATCH_OPTS \
+    JOB_cluster_subset2=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 ID="enriched2",\
 main_ID="enriched2",\
@@ -253,21 +253,21 @@ ENRICHMENT=0.2,\
 TOP_MARKERS=100,\
 CELLS="Neurons" \
       --job-name=cluster_subset2 \
-      --dependency=afterok:$JOB11 \
+      --dependency=afterok:$JOB_subset2 \
       $SLURM/03_cluster.sbatch)
-    echo "  Job ID: $JOB12"
+    echo "  Job ID: $JOB_cluster_subset2"
 
     # Score enriched dataset with cell type markers
     echo "Submitting marker-based scoring..."
-    JOB13=$(sbatch $SBATCH_OPTS \
+    JOB_score_subset2=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_marker-1)) \
       --export=ALL,\
 main_ID="enriched2",\
 MARKER_FILE="${MARKER_FILE}" \
       --job-name=score_subset2 \
-      --dependency=afterok:$JOB12 \
+      --dependency=afterok:$JOB_cluster_subset2 \
       $SLURM/04_score_markers.sbatch)
-    echo "  Job ID: $JOB13"
+    echo "  Job ID: $JOB_score_subset2"
 
 fi
 
@@ -278,21 +278,22 @@ if [ "$manual_annotate" = true ]; then
     echo "Submitting manual annotation..."
 
     DEPS=""
-    [ "$cluster_all" = true ]	&& DEPS="${DEPS}:$JOB3"
-    [ "$subcluster" = true ]  	&& DEPS="${DEPS}:$JOB6"
-    [ "$enrich1" = true ]     	&& DEPS="${DEPS}:$JOB9"
-    [ "$enrich2" = true ]     	&& DEPS="${DEPS}:$JOB12"
+    [ "$cluster_all" = true ] && DEPS="${DEPS}:$JOB_cluster"
+    [ "$subcluster" = true ]  && DEPS="${DEPS}:$JOB_cluster_subcluster"
+    [ "$enrich1" = true ]     && DEPS="${DEPS}:$JOB_cluster_subset1"
+    [ "$enrich2" = true ]     && DEPS="${DEPS}:$JOB_cluster_subset2"
 
     DEP_FLAG=""
     [ -n "$DEPS" ] && DEP_FLAG="--dependency=afterok${DEPS}"
 
-JOB14=$(sbatch $SBATCH_OPTS \
+    JOB_manual_annotate=$(sbatch $SBATCH_OPTS \
       --array=0-$((n_annotation-1)) \
       --export=ALL,\
 ANNOTATION_FILE="$ANNOTATION_FILE" \
+      --job-name=manual_annotate \
       $DEP_FLAG \
       $SLURM/07_manual_annotate.sbatch)
-    echo "  Job ID: $JOB14"
+    echo "  Job ID: $JOB_manual_annotate"
 fi
 
 # -----------------------------------------------------------------------------

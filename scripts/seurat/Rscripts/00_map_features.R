@@ -46,7 +46,7 @@ loc_map <- read.table(tsv,
 n_genes_mapped <- nrow(loc_map)
 
 # Extract count matrix and prepare for remapping
-counts <- GetAssayData(obj, slot = "counts", assay = "RNA")
+counts <- GetAssayData(obj, layer = "counts", assay = "RNA")
 
 # Map gene IDs to gene symbols
 new_names <- rownames(obj)

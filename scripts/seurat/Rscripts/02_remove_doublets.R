@@ -34,7 +34,8 @@ n_features_before <- nrow(obj)
 sce <- as.SingleCellExperiment(obj)
 
 # Run doublet detection
-# scDblFinder has no seed parameter; uses BPPARAM for parallelism — set.seed() here is ineffective for parallel workers but sets state for serial fallback
+# scDblFinder has no seed parameter; uses BPPARAM for parallelism —
+# set.seed() here is ineffective for parallel workers but sets state for serial fallback
 set.seed(271)
 sce <- scDblFinder(sce)
 
