@@ -16,7 +16,8 @@ set -euo pipefail
 # Parameter defaults
 main_ID="${main_ID:-all}"
 ID="${ID:-cluster1}"
-IDENT="${IDENT:-1}"
+METHOD="${METHOD:-idents}"
+VALUE="${VALUE:-1}"
 
 # Load configuration and setup paths
 cd "$SLURM_SUBMIT_DIR"
@@ -45,7 +46,8 @@ Rscript "$RUN/13_subset_clusters.R"\
     "$ID"\
     "$OUT_subset"\
     "$OUT/seurat/${main_ID}_processed.rds"\
-    "$IDENT"
+    "$METHOD"\
+	"$VALUE"
 echo "Subset completed✅"
 
 # Step 2: Re-normalize and re-integrate the subset

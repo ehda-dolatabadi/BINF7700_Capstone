@@ -30,9 +30,9 @@ SBATCH_OPTS="--parsable"
 # Pipeline control flags (set to false to skip steps)
 preprocess=false
 integrate=false
-cluster_all=true
+cluster_all=false
 score_all=false
-subcluster=false
+subcluster=true
 enrich1=false
 enrich2=false
 
@@ -122,44 +122,45 @@ if [ "$subcluster" = true ]; then
     JOB_subcluster=$(sbatch $SBATCH_OPTS \
       --export=ALL,\
 main_ID=$main_ID,\
-ID="all_cluster15",\
-IDENT="15" \
+ID="neurons",\
+METHOD="singler",\
+VALUE="Neurons" \
       $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB_cluster") \
       $SLURM/05_subcluster.sbatch)
     echo "  Job ID: $JOB_subcluster"
 
     # Re-cluster the subset at higher resolution
-    echo "Submitting clustering..."
-    JOB_cluster_subcluster=$(sbatch $SBATCH_OPTS \
-      --export=ALL,\
-main_ID=$main_ID,\
-ID="all_cluster15",\
-NPCS=50,\
-DIMS=10,\
-RES=1.5,\
-UMAP_DIMS=10,\
-UMAP_METRIC="cosine",\
-SIGNIFICANCE=0.05,\
-REGULATION=0.5,\
-ENRICHMENT=0.1,\
-TOP_MARKERS=100,\
-CELLS="Neurons" \
-      --job-name=cluster_subcluster \
-      --dependency=afterok:$JOB_subcluster \
-      $SLURM/03_cluster.sbatch)
-    echo "  Job ID: $JOB_cluster_subcluster"
+    # echo "Submitting clustering..."
+    # JOB_cluster_subcluster=$(sbatch $SBATCH_OPTS \
+      # --export=ALL,\
+# main_ID=$main_ID,\
+# ID="neurons",\
+# NPCS=50,\
+# DIMS=10,\
+# RES=1.5,\
+# UMAP_DIMS=10,\
+# UMAP_METRIC="cosine",\
+# SIGNIFICANCE=0.05,\
+# REGULATION=0.5,\
+# ENRICHMENT=0.1,\
+# TOP_MARKERS=100,\
+# CELLS="Neurons" \
+      # --job-name=cluster_subcluster \
+      # --dependency=afterok:$JOB_subcluster \
+      # $SLURM/03_cluster.sbatch)
+    # echo "  Job ID: $JOB_cluster_subcluster"
 
-    # Score subcluster with cell type markers
-    echo "Submitting marker-based scoring..."
-    JOB_score_subcluster=$(sbatch $SBATCH_OPTS \
-      --array=0-$((n_marker-1)) \
-      --export=ALL,\
-main_ID="all_cluster15",\
-MARKER_FILE="${MARKER_FILE}",\
-      --job-name=score_subcluster \
-      --dependency=afterok:$JOB_cluster_subcluster \
-      $SLURM/04_score_markers.sbatch)
-    echo "  Job ID: $JOB_score_subcluster"
+    # # Score subcluster with cell type markers
+    # echo "Submitting marker-based scoring..."
+    # JOB_score_subcluster=$(sbatch $SBATCH_OPTS \
+      # --array=0-$((n_marker-1)) \
+      # --export=ALL,\
+# main_ID="neurons",\
+# MARKER_FILE="${MARKER_FILE}",\
+      # --job-name=score_subcluster \
+      # --dependency=afterok:$JOB_cluster_subcluster \
+      # $SLURM/04_score_markers.sbatch)
+    # echo "  Job ID: $JOB_score_subcluster"
 
 fi
 
