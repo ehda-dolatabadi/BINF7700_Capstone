@@ -42,7 +42,6 @@ value_vec <- unlist(strsplit(value, ";"))
 if (method == "idents") {
   obj <- subset(obj, idents = value_vec)
 } else {
-  obj <- JoinLayers(obj, assay = "RNA")
   obj <- subset(obj, singler_label %in% value_vec)
 }
 

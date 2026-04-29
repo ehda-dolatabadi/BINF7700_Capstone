@@ -57,12 +57,12 @@ obj <- IntegrateData(
 # Set default assay to integrated for downstream steps
 DefaultAssay(obj) <- "integrated"
 
-# Clear scale.data (only needed for integrate)
-# LayerData(obj, assay = "SCT", layer = "scale.data") <- NULL
-
 # Correct timepoints order
 timepoint_order <- c("control", "3h", "24h", "72h", "7dpa", "14dpa", "22dpa", "33dpa")
 obj$orig.ident <- factor(obj$orig.ident, levels = timepoint_order)
+
+# Join individual layers
+obj <- JoinLayers(obj, assay = "RNA")
 
 # Save object
 saveRDS(obj, file = file.path(dirname(outdir), paste0(id, "_integrated.rds")))
