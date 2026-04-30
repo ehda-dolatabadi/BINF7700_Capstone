@@ -34,17 +34,13 @@ n_features_before <- nrow(obj)
 # Switch to RNA assay for re-normalization
 DefaultAssay(obj) <- "RNA"
 
-# clear extra assays
-# obj[["SCT"]] <- NULL
-# obj[["integrated"]] <- NULL
-
 # Split by sample and check if integration is feasible
 obj_list <- SplitObject(obj, split.by = "orig.ident")
 cell_counts <- sapply(obj_list, ncol)
-samples <- names(cell_counts)[cell_counts < 30]
+small_samples <- names(cell_counts)[cell_counts < 30]
 
-if (length(samples) > 0) {
-  cat("Some samples had less than 30 cells:", paste(samples, collapse = ", "), "\n")
+if (length(small_samples) > 0) {
+  cat("Some samples had less than 30 cells:", paste(small_samples, collapse = ", "), "\n")
   cat("Running SCTransform on whole object without re-integration\n")
   
   # Run SCTransform on the whole object (not split)
@@ -113,9 +109,6 @@ obj <- IntegrateData(
 
 # Set default assay to integrated for downstream steps
 DefaultAssay(obj) <- "integrated"
-
-# Clear scale.data (only needed for integrate)
-# LayerData(obj, assay = "SCT", layer = "scale.data") <- NULL
 
 # Correct timepoints order
 timepoint_order <- c("control", "3h", "24h", "72h", "7dpa", "14dpa", "22dpa", "33dpa")
