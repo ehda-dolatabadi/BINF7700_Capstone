@@ -106,3 +106,5 @@ Rscript "$RUN/04_normalize.R" \
   "$OUT_normalize" \
   "$OUT/seurat/${SMP}.rds"
 echo "Normalization of $SMP completed✅"
+
+mv "$OUT/seurat/${SMP}.rds" "$OUT_normalize/${SMP}.rds"

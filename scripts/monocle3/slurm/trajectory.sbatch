@@ -41,5 +41,5 @@ echo "Running trajectory analysis..."
 Rscript "$RUN/trajectory.R" \
   "$ID" \
   "$OUT_trajectory" \
-  "$OUT/seurat/${ID}_integrated.rds"
+  "$OUT/seurat/${ID}_processed.rds"
 echo "Trajectory analysis completed✅"

@@ -29,9 +29,12 @@ preprocess=false
 integrate=false
 cluster_all=false
 
-score_all=false
+subcluster=false
 
-subcluster=true
+subcluster1=false
+subcluster2=true
+
+score_all=false
 
 neg_enrich=false
 pos_enrich=false
@@ -102,35 +105,19 @@ fi
 
 # -----------------------------------------------------------------------------
 
-# Step 4: Marker-based scoring
-# Score cells based on cell type marker gene expression
-if [ "$score_all" = true ]; then
-    echo "Submitting marker-based scoring..."
-    JOB_score=$(sbatch \
-	  --parsable \
-      --array=0-$((n_marker-1)) \
-      --export=ALL,\
-main_ID=$main_ID,\
-MARKER_FILE="${MARKER_FILE}",\
-      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB_cluster") \
-      $SLURM/04_score_markers.sbatch)
-    echo "  Job ID: $JOB_score"
-fi
-
-# -----------------------------------------------------------------------------
-
-# Step 5: Subclustering
-# Extract specific clusters or singleR labelled cell types
+# Step 4: Subclustering
+# Remove specific clusters or singleR labelled cell types
 if [ "$subcluster" = true ]; then
     echo "Submitting subclustering..."
     JOB_subcluster=$(sbatch \
 	  --parsable \
       --export=ALL,\
 main_ID=$main_ID,\
-ID="enriched1",\
-MODE="remove",\
-IDENTS="1;2;4;5;6;7;8;10;11;12;13;14;15",\
-LABELS="Epithelial_cells;Keratinocytes;Endothelial_cells;Chondrocytes;Smooth_muscle_cells;BM;Erythroblast" \
+ID="enriched",\
+MODE="keep",\
+IDENTS="20",\
+LABELS="Neurons;Monocyte;Macrophage;Neutrophils;DC;Pre-B_cell_CD34-;Pro-Myelocyte;Myelocyte;T_cells;NK_cell;B_cell;;Pro-B_cell_CD34+" \
+      --job-name=subcluster \
       $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB_cluster") \
       $SLURM/05_subcluster.sbatch)
     echo "  Job ID: $JOB_subcluster"
@@ -141,7 +128,7 @@ LABELS="Epithelial_cells;Keratinocytes;Endothelial_cells;Chondrocytes;Smooth_mus
 	  --parsable \
       --export=ALL,\
 main_ID=$main_ID,\
-ID="enriched1",\
+ID="enriched",\
 NPCS=100,\
 DIMS=50,\
 RES=0.5,\
@@ -157,6 +144,109 @@ CELLS="Neurons" \
       $SLURM/03_cluster.sbatch)
     echo "  Job ID: $JOB_cluster_subcluster"
 
+fi
+
+# -----------------------------------------------------------------------------
+
+# Step 4a: Subclustering
+# Remove specific clusters or singleR labelled cell types
+if [ "$subcluster1" = true ]; then
+    echo "Submitting subclustering..."
+    JOB_subcluster1=$(sbatch \
+	  --parsable \
+      --export=ALL,\
+main_ID=$main_ID,\
+ID="enriched1",\
+MODE="remove",\
+IDENTS="1;2;4;5;6;7;8;10;11;12;13;14;15",\
+LABELS="Epithelial_cells;Keratinocytes;Endothelial_cells;Chondrocytes;Smooth_muscle_cells;BM;BM & Prog.;Erythroblast" \
+      --job-name=subcluster1 \
+      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB_cluster") \
+      $SLURM/05_subcluster.sbatch)
+    echo "  Job ID: $JOB_subcluster1"
+
+    # Re-cluster the subset at higher resolution
+    echo "Submitting clustering..."
+    JOB_cluster_subcluster1=$(sbatch \
+	  --parsable \
+      --export=ALL,\
+main_ID=$main_ID,\
+ID="enriched1",\
+NPCS=100,\
+DIMS=50,\
+RES=0.5,\
+UMAP_DIMS=50,\
+UMAP_METRIC="cosine",\
+SIGNIFICANCE=0.05,\
+REGULATION=0.5,\
+ENRICHMENT=0.1,\
+TOP_MARKERS=100,\
+CELLS="Neurons" \
+      --job-name=cluster_subcluster1 \
+      --dependency=afterok:$JOB_subcluster1 \
+      $SLURM/03_cluster.sbatch)
+    echo "  Job ID: $JOB_cluster_subcluster1"
+
+fi
+
+# -----------------------------------------------------------------------------
+
+# Step 4b: Subclustering
+# Extract specific clusters or singleR labelled cell types
+if [ "$subcluster2" = true ]; then
+    echo "Submitting subclustering..."
+    JOB_subcluster2=$(sbatch \
+	  --parsable \
+      --export=ALL,\
+main_ID="enriched1",\
+ID="enriched2",\
+MODE="keep",\
+IDENTS="18",\
+LABELS="Neurons;Monocyte;Macrophage;Neutrophils;DC;Pre-B_cell_CD34-;Pro-Myelocyte;Myelocyte;T_cells;NK_cell;B_cell;;Pro-B_cell_CD34+" \
+      --job-name=subcluster2 \
+      $([ "$subcluster1" = true ] && echo "--dependency=afterok:$JOB_subcluster1") \
+      $SLURM/05_subcluster.sbatch)
+    echo "  Job ID: $JOB_subcluster2"
+
+    # Re-cluster the subset at higher resolution
+    echo "Submitting clustering..."
+    JOB_cluster_subcluster2=$(sbatch \
+	  --parsable \
+      --export=ALL,\
+main_ID="enriched1",\
+ID="enriched2",\
+NPCS=100,\
+DIMS=50,\
+RES=0.5,\
+UMAP_DIMS=50,\
+UMAP_METRIC="cosine",\
+SIGNIFICANCE=0.05,\
+REGULATION=0.5,\
+ENRICHMENT=0.1,\
+TOP_MARKERS=100,\
+CELLS="Neurons" \
+      --job-name=cluster_subcluster2 \
+      --dependency=afterok:$JOB_subcluster2 \
+      $SLURM/03_cluster.sbatch)
+    echo "  Job ID: $JOB_cluster_subcluster2"
+
+fi
+
+# -----------------------------------------------------------------------------
+
+# Step 5: Marker-based scoring
+# Score cells based on cell type marker gene expression
+if [ "$score_all" = true ]; then
+    echo "Submitting marker-based scoring..."
+    JOB_score=$(sbatch \
+	  --parsable \
+      --array=0-$((n_marker-1)) \
+      --export=ALL,\
+main_ID=$main_ID,\
+MARKER_FILE="${MARKER_FILE}",\
+      $([ "$cluster_all" = true ] && echo "--dependency=afterok:$JOB_cluster") \
+      $SLURM/04_score_markers.sbatch)
+    echo "  Job ID: $JOB_score"
 fi
 
 # -----------------------------------------------------------------------------

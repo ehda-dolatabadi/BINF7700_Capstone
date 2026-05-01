@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Common variables
-export ID="neurons"
+export ID="enriched"
 
 # Load configuration paths
 source "config/default_paths.sh"

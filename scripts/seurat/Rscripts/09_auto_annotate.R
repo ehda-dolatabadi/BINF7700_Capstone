@@ -59,13 +59,13 @@ obj$singler_score  <- apply(predictions$scores, 1, max)
 # Get consensus label per cluster by majority vote
 # NA cells (pruned) are excluded from the vote
 clusters <- obj@meta.data %>%
-  filter(!is.na(.data$singler_label)) %>%
-  group_by(seurat_clusters, .data$singler_label) %>%
+  filter(!is.na(.data$singler_pruned)) %>%
+  group_by(seurat_clusters, .data$singler_pruned) %>%
   summarise(n = n(), .groups = "drop") %>%
   group_by(seurat_clusters) %>%
   slice_max(n, n = 1, with_ties = FALSE) %>%
-  select(seurat_clusters, all_of("singler_label"))
-clusters <- setNames(clusters$singler_label, clusters$seurat_clusters)
+  select(seurat_clusters, all_of("singler_pruned"))
+clusters <- setNames(clusters$singler_pruned, clusters$seurat_clusters)
 
 # Add cluster identities as a metadata column
 obj$singler_cluster <- unname(clusters[as.character(obj$seurat_clusters)])

@@ -15,10 +15,10 @@ set -euo pipefail
 
 # Parameter defaults
 main_ID="${main_ID:-all}"
-ID="${ID:-cluster1}"
+ID="${ID:-subclustered}"
 MODE="${MODE:-keep}"
-IDENTS="${IDENTS:-1}"
-LABELS="${LABELS:-Neurons}"
+IDENTS="${IDENTS:-NA}"
+LABELS="${LABELS:-NA}"
 
 # Load configuration and setup paths
 cd "$SLURM_SUBMIT_DIR"

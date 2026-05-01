@@ -41,7 +41,7 @@ OUT_integrate="$OUT/seurat/${ID}_05_integrated"
 OUT_pca="$OUT/seurat/${ID}_06_pca"
 OUT_cluster="$OUT/seurat/${ID}_07_clustered"
 OUT_umap="$OUT/seurat/${ID}_08_umap"
-OUT_markers="$OUT/seurat/${ID}_09_markers"
+OUT_markers="$OUT/seurat/${ID}_10_markers"
 
 # Create output directories
 mkdir -p "$OUT_pca" "$OUT_cluster" "$OUT_umap" "$OUT_markers"
@@ -80,9 +80,18 @@ Rscript "$RUN/08_umap.R" \
   "$UMAP_METRIC"
 echo "UMAP completed✅"
 
-# Step 4: Find differentially expressed marker genes for manual annotation
+# Step 4: Auto annotate cells and clusters using SingleR
+echo "Annotating cells automatically..."
+Rscript "$RUN/09_auto_annotate.R" \
+  "$ID" \
+  "$OUT_umap" \
+  "$OUT/seurat/${ID}_processed.rds" \
+  "$CELLS"
+echo "Auto annotation completed✅"
+
+# Step 5: Find differentially expressed marker genes for manual annotation
 echo "Finding Markers..."
-Rscript "$RUN/09_find_markers.R" \
+Rscript "$RUN/10_find_markers.R" \
   "$ID" \
   "$OUT_markers" \
   "$OUT/seurat/${ID}_processed.rds" \
@@ -91,12 +100,3 @@ Rscript "$RUN/09_find_markers.R" \
   "$ENRICHMENT" \
   "$TOP_MARKERS"
 echo "Markers finding completed✅"
-
-# Step 5: Auto annotate cells and clusters using SingleR
-echo "Annotating cells automatically..."
-Rscript "$RUN/10_auto_annotate.R" \
-  "$ID" \
-  "$OUT_umap" \
-  "$OUT/seurat/${ID}_processed.rds" \
-  "$CELLS"
-echo "Auto annotation completed✅"
