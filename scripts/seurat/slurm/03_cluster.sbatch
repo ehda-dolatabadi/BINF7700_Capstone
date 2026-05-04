@@ -41,10 +41,11 @@ OUT_integrate="$OUT/seurat/${ID}_05_integrated"
 OUT_pca="$OUT/seurat/${ID}_06_pca"
 OUT_cluster="$OUT/seurat/${ID}_07_clustered"
 OUT_umap="$OUT/seurat/${ID}_08_umap"
+OUT_singler="$OUT/seurat/${ID}_09_singler"
 OUT_markers="$OUT/seurat/${ID}_10_markers"
 
 # Create output directories
-mkdir -p "$OUT_pca" "$OUT_cluster" "$OUT_umap" "$OUT_markers"
+mkdir -p "$OUT_pca" "$OUT_cluster" "$OUT_umap" "$OUT_singler" "$OUT_markers"
 
 # Activate conda environment
 eval "$(conda shell.bash hook)"
@@ -84,7 +85,7 @@ echo "UMAP completed✅"
 echo "Annotating cells automatically..."
 Rscript "$RUN/09_auto_annotate.R" \
   "$ID" \
-  "$OUT_umap" \
+  "$OUT_singler" \
   "$OUT/seurat/${ID}_processed.rds" \
   "$CELLS"
 echo "Auto annotation completed✅"

@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
-# Script: 09_find_markers.R
+# Script: 10_find_markers.R
 # Purpose: Identify differentially expressed marker genes for each cluster
 # Description: Finds cluster-specific markers using Wilcoxon test, filters by significance
 #              and expression thresholds, and exports top markers per cluster
-# Usage: Rscript 09_find_markers.R <id> <output> <input>
+# Usage: Rscript 10_find_markers.R <id> <output> <input>
 #        <significance> <regulation> <enrichment> <top>
 
 # Load required libraries
@@ -11,7 +11,13 @@ suppressPackageStartupMessages({
   library(Seurat)
   library(dplyr)
   library(future)
+  library(remotes)
 })
+
+if (!requireNamespace("presto", quietly = TRUE)) {
+    Sys.setenv("PKG_CXXFLAGS" = "-std=gnu++14")
+    remotes::install_github("immunogenomics/presto@1.0.0", upgrade = "never")
+}
 
 RNGkind("L'Ecuyer-CMRG")
 set.seed(271)

@@ -43,7 +43,7 @@ conda activate seurat
 # Cluster subsetting workflow
 # Step 1: Subset cells from specified cluster identities
 echo "Subsetting data..."
-Rscript "$RUN/13_subset_clusters.R"\
+Rscript "$RUN/12_subset_clusters.R"\
     "$ID"\
     "$OUT_subset"\
     "$OUT/seurat/${main_ID}_processed.rds"\

@@ -57,7 +57,7 @@ conda activate seurat
 # Cell subsetting workflow
 # Step 1: Subset cells based on marker scores (keep or remove mode)
 echo "Subsetting data..."
-Rscript "$RUN/14_subset_cells.R" \
+Rscript "$RUN/13_subset_cells.R" \
   "$ID" \
   "$OUT_subcells" \
   "$OUT/seurat/${main_ID}_integrated.rds" \
