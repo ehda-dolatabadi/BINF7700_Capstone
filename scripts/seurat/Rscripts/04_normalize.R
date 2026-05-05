@@ -33,7 +33,7 @@ obj <- SCTransform(
   object = obj,
   assay = "RNA",
   new.assay.name = "SCT",
-  ncells = 5000,               # default
+  ncells = 5000,               # default: min(ncol, 5000)
   variable.features.n = 3000,  # default
   seed.use = 271               # default: 1448145
 )

@@ -1,10 +1,11 @@
 #!/usr/bin/env Rscript
-# Script: 13_subset_clusters.R
+# Script: 12_subset_clusters.R
 # Purpose: Extract cells by cluster identity and SingleR label
-# Usage: Rscript 13_subset_clusters.R <id> <outdir> <input> <mode> <value>
+# Usage: Rscript 12_subset_clusters.R <id> <outdir> <input> <mode> <idents> <labels>
 #
-#   mode : keep or remove
-#   value  : cluster ID(s) and SingleR label(s) (semicolon-separated)
+#   mode   : keep or remove
+#   idents : semicolon-separated cluster IDs (use NA to skip)
+#   labels : semicolon-separated SingleR labels (use NA to skip)
 
 suppressPackageStartupMessages({
   library(Seurat)

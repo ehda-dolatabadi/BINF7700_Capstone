@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
-# Script: 12_score_markers.R
+# Script: 11_score_markers.R
 # Purpose: Calculate module scores for cell type markers and visualize
 # Description: Computes module scores based on predefined marker genes to identify
 #              cell populations, generates violin plots and expression plots
-# Usage: Rscript 12_score_markers.R <id> <outdir> <input> <cell_name> <markers>
+# Usage: Rscript 11_score_markers.R <id> <outdir> <input> <cell_name> <markers>
 
 # Load required libraries
 suppressPackageStartupMessages({

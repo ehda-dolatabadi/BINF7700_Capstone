@@ -15,7 +15,7 @@ set -euo pipefail
 
 # Parameter defaults
 main_ID="${main_ID:-all}"
-ID="${ID:-enriched}"
+ID="${ID:-subset}"
 MODE="${MODE:-remove}"
 CELL_TYPES="${CELL_TYPES:-epithelial}"
 CELL_THRESHOLDS="${CELL_THRESHOLDS:-1.0}"

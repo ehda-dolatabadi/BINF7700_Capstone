@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script: 03_cluster.sbatch
-# Purpose: Perform dimensionality reduction, clustering, and marker identification
+# Purpose: Perform dimensionality reduction, clustering, SingleR annotation, and marker identification
 
 #SBATCH --job-name=cluster
 #SBATCH --partition=courses
@@ -37,7 +37,6 @@ exec 2>&1
 
 # Define script and output directories
 RUN="$WORK/scripts/seurat/Rscripts"
-OUT_integrate="$OUT/seurat/${ID}_05_integrated"
 OUT_pca="$OUT/seurat/${ID}_06_pca"
 OUT_cluster="$OUT/seurat/${ID}_07_clustered"
 OUT_umap="$OUT/seurat/${ID}_08_umap"

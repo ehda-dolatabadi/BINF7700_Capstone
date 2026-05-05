@@ -28,8 +28,8 @@ min_features <- as.numeric(args[6])
 counts <- Read10X(input)
 obj <- CreateSeuratObject(
   counts = counts,
-  min.cells = min_cells,        # keep genes detected in ≥5 cells
-  min.features = min_features,  # keep cells with ≥500 genes
+  min.cells = min_cells,        # keep genes detected in >= min_cells cells
+  min.features = min_features,  # keep cells with >= min_features genes
   project = id
 )
 

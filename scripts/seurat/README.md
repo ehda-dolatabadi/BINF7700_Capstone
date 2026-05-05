@@ -55,21 +55,19 @@ scripts/seurat/
 │   ├── 06_pca.R                    # Principal component analysis
 │   ├── 07_cluster.R                # Graph-based clustering
 │   ├── 08_umap.R                   # UMAP dimensionality reduction
-│   ├── 09_find_markers.R           # Differential expression analysis
-│   ├── 10_auto_annotate.R          # Automated cluster annotation (SingleR)
-│   ├── 11_manual_annotate.R        # Manual cluster annotation
-│   ├── 12_score_markers.R          # Cell type scoring
-│   ├── 13_subset_clusters.R        # Subset by cluster identity
-│   └── 14_subset_cells.R           # Subset by cell type scores
+│   ├── 09_auto_annotate.R          # Automated cluster annotation (SingleR)
+│   ├── 10_find_markers.R           # Differential expression analysis
+│   ├── 11_score_markers.R          # Cell type scoring
+│   ├── 12_subset_clusters.R        # Subset by cluster identity or SingleR label
+│   └── 13_subset_cells.R           # Subset by cell type scores
 │
 └── slurm/                          # SLURM batch scripts
     ├── 01_preprocess.sbatch        # Steps 00-04 (mapping, QC, doublet removal, filtering, normalization)
     ├── 02_integrate.sbatch         # Step 05 (integration)
-    ├── 03_cluster.sbatch           # Steps 06-09 (PCA, clustering, UMAP, markers)
-    ├── 04_score_markers.sbatch     # Step 12 (cell type scoring)
-    ├── 05_subcluster.sbatch        # Step 13 (subset by cluster and re-integrate)
-    ├── 06_subcells.sbatch          # Step 14 (subset by cell type and re-integrate)
-    └── 07_manual_annotate.sbatch   # Step 11 (manual cluster annotation)
+    ├── 03_cluster.sbatch           # Steps 06-10 (PCA, clustering, UMAP, auto-annotation, markers)
+    ├── 04_score_markers.sbatch     # Step 11 (cell type scoring)
+    ├── 05_subcluster.sbatch        # Step 12 (subset by cluster/label and re-integrate)
+    └── 06_subcells.sbatch          # Step 13 (subset by cell type and re-integrate)
 ```
 
 ---
@@ -78,15 +76,20 @@ scripts/seurat/
 
 ### Software Requirements
 
-- R (tested with v4.5.2)
+- R (tested with v4.5.3)
 - SLURM workload manager
 - Conda (for environment management)
 
 ### R Packages
 
-- Seurat (tested with v5.3.1)
-- future (v1.68.0, for parallelization)
-- scDblFinder (v1.23.4, for doublet detection)Future (for parallelization)
+- Seurat (v5.5.0)
+- future (v1.70.0, for parallelization)
+- scDblFinder (v1.24.0, for doublet detection)
+- SingleR (v2.12.0, for automated cell type annotation)
+- celldex (v1.20.0, reference datasets for SingleR)
+
+Installed at runtime by `10_find_markers.R` if not present:
+- presto (v1.0.0, for fast marker detection)
 
 ### Input Data
 
@@ -150,15 +153,14 @@ graph TD
     G --> H[06: PCA]
     H --> I[07: Cluster - Leiden]
     I --> J[08: UMAP]
-    I --> K[09: Find Markers]
-    I --> L[10: Auto Annotate - SingleR]
-    I --> M[11: Manual Annotate]
-    I --> N[12: Score Cell Types]
-    I --> O[13: Subset Clusters]
-    G --> P[14: Subset Cell Types]
-    O --> Q[05: Re-integrate Subset]
-    P --> Q
-    Q --> H
+    I --> K[09: Auto Annotate - SingleR]
+    I --> L[10: Find Markers]
+    I --> M[11: Score Cell Types]
+    I --> N[12: Subset Clusters/Labels]
+    G --> O[13: Subset Cell Types]
+    N --> P[05: Re-integrate Subset]
+    O --> P
+    P --> H
 ```
 
 ---
@@ -175,7 +177,9 @@ cd $WORK
 bash scripts/seurat/run_pipeline.sh
 ```
 
-The pipeline will automatically:
+**Note**: All steps are gated by boolean flags in `run_pipeline.sh` (e.g. `preprocess`, `integrate`, `cluster_all`) that default to `false`. Set the desired steps to `true` before running.
+
+The pipeline will then automatically:
 1. Submit preprocessing jobs (array job for 8 samples)
 2. Wait for completion and integrate samples
 3. Perform clustering and analysis
@@ -228,7 +232,7 @@ sbatch --export=ALL,ID=myanalysis scripts/seurat/slurm/02_integrate.sbatch
 ---
 
 #### 03_cluster.sbatch
-Performs PCA, clustering, UMAP, marker identification, and automated annotation (steps 06-10).
+Performs PCA, clustering, UMAP, automated annotation, and marker identification (steps 06-10).
 
 **Parameters**:
 - `ID`: Analysis identifier (default: "all")
@@ -239,7 +243,7 @@ Performs PCA, clustering, UMAP, marker identification, and automated annotation 
 - `UMAP_METRIC`: Distance metric for UMAP (default: "cosine")
 - `SIGNIFICANCE`: p-value threshold for markers (default: 0.05)
 - `REGULATION`: Log fold-change threshold (default: 1)
-- `ENRICHMENT`: Minimum fraction of cells expressing marker (default: 0.2)
+- `ENRICHMENT`: Minimum absolute pct difference between foreground and background cells (default: 0.2)
 - `TOP_MARKERS`: Number of top markers to keep (default: 100)
 - `CELLS`: Cell types to highlight in auto-annotation UMAP (default: "Neurons")
 
@@ -258,7 +262,7 @@ sbatch --export=ALL,ID=test,SIGNIFICANCE=0.01,REGULATION=1.5 scripts/seurat/slur
 ---
 
 #### 04_score_markers.sbatch
-Scores cells based on cell type marker genes (step 12). Runs as an array job, one task per cell type.
+Scores cells based on cell type marker genes (step 11). Runs as an array job, one task per cell type.
 
 **Parameters**:
 - `main_ID`: Main analysis identifier (default: "all")
@@ -276,35 +280,44 @@ sbatch --export=ALL,main_ID=myanalysis scripts/seurat/slurm/04_score_markers.sba
 sbatch --array=0-5 --export=ALL,MARKER_FILE=/path/to/markers.txt scripts/seurat/slurm/04_score_markers.sbatch
 ```
 
-**Note**: Use `--array=0-N` where N is one less than the number of cell types in your marker file.
+**Note**: Use `--array=0-N` where N is one less than the number of cell types in your marker file. The script header contains a hardcoded `#SBATCH --array=0-10` default — omitting `--array` on the command line will silently run 11 tasks regardless of how many cell types are defined. The script exits cleanly if the array task ID exceeds the cell type count.
 
 ---
 
 #### 05_subcluster.sbatch
-Subsets specific clusters and re-integrates for deeper analysis (step 13).
+Subsets cells by cluster ID or SingleR label and re-integrates for deeper analysis (step 12).
 
 **Parameters**:
 - `main_ID`: Main analysis identifier (default: "all")
-- `ID`: Subset identifier (default: "cluster1")
-- `IDENT`: Cluster identity/identities to subset (default: "1")
+- `ID`: Subset identifier (default: "subclustered")
+- `MODE`: Subsetting mode - "keep" or "remove" (default: "keep")
+- `IDENTS`: Semicolon-separated cluster IDs (default: "NA")
+- `LABELS`: Semicolon-separated SingleR labels (default: "NA")
+
+**Mode logic**:
+- **keep**: retains cells where cluster is in `IDENTS` **OR** SingleR label is in `LABELS`
+- **remove**: removes cells where cluster is in `IDENTS` **AND** SingleR label is in `LABELS`
 
 **Usage**:
 ```bash
-# Subset cluster 5
-sbatch --export=ALL,main_ID=all,ID=cluster5,IDENT=5 scripts/seurat/slurm/05_subcluster.sbatch
+# Keep cells from cluster 5
+sbatch --export=ALL,main_ID=all,ID=cluster5,MODE=keep,IDENTS=5,LABELS=NA scripts/seurat/slurm/05_subcluster.sbatch
 
-# Subset multiple clusters (comma-separated)
-sbatch --export=ALL,main_ID=all,ID=clusters_1_2_3,IDENT="1,2,3" scripts/seurat/slurm/05_subcluster.sbatch
+# Keep cells from multiple clusters or specific SingleR labels
+sbatch --export=ALL,main_ID=all,ID=neurons,MODE=keep,IDENTS="0;1;2",LABELS="Neurons" scripts/seurat/slurm/05_subcluster.sbatch
+
+# Remove clusters with specific SingleR labels
+sbatch --export=ALL,main_ID=all,ID=no_immune,MODE=remove,IDENTS=NA,LABELS="Monocyte;Macrophage" scripts/seurat/slurm/05_subcluster.sbatch
 ```
 
 ---
 
 #### 06_subcells.sbatch
-Subsets cells based on marker expression scores and re-integrates (step 14).
+Subsets cells based on marker expression scores and re-integrates (step 13).
 
 **Parameters**:
 - `main_ID`: Main analysis identifier (default: "all")
-- `ID`: Subset identifier (default: "enriched")
+- `ID`: Subset identifier (default: "subset")
 - `MODE`: Subsetting mode - "remove" or "keep" (default: "remove")
 - `CELL_TYPES`: Semicolon-separated cell type names (default: "epithelial")
 - `CELL_THRESHOLDS`: Semicolon-separated score thresholds (default: "1.0")
@@ -316,34 +329,13 @@ Subsets cells based on marker expression scores and re-integrates (step 14).
 sbatch --export=ALL,main_ID=all,ID=no_epi,MODE=remove,CELL_TYPES=Epithelial,CELL_THRESHOLDS=0.5 scripts/seurat/slurm/06_subcells.sbatch
 
 # Keep cells with high macrophage scores (enrich for target population)
-sbatch --export=ALL,main_ID=all,ID=enriched_macrophages,MODE=keep,CELL_TYPES=Macrophage,CELL_THRESHOLDS=1.0 scripts/seurat/slurm/06_subcells.sbatch
+sbatch --export=ALL,main_ID=all,ID=macrophages,MODE=keep,CELL_TYPES=Macrophage,CELL_THRESHOLDS=1.0 scripts/seurat/slurm/06_subcells.sbatch
 
 # Filter multiple cell types (semi-colon separated)
 sbatch --export=ALL,main_ID=all,ID=filtered,MODE=remove,CELL_TYPES="Epithelial;Erythrocytes",CELL_THRESHOLDS="0.5;3.0" scripts/seurat/slurm/06_subcells.sbatch
 ```
 
 **Note**: Cell type names must match those defined in `cell_markers.txt`.
-
----
-
-#### 07_manual_annotate.sbatch
-Annotates clusters with user-supplied ordered labels (step 11). Runs as an array job, one task
-per entry in `clusters_annotation.txt`.
-
-**Parameters**:
-- `ANNOTATION_FILE`: Path to annotation file (default: `$WORK/scripts/seurat/clusters_annotation.txt`)
-
-**Usage**:
-```bash
-# Run with defaults
-sbatch --array=0-N scripts/seurat/slurm/07_manual_annotate.sbatch
-
-# Run with custom annotation file
-sbatch --array=0-3 --export=ALL,ANNOTATION_FILE=/path/to/annotation.txt scripts/seurat/slurm/07_manual_annotate.sbatch
-```
-
-**Note**: `clusters_annotation.txt` uses the same key=value format as `cell_markers.txt`.
-Use `--array=0-N` where N is one less than the number of annotation entries.
 
 ---
 
@@ -386,7 +378,7 @@ Rscript scripts/seurat/Rscripts/05_integrate.R <analysis_id> <output_dir> sample
 - `percent.ribo`: Ribosomal gene percentage
 - `percent.rrna`: rRNA percentage
 - `percent.trna`: tRNA percentage
-- `log10UMIsPerGene`: Library complexity
+- `complexity`: Library complexity
 
 **Usage**: `Rscript 01_qc.R <id> <outdir> <input_rds>`
 
@@ -450,13 +442,13 @@ Rscript scripts/seurat/Rscripts/05_integrate.R <analysis_id> <output_dir> sample
 **Usage**: `Rscript 05_integrate.R <id> <outdir> <sample1.rds> <sample2.rds> ...`
 
 **Output**:
-- `<id>_integrated.rds`-
+- `<id>_integrated.rds`
 - `<id>_integration_summary.tsv`
 
 #### 05_reintegrate_subset.R
 **Purpose**: Re-normalize and re-integrate a subset of cells.
 
-**Method**: Splits subset by sample, re-runs SCTransform on each, and performs integration. If any sample has <30 cells, integration is skipped and SCTransform is run on the entire subset>
+**Method**: Splits subset by sample, re-runs SCTransform on each, and performs integration. If any sample has <30 cells, integration is skipped and SCTransform is run on the entire subset.
 
 **Usage**: `Rscript 05_reintegrate_subset.R <id> <outdir> <input_rds>`
 
@@ -505,27 +497,12 @@ Rscript scripts/seurat/Rscripts/05_integrate.R <analysis_id> <output_dir> sample
 
 ---
 
-#### 09_find_markers.R
-**Purpose**: Identify cluster-specific marker genes.
-
-**Parameters**:
-- `max.cells.per.ident = 500`: Downsample cells per cluster
-- `only.pos = FALSE`: Find both up and down-regulated markers
-
-**Usage**: `Rscript 09_find_markers.R <id> <outdir> <input_rds> <significance> <regulation> <enrichment> <top>`
-
-**Output**:
-- `<id>_markers.tsv`: All markers
-- `<id>_markers_filtered.tsv`: Filtered top markers
-
----
-
-#### 10_auto_annotate.R
+#### 09_auto_annotate.R
 **Purpose**: Automatically annotate clusters using SingleR against a reference dataset.
 
 **Method**: Runs SingleR using the Human Primary Cell Atlas reference. Labels are assigned per-cell, then a consensus cluster label is derived by majority vote. The object with SingleR metadata is saved as `<id>_processed.rds`.
 
-**Usage**: `Rscript 10_auto_annotate.R <id> <outdir> <input_rds> <cells>`
+**Usage**: `Rscript 09_auto_annotate.R <id> <outdir> <input_rds> <cells>`
 
 **Arguments**:
 - `cells`: Comma-separated cell types to highlight in the filtered UMAP
@@ -538,41 +515,53 @@ Rscript scripts/seurat/Rscripts/05_integrate.R <analysis_id> <output_dir> sample
 
 ---
 
-#### 11_manual_annotate.R
-**Purpose**: Rename cluster identities using a user-supplied ordered list of labels.
+#### 10_find_markers.R
+**Purpose**: Identify cluster-specific marker genes.
 
-**Usage**: `Rscript 11_manual_annotate.R <id> <outdir> <input_rds> <labels>`
+**Parameters**:
+- `max.cells.per.ident = 500`: Downsample cells per cluster
+- `only.pos = FALSE`: Find both up and down-regulated markers
 
-**Arguments**:
-- `labels`: Comma-separated labels in cluster order (cluster 0, 1, 2, ...)
+**Note**: Uses the `presto` package for fast Wilcoxon-based marker detection. `ENRICHMENT` filters on the absolute difference in expression fraction between the foreground cluster and all other cells (`abs(pct.1 - pct.2)`), not a minimum expression fraction.
+
+**Usage**: `Rscript 10_find_markers.R <id> <outdir> <input_rds> <significance> <regulation> <enrichment> <top>`
 
 **Output**:
-- `<id>_processed.rds`: Object with renamed cluster identities (overwrites input)
-- `<id>_annotated.png`: UMAP with renamed labels
+- `<id>_markers.tsv`: All markers
+- `<id>_markers_filtered.tsv`: Filtered top markers
 
 ---
 
-#### 12_score_markers.R
+#### 11_score_markers.R
 **Purpose**: Score cells based on cell type markers and visualize expression patterns.
 
 **Method**: Calculates module scores using AddModuleScore and generates comprehensive visualizations grouped by both timepoints and clusters.
 
-**Usage**: `Rscript 12_score_markers.R <id> <outdir> <input_rds> <cell_name> <markers>`
+**Usage**: `Rscript 11_score_markers.R <id> <outdir> <input_rds> <cell_name> <markers>`
 
 **Output**:
-- `<id>_all_timepoints_violin_score.png`: Violin plot grouped by timepoint
-- `<id>_all_clusters_violin_score.png`: Violin plot grouped by cluster
-- `<id>_<marker>_timepoints_violin_score.png`: Individual marker expression by timepoint
-- `<id>_<marker>_clusters_violin_score.png`: Individual marker expression by cluster
-- `<id>_all_score_distribution.png`: Score distribution histogram
-- `<id>_score_summary.tsv`: Summary of available and missing markers
+- `<cell_name>_all_timepoints_violin_score.png`: Violin plot grouped by timepoint
+- `<cell_name>_all_clusters_violin_score.png`: Violin plot grouped by cluster
+- `<cell_name>_<marker>_timepoints_violin_score.png`: Individual marker expression by timepoint
+- `<cell_name>_<marker>_clusters_violin_score.png`: Individual marker expression by cluster
+- `<cell_name>_all_score_distribution.png`: Score distribution histogram
+- `<cell_name>_score_summary.tsv`: Summary of available and missing markers
 
 ---
 
-#### 13_subset_clusters.R
-**Purpose**: Subset data to specific clusters for focused re-analysis.
+#### 12_subset_clusters.R
+**Purpose**: Subset data by cluster ID or SingleR label for focused re-analysis.
 
-**Usage**: `Rscript 13_subset_clusters.R <id> <outdir> <input_rds> <cluster_ident>`
+**Modes**:
+- **"keep"**: Retains cells where cluster is in `idents` **OR** SingleR label is in `labels`
+- **"remove"**: Removes cells where cluster is in `idents` **AND** SingleR label is in `labels`
+
+**Usage**: `Rscript 12_subset_clusters.R <id> <outdir> <input_rds> <mode> <idents> <labels>`
+
+**Arguments Format**:
+- `mode`: Either `keep` or `remove`
+- `idents`: Semicolon-separated cluster IDs (use `NA` to skip cluster filtering)
+- `labels`: Semicolon-separated SingleR labels (use `NA` to skip label filtering)
 
 **Output**:
 - `<id>_integrated.rds`: Subset object ready for re-integration
@@ -580,14 +569,14 @@ Rscript scripts/seurat/Rscripts/05_integrate.R <analysis_id> <output_dir> sample
 
 ---
 
-#### 14_subset_cells.R
+#### 13_subset_cells.R
 **Purpose**: Filter cells based on cell type marker expression scores with two modes.
 
 **Modes**:
 - **"remove" mode**: Keeps cells where ALL scores are below threshold (filters OUT high-scoring cells from unwanted populations)
 - **"keep" mode**: Keeps cells where AT LEAST ONE score is above threshold (enriches FOR cells expressing target markers)
 
-**Usage**: `Rscript 14_subset_cells.R <id> <outdir> <input_rds> <mode> <cell_types> <cell_markers> <cell_thresholds>`
+**Usage**: `Rscript 13_subset_cells.R <id> <outdir> <input_rds> <mode> <cell_types> <cell_markers> <cell_thresholds>`
 
 **Arguments Format**:
 - `mode`: Either remove or keep
@@ -607,35 +596,48 @@ Rscript scripts/seurat/Rscripts/05_integrate.R <analysis_id> <output_dir> sample
 
 ### File Naming Convention
 
-Per-sample preprocessing steps (00–04) all overwrite the same `<smp>.rds` file in `$OUT/seurat/`. Integration produces `<id>_integrated.rds`. Clustering and annotation steps (06–10/11) all overwrite `<id>_processed.rds`. Subsetting steps (13/14) produce `<id>_integrated.rds` for the subset, ready to be passed back into re-integration. Scripts that produce no .rds (01_qc, 09_find_markers, 12_score_markers) output only plots and TSV summaries into their step-specific subdirectory.
+Steps 00, 02, 03, and 04 each overwrite the same `<smp>.rds` in `$OUT/seurat/` (step 01 reads but does not write); after normalization the file is moved to `all_04_normalized/`. Integration produces `<id>_integrated.rds`. Clustering and annotation steps (06–09) all overwrite `<id>_processed.rds`. Subsetting steps (12/13) produce `<id>_integrated.rds` for the subset, ready to be passed back into re-integration. Scripts that produce no .rds (01_qc, 10_find_markers, 11_score_markers) output only plots and TSV summaries into their step-specific subdirectory.
 
 Examples:
-- `control.rds` (per-sample, shared across steps 00–04)
+- `control.rds` (per-sample; created at step 00, overwritten at steps 02–04, moved to `all_04_normalized/` after step 04)
 - `all_integrated.rds` (after step 05, main integration)
-- `all_processed.rds` (after steps 06–10/11, overwritten at each stage)
-- `enriched1_integrated.rds` (after step 14 subset)
+- `all_processed.rds` (after steps 06–09, overwritten at each stage)
+- `subset_integrated.rds` (after step 13 subset)
 
 ### Output Directory Structure
 
 ```
 $OUT/seurat/
-├── <sample>.rds                    # Shared per-sample file (overwritten at steps 00–04)
 ├── all_integrated.rds              # After step 05 (integration)
-├── all_processed.rds               # After steps 06–10/11 (overwritten at each stage)
+├── all_processed.rds               # After steps 06–09 (overwritten at each stage)
 │
 ├── all_00_mapped/
 │   └── <sample>_mapping_summary.tsv
 ├── all_01_qc/
-│   └── <sample>/
-│       └── QC plots and PDFs
+│   ├── <sample>_plots.pdf          # All QC plots for one sample in a single PDF
+│   ├── nCount_RNA/                 # Per-metric subdirectory
+│   │   ├── nCount_RNA_vln_<sample>.png
+│   │   ├── nCount_RNA_dist_<sample>.png
+│   │   ├── nCount_RNA_KDE_<sample>.png
+│   │   └── ...                     # Additional plots; same pattern repeated per sample
+│   ├── nFeature_RNA/
+│   ├── percent.mt/
+│   ├── percent.ribo/
+│   ├── complexity/
+│   ├── percent.rrna/
+│   └── percent.trna/
 ├── all_02_DB_removed/
-│   └── <sample>/
-│       └── <sample>_DB_removed_summary.tsv
+│   └── <sample>_DB_removed_summary.tsv
 ├── all_03_filtered/
-│   └── <sample>/
-│       ├── <sample>_filtering_summary.tsv
-│       └── QC plots with threshold lines
+│   ├── <sample>_filtering_summary.tsv
+│   ├── <sample>_plots.pdf
+│   ├── nCount_RNA/                 # Per-metric subdirectory; plots include threshold lines
+│   ├── nFeature_RNA/
+│   ├── percent.mt/
+│   ├── percent.ribo/
+│   └── complexity/
 ├── all_04_normalized/
+│   ├── <sample>.rds               # Normalized per-sample object (moved here after step 04)
 │   └── <sample>_normalization_summary.tsv
 ├── all_05_integrated/
 │   └── all_integration_summary.tsv
@@ -647,45 +649,48 @@ $OUT/seurat/
 ├── all_08_umap/
 │   ├── all_umap.png
 │   ├── all_umap_split.png
-│   ├── all_umap_summary.tsv
-│   ├── all_cluster_annotated.png   # Step 10 auto-annotation outputs
+│   └── all_umap_summary.tsv
+├── all_09_singler/
+│   ├── all_cluster_annotated.png   # Step 09 auto-annotation outputs
 │   ├── all_cell_annotated.png
 │   └── all_cell_annotated_filtered.png
-├── all_09_markers/
+├── all_10_markers/
 │   ├── all_markers.tsv
 │   └── all_markers_filtered.tsv
-├── all_12_scored/
+├── all_11_scored/
 │   ├── <celltype>_all_timepoints_violin_score.png
 │   ├── <celltype>_all_clusters_violin_score.png
 │   ├── <celltype>_<marker>_timepoints_violin_score.png
 │   ├── <celltype>_<marker>_clusters_violin_score.png
 │   ├── <celltype>_all_score_distribution.png
 │   └── <celltype>_score_summary.tsv
-├── all_cluster15_integrated.rds    # After step 13 subset
-├── all_cluster15_subset/
-│   └── all_cluster15_subsetting_summary.tsv
-└── enriched1/
-    ├── enriched1_integrated.rds    # After step 14 subset
-    ├── enriched1_<celltype>_score_distribution.png
-    ├── enriched1_<celltype>_violin_score.png
-    └── enriched1_subsetting_summary.tsv
+├── subclustered_integrated.rds     # After step 12 subset + re-integration
+├── subclustered_05_integrated/
+│   ├── subclustered_subsetting_summary.tsv
+│   └── subclustered_integration_summary.tsv
+├── subset_integrated.rds           # After step 13 subset + re-integration
+└── subset_05_integrated/
+    ├── subset_<celltype>_score_distribution.png
+    ├── subset_<celltype>_violin_score.png
+    ├── subset_subsetting_summary.tsv
+    └── subset_integration_summary.tsv
 ```
 
 ### Key Output Files
 
 | File | Description |
 |------|-------------|
-| `<smp>.rds` | Per-sample object — shared and overwritten across preprocessing steps 00–04 |
-| `*_integrated.rds` | Batch-corrected integrated object (step 05, or subset output from steps 13/14) |
-| `*_processed.rds` | Object after clustering and annotation — overwritten at each of steps 06–10/11 |
-| `*_markers.tsv` | Differentially expressed genes per cluster (step 09) |
+| `<smp>.rds` | Per-sample object — created at step 00, overwritten at steps 02–04, moved to `all_04_normalized/` after normalization |
+| `*_integrated.rds` | Batch-corrected integrated object (step 05, or subset output from steps 12/13) |
+| `*_processed.rds` | Object after clustering and annotation — overwritten at each of steps 06–09 |
+| `*_markers.tsv` | Differentially expressed genes per cluster (step 10) |
 | `*_summary.tsv` | Summary statistics for each step |
 
 ---
 
 ## Cell Markers File
 
-The `cell_markers.txt` file defines cell type markers used for scoring in step 12 and subsetting in step 14.
+The `cell_markers.txt` file defines cell type markers used for scoring in step 11 and subsetting in step 13.
 
 **Format**: Each line defines one cell type with the format:
 ```
@@ -693,8 +698,8 @@ CELL_TYPE_NAME="GENE1,GENE2,GENE3,..."
 ```
 
 **Usage in pipeline**:
-- Step 12 (04_score_markers.sbatch): Runs as an array job, processing each cell type
-- Step 14 (06_subcells.sbatch): Uses specified cell types for subsetting based on MODE
+- Step 11 (04_score_markers.sbatch): Runs as an array job, processing each cell type
+- Step 13 (06_subcells.sbatch): Uses specified cell types for subsetting based on MODE
 
 **Notes**:
 - Cell type names should not contain spaces
@@ -716,4 +721,4 @@ CELL_TYPE_NAME="GENE1,GENE2,GENE3,..."
 
 ---
 
-**Last Updated**: 2025-12-09
+**Last Updated**: 2026-05-04

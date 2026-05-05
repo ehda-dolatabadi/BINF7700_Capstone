@@ -1,12 +1,14 @@
 #!/bin/bash
 # Script: run_pipeline.sh
+# Purpose: Submit CellChat cell-cell communication pipeline to SLURM scheduler
+# Usage: bash scripts/cellchat/run_pipeline.sh
 
 # Exit on error, undefined variables, and pipe failures
 set -euo pipefail
 
 # Common variables
 export ID="all"
-export GROUP_BY="singler_label"
+export GROUP_BY="singler_cluster"
 
 # Load configuration paths
 source "config/default_paths.sh"
@@ -16,8 +18,8 @@ source "config/default_paths.sh"
 SLURM="$WORK/scripts/cellchat/slurm"
 
 # Pipeline control flags
-install=false
-inference=false
+install=true
+inference=true
 merge=true
 
 # -----------------------------------------------------------------------------

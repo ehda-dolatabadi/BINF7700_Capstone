@@ -57,9 +57,11 @@ cellchat <- subsetData(cellchat)
 cellchat <- identifyOverExpressedGenes(cellchat)
 cellchat <- identifyOverExpressedInteractions(cellchat)
 
-# Infer communication probabilities at L-R and pathway level
-cellchat <- computeCommunProb(cellchat, type = "triMean")
+# Infer communication probabilities at L-R level and filter low-confidence interactions
+cellchat <- computeCommunProb(cellchat, type = "triMean", seed.use = 271)  # default: 1
 cellchat <- filterCommunication(cellchat, min.cells = 10)
+
+# Aggregate to pathway level
 cellchat <- computeCommunProbPathway(cellchat)
 
 # Aggregate communication network and compute centrality scores

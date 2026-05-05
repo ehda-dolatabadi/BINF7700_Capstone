@@ -35,6 +35,7 @@ The pipeline is designed to run on HPC systems using SLURM job scheduling and pr
 scripts/cellranger/
 ├── README.md                      # This file
 ├── run_pipeline.sh                # Automated pipeline execution script
+├── aggr_samples.csv               # Sample manifest for cellranger aggr
 ├── gtf_remove_whitespace.sh       # Utility for cleaning GTF files (AmexG reference only)
 │
 └── slurm/                         # SLURM batch scripts
@@ -256,7 +257,7 @@ sbatch scripts/cellranger/slurm/03_aggr.sbatch
 - `$OUT/cellranger/ref_{REF}/sample/outs/molecule_info.h5`: Molecule data
 - `$OUT/cellranger/ref_{REF}/sample/outs/web_summary.html`: QC report
 
-**Results Copy**: Web summary copied to `$WORK/results/cellranger/ref_{REF}/sample/`
+**Results Copy**: Web summary copied to `$OUT/cellranger/ref_{REF}/{SMP}_summary.html` for easy access
 
 ---
 
@@ -282,10 +283,10 @@ sbatch scripts/cellranger/slurm/03_aggr.sbatch
 - `--localmem`: Memory in GB (total - 20GB buffer)
 
 **Input**:
-- Requires `aggr_samples.csv` in `$OUT/cellranger/ref_{REF}/`
+- Requires `aggr_samples.csv` at `$WORK/scripts/cellranger/aggr_samples.csv`
 - CSV format:
   ```csv
-  library_id,molecule_h5
+  sample_id,molecule_h5
   control,/path/to/control/outs/molecule_info.h5
   3h,/path/to/3h/outs/molecule_info.h5
   24h,/path/to/24h/outs/molecule_info.h5
@@ -321,6 +322,9 @@ $DATA/
 $OUT/
 └── cellranger/
     ├── ref_UKY_AmexF1_1_genomic/
+    │   ├── control_summary.html        # Web summary copied for easy access
+    │   ├── 3h_summary.html
+    │   ├── ...                         # Same pattern for all samples
     │   ├── control/
     │   │   └── outs/
     │   │       ├── filtered_feature_bc_matrix/
@@ -344,16 +348,6 @@ $OUT/
     │
     └── ref_AmexT_v47-AmexG_v6_0-DD/
         └── (same structure as above)
-
-$WORK/
-└── results/
-    └── cellranger/
-        ├── ref_UKY_AmexF1_1_genomic/
-        │   ├── control/web_summary.html
-        │   ├── 3h/web_summary.html
-        │   └── ... (all samples)
-        └── ref_AmexT_v47-AmexG_v6_0-DD/
-            └── (same structure)
 ```
 
 The `results/` directory contains copies of web summary reports for easy access.
@@ -368,4 +362,4 @@ The `results/` directory contains copies of web summary reports for easy access.
 
 ---
 
-**Last Updated**: 2025-12-09
+**Last Updated**: 2026-05-04

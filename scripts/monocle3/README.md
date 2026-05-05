@@ -64,7 +64,6 @@ scripts/monocle3/
 - Monocle3 (v1.4.26)
 - Seurat (v5.5.0)
 - SeuratWrappers (GitHub, installed at runtime by `seurat_wrapper.sbatch`)
-- future (v1.69.0, for parallelization)
 
 ### Input Data
 
@@ -179,7 +178,7 @@ sbatch --array=0-3 --export=ALL,ID=all,DIMS=50 scripts/monocle3/slurm/trajectory
 sbatch --array=0 --export=ALL,ID=all,DIMS=50 scripts/monocle3/slurm/trajectory.sbatch
 ```
 
-**Note**: Use `--array=0-N` where N is one less than the number of lineages in your `lineages.txt` file. The script exits cleanly if the array task ID exceeds the number of defined lineages.
+**Note**: Use `--array=0-N` where N is one less than the number of lineages in your `lineages.txt` file. The script header contains a hardcoded `#SBATCH --array=0-3` default — omitting `--array` on the command line will silently run 4 tasks regardless of how many lineages are defined. The script exits cleanly if the array task ID exceeds the number of defined lineages.
 
 ---
 
@@ -206,7 +205,7 @@ Rscript scripts/monocle3/Rscripts/trajectory.R \
 **Method**:
 - Subsets the Seurat object to cells matching `singler_cluster` labels for this lineage
 - Converts to `cell_data_set` via `SeuratWrappers::as.cell_data_set()`
-- Preprocesses with `preprocess_cds()` (PCA normalization)
+- Preprocesses with `preprocess_cds()` (normalization + PCA)
 - Reduces dimensions with `reduce_dimension()` (UMAP on PCA)
 - Clusters cells with `cluster_cells()` using Louvain community detection (`random_seed = 271`)
 - Learns principal graph with `learn_graph(use_partition = FALSE)` — single connected graph appropriate since lineage boundaries were set by subsetting
@@ -290,7 +289,7 @@ $OUT/monocle3/
 | `n_monocle_clusters` | Number of Monocle3 Louvain clusters |
 | `n_partitions` | Number of partitions (expected 1 with `use_partition = FALSE`) |
 | `root_timepoint` | Earliest timepoint found in this lineage (used as pseudotime root) |
-| `n_root_cells` | Number of cells used as root |
+| `n_root_cells` | Number of cells from the earliest present timepoint, all used as pseudotime root |
 | `n_trajectory_genes` | Genes with q < 0.05 and Moran's I > 0.1 |
 | `cells_per_timepoint` | Cell counts per timepoint |
 | `cells_per_singler_cluster` | Cell counts per SingleR cluster label |

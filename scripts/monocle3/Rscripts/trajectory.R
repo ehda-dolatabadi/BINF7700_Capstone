@@ -60,13 +60,13 @@ cds <- preprocess_cds(cds, num_dim = num_dim)
 set.seed(271)
 cds <- reduce_dimension(cds, reduction_method = "UMAP", preprocess_method = "PCA")
 
-# Cluster cells using Louvain community detection on the lineage UMAP
+# Cluster cells using Leiden community detection on the lineage UMAP
 cds <- cluster_cells(cds, reduction_method = "UMAP", random_seed = 271)  # default: 42
 
 # Learn principal graph within this lineage
 # use_partition = FALSE: biological separation was already done by subsetting;
 # forcing a single connected graph within each lineage is appropriate here
-# learn_graph has no seed parameter; uses internal graph learning with stochastic initialization
+# learn_graph has no seed parameter; uses R's global RNG directly — set.seed() is effective
 set.seed(271)
 cds <- learn_graph(cds, use_partition = FALSE)
 

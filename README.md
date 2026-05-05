@@ -51,12 +51,16 @@ bash scripts/cellranger/run_pipeline.sh
 # Set up R environment for Seurat analysis
 conda env create -f config/env_seurat.yml
 
-# Run Seurat analysis
+# Run Seurat analysis (enable steps in run_pipeline.sh before running)
 bash scripts/seurat/run_pipeline.sh
 
-# Additional analyses coming soon:
-# - Monocle3 trajectory inference
-# - CellChat cell-cell communication
+# Set up and run Monocle3 trajectory inference
+conda env create -f config/env_monocle3.yml
+bash scripts/monocle3/run_pipeline.sh
+
+# Set up and run CellChat cell-cell communication
+conda env create -f config/env_cellchat.yml
+bash scripts/cellchat/run_pipeline.sh
 ```
 
 ---
@@ -69,8 +73,8 @@ bash scripts/seurat/run_pipeline.sh
 |-----------|---------|---------------|
 | **Cell Ranger** | FASTQ → Count Matrix | [Cell Ranger README](scripts/cellranger/README.md) |
 | **Seurat Analysis** | QC → Clustering → Markers | [Seurat README](scripts/seurat/README.md) |
-| **Monocle3** | Trajectory Inference & Pseudotime | [Monocle3 README](scripts/monocle3/README.md) *(Coming soon)* |
-| **CellChat** | Cell-Cell Communication | [CellChat README](scripts/cellchat/README.md) *(Coming soon)* |
+| **Monocle3** | Trajectory Inference & Pseudotime | [Monocle3 README](scripts/monocle3/README.md) |
+| **CellChat** | Cell-Cell Communication | [CellChat README](scripts/cellchat/README.md) |
 
 ---
 
@@ -78,18 +82,38 @@ bash scripts/seurat/run_pipeline.sh
 
 **Software Requirements:**
 - Cell Ranger (tested with v9.0.1)
-- R (tested with v4.5.2)
+- R (v4.4.3 for Monocle3 environment; v4.5.3 for Seurat and CellChat environments)
 - Conda (for R environment management)
 - SLURM job scheduler
 
-**R Packages** (installed via conda environment):
-- Seurat (tested with v5.3.1)
-- future (v1.68.0, for parallelization)
-- scDblFinder (v1.23.4, for doublet detection)
-- Monocle3 (for trajectory analysis - coming soon)
-- CellChat (for communication analysis - coming soon)
+**R Packages**:
 
-See `config/env_seurat.yml` for complete Seurat environment specification.
+*Seurat environment* (`config/env_seurat.yml`):
+- Seurat (v5.5.0)
+- future (v1.70.0, for parallelization)
+- scDblFinder (v1.24.0, for doublet detection)
+- SingleR (v2.12.0, for automated cell type annotation)
+- celldex (v1.20.0, reference datasets for SingleR)
+
+  Installed at runtime by `10_find_markers.R` if not present:
+  - presto (v1.0.0, for fast marker detection)
+
+*Monocle3 environment* (`config/env_monocle3.yml`):
+- Monocle3 (v1.4.26)
+- Seurat (v5.5.0)
+
+  Installed at runtime via `seurat_wrapper.sbatch`:
+  - SeuratWrappers (from GitHub)
+
+*CellChat environment* (`config/env_cellchat.yml`):
+- Seurat (v5.5.0)
+- future (v1.70.0, for parallelization)
+- ComplexHeatmap (v2.26.1, for pathway heatmaps)
+
+  Installed at runtime via `00_install.sbatch`:
+  - CellChat (v2.1.2, from GitHub)
+  - NMF (v0.28.0, pinned version required by CellChat)
+  - presto (v1.0.0, for fast marker detection)
 
 ---
 
@@ -122,17 +146,15 @@ cp config/default_paths.sh config/local_paths.sh
 - **Time**: ~2-3 hours for full dataset
 - **Requirements**: R environment (set up via `config/env_seurat.yml`)
 
-#### Stage 3: Monocle3 (Trajectory Inference) *(Coming soon)*
-- **Input**: Annotated Seurat objects
-- **Output**: Pseudotime trajectories
-- **Time**: TBD
-- **Requirements**: R environment
+#### Stage 3: Monocle3 (Trajectory Inference)
+- **Input**: Annotated Seurat object (`<id>_processed.rds`)
+- **Output**: Pseudotime trajectories and graph test results per lineage
+- **Requirements**: R environment (set up via `config/env_monocle3.yml`)
 
-#### Stage 4: CellChat (Cell-Cell Communication) *(Coming soon)*
-- **Input**: Annotated Seurat objects
-- **Output**: Ligand-receptor networks
-- **Time**: TBD
-- **Requirements**: R environment
+#### Stage 4: CellChat (Cell-Cell Communication)
+- **Input**: Annotated Seurat object (`<id>_processed.rds`)
+- **Output**: Ligand-receptor interaction networks per timepoint and cross-timepoint comparisons
+- **Requirements**: R environment (set up via `config/env_cellchat.yml`)
 
 ---
 
@@ -143,9 +165,12 @@ cp config/default_paths.sh config/local_paths.sh
 ├── config/                        # Configuration files
 │   ├── default_paths.sh           # Default path configurations
 │   ├── local_paths.sh             # Optional local overrides (not tracked)
-│   └── env_seurat.yml             # Conda environment specification for Seurat
+│   ├── env_seurat.yml             # Conda environment specification for Seurat
+│   ├── env_monocle3.yml           # Conda environment specification for Monocle3
+│   └── env_cellchat.yml           # Conda environment specification for CellChat
 │
 ├── scripts/
+│   ├── R_seeds.md                 # Seed and randomness audit for all R functions
 │   ├── cellranger/                # Cell Ranger alignment pipeline
 │   │   ├── slurm/                 # SLURM batch scripts
 │   │   │   ├── 01_mkref.sbatch
@@ -167,10 +192,11 @@ cp config/default_paths.sh config/local_paths.sh
 │   │   │   ├── 06_pca.R                # PCA
 │   │   │   ├── 07_cluster.R            # Clustering
 │   │   │   ├── 08_umap.R               # UMAP
-│   │   │   ├── 09_find_markers.R       # Marker identification
-│   │   │   ├── 10_score_markers.R      # Cell type scoring
-│   │   │   ├── 11_subset_clusters.R    # Cluster subsetting
-│   │   │   └── 12_subset_cells.R       # Cell type filtering
+│   │   │   ├── 09_auto_annotate.R      # Automated cell type annotation (SingleR)
+│   │   │   ├── 10_find_markers.R       # Marker identification
+│   │   │   ├── 11_score_markers.R      # Cell type scoring
+│   │   │   ├── 12_subset_clusters.R    # Cluster subsetting
+│   │   │   └── 13_subset_cells.R       # Cell type filtering
 │   │   ├── slurm/                 # SLURM batch scripts
 │   │   │   ├── 01_preprocess.sbatch
 │   │   │   ├── 02_integrate.sbatch
@@ -182,10 +208,26 @@ cp config/default_paths.sh config/local_paths.sh
 │   │   ├── run_pipeline.sh        # Pipeline orchestration
 │   │   └── README.md              # Seurat documentation
 │   │
-│   ├── monocle3/                  # Trajectory inference (Coming soon)
+│   ├── monocle3/                  # Trajectory inference pipeline
+│   │   ├── Rscripts/
+│   │   │   └── trajectory.R            # Per-lineage trajectory inference
+│   │   ├── slurm/
+│   │   │   ├── seurat_wrapper.sbatch   # One-time SeuratWrappers installation
+│   │   │   └── trajectory.sbatch       # Per-lineage trajectory analysis (array job)
+│   │   ├── lineages.txt           # Lineage definitions
+│   │   ├── run_pipeline.sh        # Pipeline orchestration
 │   │   └── README.md              # Monocle3 documentation
 │   │
-│   └── cellchat/                  # Cell-cell communication (Coming soon)
+│   └── cellchat/                  # Cell-cell communication pipeline
+│       ├── Rscripts/
+│       │   ├── install_packages.R      # One-time dependency installation
+│       │   ├── inference_per_timepoint.R  # Per-timepoint CellChat inference
+│       │   └── merge_timepoints.R      # Cross-timepoint merge and plots
+│       ├── slurm/
+│       │   ├── 00_install.sbatch       # One-time package installation
+│       │   ├── 01_inference.sbatch     # Per-timepoint inference (array job)
+│       │   └── 02_merge.sbatch         # Cross-timepoint merge
+│       ├── run_pipeline.sh        # Pipeline orchestration
 │       └── README.md              # CellChat documentation
 │
 ├── data/                          # Input data (not tracked)
@@ -194,11 +236,9 @@ cp config/default_paths.sh config/local_paths.sh
 │
 ├── outputs/                       # Working outputs (not tracked)
 │   ├── cellranger/                # Cell Ranger outputs (count matrices)
-│   └── seurat/                    # Seurat outputs (Seurat objects)
-│
-├── results/                       # Synced analysis results (not tracked)
-│   ├── cellranger/                # Alignment results (QC reports, summaries)
-│   └── seurat/                    # Analysis results (plots, tables, summaries)
+│   ├── seurat/                    # Seurat outputs (Seurat objects)
+│   ├── monocle3/                  # Monocle3 outputs (trajectory objects and plots)
+│   └── cellchat/                  # CellChat outputs (CellChat objects and plots)
 │
 ├── logs/                          # SLURM job logs (not tracked)
 │
@@ -267,6 +307,8 @@ This project uses two axolotl reference genomes:
 
 - **CellChat**: Jin, S., Guerrero-Juarez, C.F., Zhang, L., Chang, I., Ramos, R., Kuan, C.H., Myung, P., Plikus, M.V., & Nie, Q. (2021). Inference and analysis of cell-cell communication using CellChat. *Nature Communications, 12*(1), 1088. https://doi.org/10.1038/s41467-021-21246-9
 
+- **CellChat v2**: Jin, S., Plikus, M.V., & Bhatt, D.L. (2024). CellChat for systematic analysis of cell-cell communication from single-cell transcriptomics. *Nature Protocols*. https://doi.org/10.1038/s41596-024-01045-4
+
 ### Cell Type Annotation Tools
 - **webCSEA**: Cell-type Specific Enrichment Analysis of Genes. UTHealth School of Biomedical Informatics. https://bioinfo.uth.edu/webcsea/
 
@@ -290,6 +332,6 @@ Email: [dolatabadi.e@northeastern.edu](mailto:dolatabadi.e@northeastern.edu)
 
 ---
 
-**Last Updated**: December 9, 2025
+**Last Updated**: 2026-05-04
 **Status**: Active Development
 **Version**: 1.0.0

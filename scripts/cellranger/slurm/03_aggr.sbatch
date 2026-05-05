@@ -50,7 +50,7 @@ cd "$OUT_cellranger"
 # - Generates combined feature-barcode matrix
 cellranger aggr \
   --output-dir="$OUT_cellranger" \
-  --id="${CSV%.*}_${SUFFIX}" \
+  --id="$(basename "${CSV%.*}")_${SUFFIX}" \
   --csv="$CSV" \
   --localcores="$SLURM_CPUS_PER_TASK" \
   --localmem=$(( SLURM_MEM_PER_NODE / 1024 - 20)) \

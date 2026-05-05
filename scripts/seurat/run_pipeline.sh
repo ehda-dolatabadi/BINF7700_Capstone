@@ -71,7 +71,7 @@ fi
 # -----------------------------------------------------------------------------
 
 # Step 3: Clustering
-# Run PCA, clustering, UMAP, and find marker genes
+# Run PCA, clustering, UMAP, SingleR annotation, and find marker genes
 if [ "$cluster_all" = true ]; then
     echo "Submitting clustering..."
     JOB_cluster=$(sbatch \

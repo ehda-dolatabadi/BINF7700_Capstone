@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
-# Script: 14_subset_cells.R
+# Script: 13_subset_cells.R
 # Purpose: Filter cells based on cell type marker expression scores
 # Description: Calculates module scores for cell type markers and filters cells based
 #              on thresholds (keep mode retains high-scoring cells, remove mode excludes them)
-# Usage: Rscript 14_subset_cells.R <id> <outdir> <input> <mode>
+# Usage: Rscript 13_subset_cells.R <id> <outdir> <input> <mode>
 #        <cell_types> <cell_markers> <cell_thresholds>
 
 # Load required libraries
@@ -148,14 +148,14 @@ if (mode == "remove") {
 
 # To enrich
 if (mode == "keep") {
-  # Get cells that pass the filter
+  # Get cells failing all filters (below threshold for every cell type)
   cells_to_remove <- rep(TRUE, ncol(obj))
   for (i in 1:length(cell_types)) {
     score_col <- paste0(cell_types[i], "_score1")
     threshold <- cell_thresholds[i]
     cells_to_remove <- cells_to_remove & (obj[[score_col]][,1] < threshold)
   }
-  # Subset to keep only cells that pass all filters
+  # Keep cells passing at least one filter (above threshold for at least one cell type)
   obj <- obj[, !cells_to_remove]
 }
 

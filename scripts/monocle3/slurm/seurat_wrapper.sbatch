@@ -1,6 +1,6 @@
 #!/bin/bash
-# Script: seurat_wrappers.sbatch
-# Purpose: Install  SeuratWrappers in R environment if not installed
+# Script: seurat_wrapper.sbatch
+# Purpose: Install SeuratWrappers in R environment if not installed
 
 #SBATCH --job-name=seurat_wrappers
 #SBATCH --partition=courses

@@ -27,7 +27,7 @@ This pipeline takes an annotated Seurat object from the Seurat pipeline and infe
 - Generates per-timepoint interaction circle plots, signaling role scatter plots, and pathway heatmaps
 - Merges all timepoint objects to produce cross-timepoint comparison plots and a concatenated summary TSV
 
-The pipeline is designed to run on HPC systems using SLURM job scheduling. GitHub-only dependencies (CellChat, NMF, presto) are installed once via a dedicated install step.
+The pipeline is designed to run on HPC systems using SLURM job scheduling. CellChat, NMF, and presto are installed once via a dedicated install step as they are not available through conda (CellChat is GitHub-only; presto has no build for the r-base version; NMF requires a newer version than conda provides).
 
 ---
 
@@ -66,9 +66,9 @@ scripts/cellchat/
 - presto (v1.0.0, from GitHub: `immunogenomics/presto@1.0.0`)
 - Seurat (v5.5.0)
 - future (v1.70.0, for parallelization)
-- ComplexHeatmap (Bioconductor, for pathway heatmaps)
+- ComplexHeatmap (v2.26.1, for pathway heatmaps)
 
-**Note**: CellChat, NMF, and presto are not available via conda and must be installed once using `00_install.sbatch` or `install_packages.R`. The install step is idempotent — it skips packages that are already present.
+**Note**: CellChat is GitHub-only; presto has no build for the r-base conda version; NMF requires a newer version than conda provides. All three must be installed once using `00_install.sbatch` or `install_packages.R` before running the pipeline. Already-installed packages are skipped automatically.
 
 ### Input Data
 
@@ -95,13 +95,13 @@ The pipeline uses configuration files in the `config/` directory. Default paths 
 **Main analysis variables**: Set in `run_pipeline.sh`:
 ```bash
 export ID="all"                     # Analysis identifier (matches Seurat output)
-export GROUP_BY="singler_cluster"   # Metadata column used to define cell groups
+export GROUP_BY="singler_cluster"   # Cell grouping column: singler_cluster | singler_label | seurat_clusters (default: "singler_cluster")
 ```
 
 **Pipeline control flags**: Enable/disable individual steps in `run_pipeline.sh`:
 ```bash
-install=false       # Run package installation (set true for first-time setup)
-inference=false     # Run per-timepoint inference array job
+install=true        # Run package installation
+inference=true      # Run per-timepoint inference array job
 merge=true          # Run cross-timepoint merge
 ```
 
@@ -176,7 +176,7 @@ Runs per-timepoint CellChat inference as a SLURM array job. Each array task proc
 
 **Parameters**:
 - `ID`: Analysis identifier (default: "all")
-- `GROUP_BY`: Metadata column for cell grouping (default: "singler_cluster")
+- `GROUP_BY`: Any metadata column in the Seurat object to define cell groups (default: "singler_cluster")
 
 **Usage**:
 ```bash
@@ -197,7 +197,7 @@ Merges all per-timepoint CellChat objects and generates cross-timepoint comparis
 
 **Parameters**:
 - `ID`: Analysis identifier (default: "all")
-- `GROUP_BY`: Must match the value used in `01_inference.sbatch` (default: "singler_cluster")
+- `GROUP_BY`: Must match the value used in `01_inference.sbatch` — any metadata column in the Seurat object (default: "singler_cluster")
 
 **Usage**:
 ```bash
@@ -347,9 +347,9 @@ $OUT/cellchat/
 | `timepoint` | Experimental timepoint |
 | `group_by` | Metadata column used for cell grouping |
 | `n_cells` | Total cells in this timepoint |
-| `n_groups` | Number of cell groups with sufficient cells |
+| `n_groups` | Number of cell groups present in this timepoint |
 | `n_signaling_genes` | Number of over-expressed signaling genes identified |
-| `n_LR_pairs` | Number of significant L-R pairs identified |
+| `n_LR_pairs` | Number of over-expressed L-R pairs identified |
 | `n_significant_LR` | Number of L-R interactions with p < 0.05 |
 | `n_signaling_pathways` | Number of active signaling pathways |
 

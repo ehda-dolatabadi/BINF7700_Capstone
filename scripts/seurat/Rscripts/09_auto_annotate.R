@@ -1,8 +1,9 @@
 #!/usr/bin/env Rscript
-# Script: 10_auto_annotate.R
-# Purpose: Annotate clusters
-# Description: Annotate clusters automatically using SingleR
-# Usage: Rscript 10_auto_annotate.R <id> <output> <input> <cells>
+# Script: 09_auto_annotate.R
+# Purpose: Annotate clusters automatically using SingleR
+# Description: Runs SingleR against the Human Primary Cell Atlas reference to assign
+#              cell-level and cluster-level labels and generates annotation UMAP plots
+# Usage: Rscript 09_auto_annotate.R <id> <output> <input> <cells>
 
 # Load required libraries
 suppressPackageStartupMessages({

@@ -33,7 +33,7 @@ obj <- readRDS(input)
 
 # Neighbors and clustering (Leiden)
 # FindNeighbors uses Annoy (C-level RNG) — set.seed() does not control it;
-# switch to annoy.metric with nn.method="rann" for R-level reproducibility
+# switch to nn.method="rann" for R-level reproducibility
 set.seed(271)
 obj <- FindNeighbors(obj, dims = 1:dims)
 obj <- FindClusters(
