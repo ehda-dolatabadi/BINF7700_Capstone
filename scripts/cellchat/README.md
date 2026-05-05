@@ -21,7 +21,7 @@ A pipeline for inferring ligand-receptor mediated cell-cell communication networ
 This pipeline takes an annotated Seurat object from the Seurat pipeline and infers cell-cell communication for each experimental timepoint using CellChat v2. The pipeline:
 
 - Runs per-timepoint CellChat inference in parallel via a SLURM array job (one task per timepoint)
-- Identifies over-expressed signaling genes and interactions using the human ligand-receptor database (axolotl gene symbols are mapped to human via `loc_map.tsv`)
+- Identifies over-expressed signaling genes and interactions using the human ligand-receptor database
 - Computes communication probabilities at both the ligand-receptor and pathway levels
 - Aggregates interaction networks and computes network centrality scores per cell group
 - Generates per-timepoint interaction circle plots, signaling role scatter plots, and pathway heatmaps
@@ -356,6 +356,8 @@ $OUT/cellchat/
 ---
 
 ## Citation
+
+- **CellChat**: Jin, S., Guerrero-Juarez, C.F., Zhang, L., Chang, I., Ramos, R., Kuan, C.H., Myung, P., Plikus, M.V., & Nie, Q. (2021). Inference and analysis of cell-cell communication using CellChat. *Nature Communications, 12*(1), 1088. https://doi.org/10.1038/s41467-021-21246-9
 
 - **CellChat v2**: Jin, S., Plikus, M.V., & Bhatt, D.L. (2024). CellChat for systematic analysis of cell-cell communication from single-cell transcriptomics. *Nature Protocols*. https://doi.org/10.1038/s41596-024-01045-4
 

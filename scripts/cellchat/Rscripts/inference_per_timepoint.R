@@ -48,7 +48,6 @@ if (ncol(obj) < 100) {
 obj@meta.data[[group_by]] <- droplevels(factor(obj@meta.data[[group_by]]))
 
 # Create CellChat object using human ligand-receptor database
-# (axolotl symbols are mapped to human via loc_map.tsv)
 cellchat <- createCellChat(object = obj, group.by = group_by, assay = "SCT")
 cellchat@DB <- CellChatDB.human
 

@@ -48,17 +48,15 @@ cd axolotl-regeneration-scrna
 # Run Cell Ranger alignment
 bash scripts/cellranger/run_pipeline.sh
 
-# Set up R environment for Seurat analysis
+# Set up R environment and run Seurat analysis
 conda env create -f config/env_seurat.yml
-
-# Run Seurat analysis (enable steps in run_pipeline.sh before running)
 bash scripts/seurat/run_pipeline.sh
 
-# Set up and run Monocle3 trajectory inference
+# Set up R environment and run Monocle3 trajectory inference
 conda env create -f config/env_monocle3.yml
 bash scripts/monocle3/run_pipeline.sh
 
-# Set up and run CellChat cell-cell communication
+# Set up R environment and run CellChat cell-cell communication
 conda env create -f config/env_cellchat.yml
 bash scripts/cellchat/run_pipeline.sh
 ```
@@ -149,11 +147,13 @@ cp config/default_paths.sh config/local_paths.sh
 #### Stage 3: Monocle3 (Trajectory Inference)
 - **Input**: Annotated Seurat object (`<id>_processed.rds`)
 - **Output**: Pseudotime trajectories and graph test results per lineage
+- **Time**: ~0.5-1 hours for full dataset
 - **Requirements**: R environment (set up via `config/env_monocle3.yml`)
 
 #### Stage 4: CellChat (Cell-Cell Communication)
 - **Input**: Annotated Seurat object (`<id>_processed.rds`)
 - **Output**: Ligand-receptor interaction networks per timepoint and cross-timepoint comparisons
+- **Time**: ~1-2 hours for full dataset
 - **Requirements**: R environment (set up via `config/env_cellchat.yml`)
 
 ---
